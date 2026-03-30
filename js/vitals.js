@@ -11,7 +11,9 @@ const VitalsModule = (function () {
 
   // ── State ─────────────────────────────────────────────────
   let selectedAnimalId  = null;
-  let liveChart         = null;
+  let chartTemp         = null;
+  let chartHR           = null;
+  let chartActivity     = null;
   let liveInterval      = null;
   let liveReadings      = {
     labels: [],
@@ -95,115 +97,121 @@ const VitalsModule = (function () {
 
     // Seed 10 initial readings
     for (let i = 10; i >= 1; i--) {
-      liveReadings.labels.push(formatTime(new Date(Date.now() - i * 3000)));
+      liveReadings.labels.push(formatTime(new Date(Date.now() - i * 60000)));
       liveReadings.temp.push(+fluctuate(animal.baseVitals.temp, 0.15).toFixed(1));
       liveReadings.hr.push(Math.round(fluctuate(animal.baseVitals.hr, 2)));
       liveReadings.activity.push(Math.round(fluctuate(animal.baseVitals.activity, 5)));
     }
 
-    if (liveChart) updateLiveChart();
+    if (chartTemp) { updateCharts(); }
   }
 
-  // ── Create Live Chart ─────────────────────────────────────
-  function createLiveChart() {
-    const ctx = document.getElementById('live-chart').getContext('2d');
-    if (liveChart) liveChart.destroy();
+  // ── Chart factory ─────────────────────────────────────────
+  function makeChart(canvasId, label, data, color, unit, minY, maxY, safeMin, safeMax) {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return null;
 
-    liveChart = new Chart(ctx, {
+    const safeColor = color + '22'; // ~13% opacity fill for safe band
+
+    return new Chart(ctx.getContext('2d'), {
       type: 'line',
       data: {
         labels: liveReadings.labels,
         datasets: [
           {
-            label: 'Temp (°C)',
-            data: liveReadings.temp,
-            borderColor: '#7CB518',
-            backgroundColor: 'rgba(124,181,24,0.08)',
-            tension: 0.45,
+            label,
+            data,
+            borderColor: color,
+            backgroundColor: color + '14',
+            tension: 0.42,
             pointRadius: 3,
-            pointBackgroundColor: '#7CB518',
+            pointHoverRadius: 5,
+            pointBackgroundColor: color,
             fill: true,
-            yAxisID: 'y',
+            borderWidth: 2,
           },
+          // Safe-range upper reference line
           {
-            label: 'Heart Rate (bpm)',
-            data: liveReadings.hr,
-            borderColor: '#E5A100',
-            backgroundColor: 'rgba(229,161,0,0.07)',
-            tension: 0.45,
-            pointRadius: 3,
-            pointBackgroundColor: '#E5A100',
-            fill: true,
-            yAxisID: 'y1',
+            label: `Safe max (${safeMax} ${unit})`,
+            data: Array(MAX_READINGS).fill(safeMax),
+            borderColor: color + '55',
+            borderDash: [5, 4],
+            borderWidth: 1,
+            pointRadius: 0,
+            fill: false,
           },
+          // Safe-range lower reference line
           {
-            label: 'Activity (%)',
-            data: liveReadings.activity,
-            borderColor: '#3B82F6',
-            backgroundColor: 'rgba(59,130,246,0.06)',
-            tension: 0.45,
-            pointRadius: 3,
-            pointBackgroundColor: '#3B82F6',
-            fill: true,
-            yAxisID: 'y2',
+            label: `Safe min (${safeMin} ${unit})`,
+            data: Array(MAX_READINGS).fill(safeMin),
+            borderColor: color + '33',
+            borderDash: [3, 4],
+            borderWidth: 1,
+            pointRadius: 0,
+            fill: false,
           },
         ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        animation: { duration: 600, easing: 'easeInOutQuart' },
+        animation: { duration: 500, easing: 'easeInOutQuart' },
         interaction: { intersect: false, mode: 'index' },
         plugins: {
-          legend: {
-            labels: {
-              color: '#A89F8C',
-              font: { family: "'Noto Sans', sans-serif", size: 11 },
-              boxWidth: 12,
-              padding: 14,
-            },
-          },
+          legend: { display: false },
           tooltip: {
             backgroundColor: '#2C2C1A',
             titleColor: '#F0EAD6',
             bodyColor: '#A89F8C',
             borderColor: '#3D3D28',
             borderWidth: 1,
+            callbacks: {
+              label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y} ${unit}`,
+            },
           },
         },
         scales: {
           x: {
-            ticks: { color: '#706860', font: { size: 10 }, maxRotation: 0, maxTicksLimit: 8 },
-            grid: { color: 'rgba(61,61,40,0.35)' },
+            ticks: { color: '#706860', font: { size: 9 }, maxRotation: 0, maxTicksLimit: 6 },
+            grid: { color: 'rgba(61,61,40,0.3)' },
           },
           y: {
-            position: 'left',
-            title: { display: true, text: '°C', color: '#7CB518', font: { size: 11 } },
-            ticks: { color: '#7CB518', font: { size: 10 } },
-            grid: { color: 'rgba(61,61,40,0.35)' },
-          },
-          y1: {
-            position: 'right',
-            title: { display: true, text: 'bpm', color: '#E5A100', font: { size: 11 } },
-            ticks: { color: '#E5A100', font: { size: 10 } },
-            grid: { display: false },
-          },
-          y2: {
-            display: false,
+            min: minY,
+            max: maxY,
+            ticks: { color, font: { size: 9 } },
+            grid: { color: 'rgba(61,61,40,0.3)' },
+            title: { display: true, text: unit, color, font: { size: 10 } },
           },
         },
       },
     });
   }
 
-  // ── Update Live Chart data ────────────────────────────────
-  function updateLiveChart() {
-    if (!liveChart) return;
-    liveChart.data.labels = [...liveReadings.labels];
-    liveChart.data.datasets[0].data = [...liveReadings.temp];
-    liveChart.data.datasets[1].data = [...liveReadings.hr];
-    liveChart.data.datasets[2].data = [...liveReadings.activity];
-    liveChart.update('none'); // no animation for live updates
+  // ── Create all 3 charts ───────────────────────────────────
+  function createCharts() {
+    if (chartTemp)     { chartTemp.destroy();     chartTemp = null; }
+    if (chartHR)       { chartHR.destroy();       chartHR = null; }
+    if (chartActivity) { chartActivity.destroy(); chartActivity = null; }
+
+    chartTemp     = makeChart('chart-temp',     'Temperature (°C)', liveReadings.temp,     '#7CB518', '°C',  36.0, 42.0, 38.0, 39.5);
+    chartHR       = makeChart('chart-hr',       'Heart Rate (bpm)', liveReadings.hr,       '#E5A100', 'bpm', 40,   130,  60,   80);
+    chartActivity = makeChart('chart-activity', 'Activity (%)',     liveReadings.activity, '#3B82F6', '%',   0,    100,  40,   80);
+  }
+
+  // ── Update all 3 charts ───────────────────────────────────
+  function updateCharts() {
+    function syncChart(chart, newData, refMax, refMin) {
+      if (!chart) return;
+      chart.data.labels = [...liveReadings.labels];
+      chart.data.datasets[0].data = [...newData];
+      // Keep reference lines at full length
+      chart.data.datasets[1].data = Array(liveReadings.labels.length).fill(refMax);
+      chart.data.datasets[2].data = Array(liveReadings.labels.length).fill(refMin);
+      chart.update('none');
+    }
+    syncChart(chartTemp,     liveReadings.temp,     39.5, 38.0);
+    syncChart(chartHR,       liveReadings.hr,       80,   60);
+    syncChart(chartActivity, liveReadings.activity, 80,   40);
   }
 
   // ── Push new readings ─────────────────────────────────────
@@ -225,7 +233,7 @@ const VitalsModule = (function () {
       liveReadings.activity.shift();
     }
 
-    updateLiveChart();
+    updateCharts();
     updateGauges();
   }
 
@@ -277,14 +285,14 @@ const VitalsModule = (function () {
 
   function startLiveInterval() {
     if (liveInterval) clearInterval(liveInterval);
-    liveInterval = setInterval(pushReading, 3000);
+    liveInterval = setInterval(pushReading, 60000);
   }
 
   // ── Init ──────────────────────────────────────────────────
   function init() {
     populateSelector();
     initLiveData();
-    createLiveChart();
+    createCharts();
     updateGauges();
     updateAISummary();
     startLiveInterval();

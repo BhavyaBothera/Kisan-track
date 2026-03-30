@@ -270,6 +270,7 @@
     if (typeof UploadModule     !== 'undefined') UploadModule.init();
     if (typeof AddAnimalModule  !== 'undefined') AddAnimalModule.init();
     if (typeof ProfileModule    !== 'undefined') ProfileModule.init();
+    if (typeof CameraModule     !== 'undefined') CameraModule.init();
 
     attachRipples();
     startSyncTimer();

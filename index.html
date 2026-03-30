@@ -276,18 +276,55 @@
         </div>
       </div>
 
-      <!-- Live Chart -->
-      <div class="live-chart-card">
-        <div class="live-chart-header">
-          <h3 class="section-title" style="margin:0;">
-            <i class="fa-solid fa-chart-line"></i> Last 20 Readings / पिछली 20 रीडिंग
-          </h3>
-          <div class="live-badge"><div class="live-dot"></div>Updates every 3s</div>
+      <!-- Live Charts (3 separate) -->
+      <div class="live-charts-grid">
+
+        <!-- Chart 1: Temperature -->
+        <div class="live-chart-card">
+          <div class="live-chart-header">
+            <h3 class="section-title" style="margin:0;">
+              <i class="fa-solid fa-thermometer-half" style="color:#7CB518;"></i>
+              Body Temperature / शरीर का तापमान
+            </h3>
+            <div class="live-badge"><div class="live-dot"></div>Every 60s</div>
+          </div>
+          <div class="live-chart-range">Safe: 38.0 – 39.5°C &nbsp;·&nbsp; Unit: °C</div>
+          <div class="chart-wrap" style="height:180px;">
+            <canvas id="chart-temp"></canvas>
+          </div>
         </div>
-        <div class="chart-wrap" style="height:240px;">
-          <canvas id="live-chart"></canvas>
+
+        <!-- Chart 2: Heart Rate -->
+        <div class="live-chart-card">
+          <div class="live-chart-header">
+            <h3 class="section-title" style="margin:0;">
+              <i class="fa-solid fa-heart-pulse" style="color:#E5A100;"></i>
+              Heart Rate / हृदय गति
+            </h3>
+            <div class="live-badge"><div class="live-dot"></div>Every 60s</div>
+          </div>
+          <div class="live-chart-range">Safe: 60 – 80 bpm &nbsp;·&nbsp; Unit: bpm</div>
+          <div class="chart-wrap" style="height:180px;">
+            <canvas id="chart-hr"></canvas>
+          </div>
         </div>
-      </div>
+
+        <!-- Chart 3: Activity -->
+        <div class="live-chart-card">
+          <div class="live-chart-header">
+            <h3 class="section-title" style="margin:0;">
+              <i class="fa-solid fa-person-running" style="color:#3B82F6;"></i>
+              Activity Level / गतिविधि स्तर
+            </h3>
+            <div class="live-badge"><div class="live-dot"></div>Every 60s</div>
+          </div>
+          <div class="live-chart-range">Normal: 40 – 80% &nbsp;·&nbsp; Unit: %</div>
+          <div class="chart-wrap" style="height:180px;">
+            <canvas id="chart-activity"></canvas>
+          </div>
+        </div>
+
+      </div><!-- /.live-charts-grid -->
 
       <!-- AI Summary -->
       <div class="ai-summary-card">
