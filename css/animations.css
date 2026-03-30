@@ -1,0 +1,122 @@
+/**
+ * ============================================================
+ * KisanTrack — Animations
+ * All @keyframes and animation utility classes
+ * ============================================================
+ */
+
+/* ── Online Status Pulse ──────────────────────────────────── */
+@keyframes pulse-green {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(124, 181, 24, 0.7);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(124, 181, 24, 0);
+    transform: scale(1.1);
+  }
+}
+
+/* ── Critical Status Red Pulse ───────────────────────────── */
+@keyframes pulse-red {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(192, 57, 43, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(192, 57, 43, 0);
+  }
+}
+
+/* ── Critical Card Border Pulse ──────────────────────────── */
+@keyframes border-pulse-red {
+  0%, 100% {
+    border-color: var(--accent-red);
+    box-shadow: 0 0 0 0 rgba(192, 57, 43, 0.4);
+  }
+  50% {
+    border-color: rgba(192, 57, 43, 0.5);
+    box-shadow: 0 0 12px rgba(192, 57, 43, 0.3);
+  }
+}
+
+/* ── Alert Ticker Marquee ────────────────────────────────── */
+@keyframes marquee {
+  0%   { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+/* ── Modal Fade + Slide Up ───────────────────────────────── */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── Section Fade In ─────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Ripple Effect ───────────────────────────────────────── */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* ── Spinner ─────────────────────────────────────────────── */
+@keyframes spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ── Progress Fill ───────────────────────────────────────── */
+@keyframes fillBar {
+  from { width: 0%; }
+  to   { width: var(--target-width, 100%); }
+}
+
+/* ── Gauge Arc Fill ──────────────────────────────────────── */
+@keyframes gaugeReveal {
+  from { stroke-dashoffset: 314; }
+  to   { stroke-dashoffset: var(--gauge-offset, 0); }
+}
+
+/* ── Floating/Hover Lift ─────────────────────────────────── */
+@keyframes floatUp {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-4px); }
+}
+
+/* ── Ticker Pause on Hover ───────────────────────────────── */
+.ticker-wrap:hover .ticker-track {
+  animation-play-state: paused;
+}
+
+/* ── Animation Utility Classes ───────────────────────────── */
+.animate-fadein {
+  animation: fadeIn 0.4s ease both;
+}
+
+.animate-pulse-red {
+  animation: pulse-red 1.8s ease-in-out infinite;
+}
+
+.animate-pulse-green {
+  animation: pulse-green 2s ease-in-out infinite;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
