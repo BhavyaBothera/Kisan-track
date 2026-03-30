@@ -67,6 +67,11 @@
         <span class="nav-text">Live Vitals<span class="nav-hi">लाइव जीवन संकेत</span></span>
       </div>
 
+      <div class="nav-link" data-tab="camera" role="button" tabindex="0" id="nav-camera">
+        <i class="fa-solid fa-camera"></i>
+        <span class="nav-text">Camera Monitor<span class="nav-hi">कैमरा मॉनिटर</span></span>
+      </div>
+
       <div class="nav-link" data-tab="alerts" role="button" tabindex="0" id="nav-alerts">
         <i class="fa-solid fa-bell"></i>
         <span class="nav-text">Alerts<span class="nav-hi">अलर्ट</span></span>
@@ -89,11 +94,6 @@
       <div class="nav-link" data-tab="profile" role="button" tabindex="0" id="nav-profile">
         <i class="fa-solid fa-circle-user"></i>
         <span class="nav-text">Farmer Profile<span class="nav-hi">किसान प्रोफ़ाइल</span></span>
-      </div>
-
-      <div class="nav-link" data-tab="camera" role="button" tabindex="0" id="nav-camera">
-        <i class="fa-solid fa-camera"></i>
-        <span class="nav-text">Camera Monitor<span class="nav-hi">कैमरा मॉनिटर</span></span>
       </div>
     </nav>
 
@@ -306,7 +306,7 @@
               </div>
             </div>
             <div class="live-chart-range">Safe: 38.0 – 39.5°C &nbsp;·&nbsp; Unit: °C</div>
-            <div class="chart-wrap" style="height:180px;">
+            <div class="chart-wrap vitals-chart-wrap">
               <canvas id="chart-temp"></canvas>
             </div>
           </div>
@@ -323,7 +323,7 @@
               </div>
             </div>
             <div class="live-chart-range">Safe: 60 – 80 bpm &nbsp;·&nbsp; Unit: bpm</div>
-            <div class="chart-wrap" style="height:180px;">
+            <div class="chart-wrap vitals-chart-wrap">
               <canvas id="chart-hr"></canvas>
             </div>
           </div>
@@ -340,7 +340,7 @@
               </div>
             </div>
             <div class="live-chart-range">Normal: 40 – 80% &nbsp;·&nbsp; Unit: %</div>
-            <div class="chart-wrap" style="height:180px;">
+            <div class="chart-wrap vitals-chart-wrap">
               <canvas id="chart-activity"></canvas>
             </div>
           </div>
