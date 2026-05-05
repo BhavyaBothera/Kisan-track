@@ -15,8 +15,10 @@ const SeedDataModule = (function () {
     const batch = db.batch();
 
     SAMPLE_ANIMALS.forEach(animal => {
-      const ref = db.collection('animals').doc();
-      batch.set(ref, {
+      const animalRef = db.collection('animals').doc();
+      const animalDocId = animalRef.id;
+      
+      batch.set(animalRef, {
         ...animal,
         farmerId: uid,
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
@@ -26,12 +28,28 @@ const SeedDataModule = (function () {
           lastActivity: 'Normal'
         }
       });
+
+      // Seed 10 historical vital records per animal for charts
+      for (let i = 0; i < 10; i++) {
+        const vitalRef = db.collection('vitals').doc();
+        const timeOffset = (10 - i) * 5 * 60 * 1000; // 5 mins apart
+        const time = new Date(Date.now() - timeOffset);
+        
+        batch.set(vitalRef, {
+          farmerId: uid,
+          animalId: animalDocId,
+          timestamp: firebase.firestore.Timestamp.fromDate(time),
+          bodyTempCelsius: 38.2 + (Math.random() * 0.8),
+          heartRateBpm: 68 + Math.floor(Math.random() * 12),
+          activityScore: 40 + Math.floor(Math.random() * 40)
+        });
+      }
     });
 
     try {
       await batch.commit();
       localStorage.setItem('kisanTrack_seeded_' + uid, 'true');
-      console.log('Seeding successful!');
+      console.log('Seeding successful with historical vitals!');
     } catch (err) {
       console.error('Seeding failed:', err);
     }

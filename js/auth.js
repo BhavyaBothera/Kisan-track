@@ -1,40 +1,9 @@
 /**
  * ============================================================
- * KisanTrack — Authentication Module
- * Handles Firebase Auth integration, forms, and UI states.
+ * KisanTrack — Authentication & User State Module
+ * Handles Auth listeners, forms, and profile UI updates.
  * ============================================================
  */
-
-// 1. Firebase Configuration (PLACEHOLDER)
-const firebaseConfig = {
-  apiKey: "AIzaSyAiJVcnM9rTFzFRnhZk9Txb7k-gotnBCAg",
-  authDomain: "et-201.firebaseapp.com",
-  projectId: "et-201",
-  storageBucket: "et-201.firebasestorage.app",
-  messagingSenderId: "936111262185",
-  appId: "1:936111262185:web:44eb32fcc0ce086aba2378",
-  measurementId: "G-NBT02CPT26"
-};
-
-// Initialize Firebase
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
-
-const auth = firebase.auth();
-const db = firebase.firestore();
-const storage = firebase.storage();
-const googleProvider = new firebase.auth.GoogleAuthProvider();
-
-// Enable Persistence for offline handling
-db.enablePersistence()
-  .catch((err) => {
-    if (err.code == 'failed-precondition') {
-      console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
-    } else if (err.code == 'unimplemented') {
-      console.warn('The current browser does not support all of the features required to enable persistence');
-    }
-  });
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -263,9 +232,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Utility functions now served by window (utils.js)
-  const clearErrors = () => window.clearErrors && window.clearErrors();
-  const showError = (type, msg, fields) => window.showError && window.showError(type, msg, fields);
   const validateEmail = (email) => window.validateEmail && window.validateEmail(email);
   const setLoadingState = (id, loading, text) => window.setLoadingState && window.setLoadingState(id, loading, text);
 

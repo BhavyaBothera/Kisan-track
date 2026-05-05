@@ -46,12 +46,58 @@ const VitalsModule = (function () {
       selectedAnimalId = state.animals[0].id;
       select.value = selectedAnimalId;
     }
+  }
 
-    select.addEventListener('change', () => {
-      selectedAnimalId = select.value;
-      fetchHistoricalVitals();
-      updateAISummary();
-    });
+  // --- Simulation: Generate Alert ---
+  async function generateSimulatedReading() {
+    const state = getState();
+    if (!state || state.animals.length === 0) return;
+
+    // Pick a random animal to simulate a vital update
+    const idx = Math.floor(Math.random() * state.animals.length);
+    const animal = state.animals[idx];
+
+    const temp = +(38.5 + (Math.random() * 2.5)).toFixed(1);
+    const hr = Math.round(70 + (Math.random() - 0.5) * 15);
+    const act = Math.round(50 + (Math.random() - 0.5) * 30);
+    
+    try {
+      // 1. Log the vital reading
+      await db.collection('vitals').add({
+        farmerId: auth.currentUser.uid,
+        animalId: animal.id, // Document ID
+        sensorTagId: animal.tagId,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        bodyTempCelsius: temp,
+        heartRateBpm: hr,
+        activityScore: act,
+        healthStatus: temp > 39.5 ? 'Warning' : 'Healthy'
+      });
+
+      // 2. Threshold check for alert
+      if (temp > 39.5) {
+        await db.collection('alerts').add({
+          farmerId: auth.currentUser.uid,
+          animalId: animal.animalId, // Display ID (e.g. A01)
+          parameter: 'Body Temperature',
+          readingValue: temp + '°C',
+          alertType: 'High Temperature',
+          severity: temp > 40.5 ? 'Critical' : 'Warning',
+          confidenceScore: 85 + Math.floor(Math.random() * 10),
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          resolved: false,
+          source: 'Sensor'
+        });
+        showToast('⚠ Threshold breach detected! Alert generated.', 'error');
+      }
+
+      // If this was for the selected animal, refresh charts
+      if (animal.id === selectedAnimalId) {
+        fetchHistoricalVitals();
+      }
+    } catch (err) {
+      console.error('Simulation error:', err);
+    }
   }
 
   // ── Fetch Last 20 Vitals ──────────────────────────────────
@@ -157,61 +203,6 @@ const VitalsModule = (function () {
     if (chartActivity) { chartActivity.data.labels = liveReadings.labels; chartActivity.data.datasets[0].data = liveReadings.activity; chartActivity.update('none'); }
   }
 
-  // ── Simulation: Push and Alert Logic ──────────────────────
-  async function generateSimulatedReading() {
-    const state = getState();
-    if (!state || state.animals.length === 0) return;
-
-    // For simplicity, simulate for the currently selected animal
-    const animal = state.animals.find(a => a.id === selectedAnimalId) || state.animals[0];
-    if (!animal) return;
-
-    const baseTemp = animal.species === 'Cow' ? 38.5 : animal.species === 'Buffalo' ? 38.8 : 39.1;
-    const baseHR = 70;
-
-    const temp = +(baseTemp + (Math.random() - 0.5) * 0.4).toFixed(1);
-    const hr = Math.round(baseHR + (Math.random() - 0.5) * 10);
-    const act = Math.round(50 + (Math.random() - 0.5) * 20);
-
-    const reading = {
-      farmerId: auth.currentUser.uid,
-      animalId: animal.id,
-      sensorTagId: animal.tagId,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-      bodyTempCelsius: temp,
-      heartRateBpm: hr,
-      activityScore: act,
-      healthStatus: temp > 39.5 ? 'Warning' : 'Healthy'
-    };
-
-    try {
-      await db.collection('vitals').add(reading);
-      
-      // Threshold check for alert
-      if (temp > 39.5) {
-        await db.collection('alerts').add({
-          farmerId: auth.currentUser.uid,
-          animalId: animal.animalId,
-          parameter: 'Body Temperature',
-          readingValue: temp + '°C',
-          alertType: 'High Temperature',
-          severity: temp > 40.5 ? 'Critical' : 'Warning',
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-          resolved: false,
-          source: 'Sensor'
-        });
-        showToast('⚠ Threshold breach detected! Alert generated.', 'error');
-      }
-
-      // If this was for the selected animal, refresh charts
-      if (animal.id === selectedAnimalId) {
-        fetchHistoricalVitals();
-      }
-    } catch (err) {
-      console.error('Simulation error:', err);
-    }
-  }
-
   // ── AI Summary ────────────────────────────────────────────
   function updateAISummary() {
     const animal = getState().animals.find(a => a.id === selectedAnimalId);
@@ -228,6 +219,15 @@ const VitalsModule = (function () {
 
   // ── Public API ────────────────────────────────────────────
   function init() {
+    const select = document.getElementById('vitals-animal-select');
+    if (select) {
+      select.addEventListener('change', () => {
+        selectedAnimalId = select.value;
+        fetchHistoricalVitals();
+        updateAISummary();
+      });
+    }
+
     populateSelector();
     createCharts();
     fetchHistoricalVitals();

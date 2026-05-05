@@ -42,10 +42,10 @@ const FirestoreStore = (function () {
       speciesKey: data.species.toLowerCase() + 's',
       emoji: data.species === 'Cow' ? '🐄' : data.species === 'Buffalo' ? '🐃' : '🐐',
       breed: data.breed,
-      age: data.ageYears,
-      weight: data.weightKg,
-      tagId: data.sensorTagId,
-      status: data.healthStatus,
+      age: data.age,
+      weight: data.weight,
+      tagId: data.tagId,
+      status: data.status,
       createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
       // Base vitals for UI simulation fallback
       baseVitals: { temp: 38.5, hr: 70, activity: 50 }
