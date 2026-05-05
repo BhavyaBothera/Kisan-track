@@ -18,22 +18,25 @@ const ProfileModule = (function () {
 
   const showToast = (msg) => window.showToast && window.showToast(msg);
 
-  async function fetchFarmerData() {
-    if (!auth.currentUser) {
-      console.warn('ProfileModule: No user logged in yet.');
-      return;
-    }
+  let unsubscribeFarmer = null;
+
+  function subscribeFarmerData() {
+    if (!auth.currentUser) return;
     const uid = auth.currentUser.uid;
-    try {
-      const doc = await db.collection('farmers').doc(uid).get();
+    
+    if (unsubscribeFarmer) unsubscribeFarmer();
+
+    unsubscribeFarmer = db.collection('farmers').doc(uid).onSnapshot((doc) => {
       if (doc.exists) {
         farmerData = doc.data();
+        render();
       } else {
-        console.warn('ProfileModule: Farmer profile not found in Firestore.');
+        console.warn('ProfileModule: Farmer profile not found yet.');
+        // Don't clear farmerData yet, might be being created
       }
-    } catch (err) {
-      console.error('ProfileModule: Error fetching farmer data:', err);
-    }
+    }, (err) => {
+      console.error('ProfileModule: Listener error:', err);
+    });
   }
 
   function render() {
@@ -156,15 +159,15 @@ const ProfileModule = (function () {
   }
 
   function init() {
-    // If auth is already ready, fetch immediately
+    // If auth is already ready, subscribe immediately
     if (auth.currentUser) {
-      fetchFarmerData().then(render);
+      subscribeFarmerData();
     } else {
       // Otherwise wait for auth state change
-      const unsubscribe = auth.onAuthStateChanged(user => {
+      const authUnsub = auth.onAuthStateChanged(user => {
         if (user) {
-          fetchFarmerData().then(render);
-          unsubscribe(); // Only run once on first auth
+          subscribeFarmerData();
+          authUnsub(); 
         }
       });
     }
