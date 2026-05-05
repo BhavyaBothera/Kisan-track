@@ -1,0 +1,7 @@
+node_modules/
+serviceAccountKey.json
+kisantrack_firestore_dataset.json
+find_id.js
+import_to_firestore.js
+.DS_Store
+*.log
