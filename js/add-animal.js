@@ -16,7 +16,7 @@
 const AddAnimalModule = (function () {
   'use strict';
 
-  let modal, form, closeBtn, cancelBtn, openBtn;
+  let modal, form, closeBtn, cancelBtn, openBtn, processBtn;
 
   // ── Modal open / close ────────────────────────────────────
   function openModal() {
@@ -88,16 +88,20 @@ const AddAnimalModule = (function () {
       return;
     }
 
+    const species = document.getElementById('new-species').value;
+    const emojis = { 'Cow': '🐄', 'Buffalo': '🐃', 'Goat': '🐐', 'Sheep': '🐑' };
+
     const animalData = {
       farmerId: auth.currentUser.uid,
       animalId: document.getElementById('new-animal-id').value.trim().toUpperCase(),
-      species: document.getElementById('new-species').value,
+      species: species,
+      emoji: emojis[species] || '🐄',
       breed: document.getElementById('new-breed').value.trim(),
       tagId: document.getElementById('new-tag-id').value.trim(),
-      age: parseInt(document.getElementById('new-age').value),
-      weight: parseInt(document.getElementById('new-weight').value),
+      age: parseInt(document.getElementById('new-age').value) || 0,
+      weight: parseInt(document.getElementById('new-weight').value) || 0,
       status: document.getElementById('new-status').value,
-      lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
       vitals: {
         lastTemp: 38.5,
         lastHeartRate: 70,
@@ -125,12 +129,12 @@ const AddAnimalModule = (function () {
     closeBtn  = document.getElementById('add-animal-close');
     cancelBtn = document.getElementById('cancel-add-animal');
     openBtn   = document.getElementById('open-add-animal-btn');
-    const processBtn = document.getElementById('process-btn'); // Local ref
+    processBtn = document.getElementById('add-animal-submit-btn');
 
-    openBtn.addEventListener('click', openModal);
-    closeBtn.addEventListener('click', closeModal);
-    cancelBtn.addEventListener('click', closeModal);
-    form.addEventListener('submit', handleSubmit);
+    if (openBtn) openBtn.addEventListener('click', openModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+    if (form) form.addEventListener('submit', handleSubmit);
 
     form.querySelectorAll('.form-input').forEach(el => {
       el.addEventListener('input', () => el.classList.remove('input-error'));

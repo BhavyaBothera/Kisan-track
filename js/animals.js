@@ -93,7 +93,9 @@ const AnimalsModule = (function () {
             </div>
             <div class="profile-detail-item">
               <div class="detail-label">Temp / तापमान</div>
-              <div class="detail-value">38.5°C</div>
+              <div class="detail-value">
+                ${state.vitals && state.vitals[animal.id] ? state.vitals[animal.id].temp : (animal.vitals ? animal.vitals.lastTemp : 38.5)}°C
+              </div>
             </div>
           </div>
 

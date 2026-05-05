@@ -139,11 +139,11 @@
     const animal = state.animals.find(a => a.id === animalId || a.animalId === animalId);
     if (!animal) return;
 
-    // Map fields
-    const vitals = animal.vitals || {};
-    const temp = vitals.lastTemp || '—';
-    const hr = vitals.lastHeartRate || '—';
-    const act = vitals.lastActivity || '—';
+    // Map fields - Use real-time vitals from store if available
+    const rtVitals = state.vitals ? state.vitals[animal.id] : null;
+    const temp = rtVitals ? rtVitals.temp : (animal.vitals ? animal.vitals.lastTemp : '—');
+    const hr   = rtVitals ? rtVitals.hr   : (animal.vitals ? animal.vitals.lastHeartRate : '—');
+    const act  = rtVitals ? rtVitals.activity : (animal.vitals ? animal.vitals.lastActivity : '—');
 
     const emojiEl = document.getElementById('modal-emoji');
     if (emojiEl) emojiEl.textContent = animal.emoji || '🐄';

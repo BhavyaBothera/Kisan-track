@@ -80,8 +80,13 @@ const DashboardModule = (function () {
 
     grid.innerHTML = state.animals.map(animal => {
       const sc = statusClass(animal.status);
-      const temp = animal.vitals ? (animal.vitals.lastTemp || '—') : '—';
-      const hr = animal.vitals ? (animal.vitals.lastHeartRate || '—') : '—';
+      
+      // Real-time vitals from the central store (vitals collection)
+      const realTimeVitals = state.vitals ? state.vitals[animal.id] : null;
+      
+      // Fallback to the static vitals in the animal document (from seed/add)
+      const temp = realTimeVitals ? realTimeVitals.temp : (animal.vitals ? animal.vitals.lastTemp : '—');
+      const hr   = realTimeVitals ? realTimeVitals.hr   : (animal.vitals ? animal.vitals.lastHeartRate : '—');
       
       return `
         <div class="animal-card status-${sc.toLowerCase()}" data-id="${animal.id}" role="button" tabindex="0">

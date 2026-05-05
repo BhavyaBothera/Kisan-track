@@ -128,20 +128,50 @@ const FirestoreStore = (function () {
       }, (err) => {
         console.error('Alerts Listener Error:', err);
       });
+    // 4. Subscribe to latest Vitals (Real-time tracking)
+    listeners.vitals = db.collection('vitals')
+      .where('farmerId', '==', uid)
+      .orderBy('timestamp', 'desc')
+      .limit(50) // Track the last 50 readings to ensure we get latest for all animals
+      .onSnapshot((snapshot) => {
+        const latestPerAnimal = {};
+        // Snapshot is desc, so the first time we see an animalId, it's the latest
+        snapshot.docs.forEach(doc => {
+          const data = doc.data();
+          // We use data.animalId (which is the document ID of the animal)
+          const animalDocId = data.animalId; 
+          if (!latestPerAnimal[animalDocId]) {
+            latestPerAnimal[animalDocId] = {
+              temp: data.bodyTempCelsius,
+              hr: data.heartRateBpm,
+              activity: data.activityScore,
+              timestamp: data.timestamp ? data.timestamp.toDate() : new Date()
+            };
+          }
+        });
+        STATE.vitals = latestPerAnimal;
+        console.log('Real-time Vitals Updated for', Object.keys(latestPerAnimal).length, 'animals');
+        recalculateKPIs();
+      }, (err) => {
+        console.error('Vitals Listener Error:', err);
+      });
   }
 
   function unsubscribeAll() {
     if (listeners.farmer) listeners.farmer();
     if (listeners.animals) listeners.animals();
     if (listeners.alerts) listeners.alerts();
+    if (listeners.vitals) listeners.vitals();
     
     listeners.farmer = null;
     listeners.animals = null;
     listeners.alerts = null;
+    listeners.vitals = null;
 
     STATE.farmer = null;
     STATE.animals = [];
     STATE.alerts = [];
+    STATE.vitals = {};
     STATE.isLoading = true;
     console.log('FirestoreStore: All listeners unsubscribed.');
   }

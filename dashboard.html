@@ -426,12 +426,21 @@
           <button class="modal-close" id="modal-close"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="modal-body">
-            <div class="modal-vitals-grid">
-                <div class="modal-vital"><div id="modal-temp"></div></div>
-                <div class="modal-vital"><div id="modal-hr"></div></div>
-                <div class="modal-vital"><div id="modal-act"></div></div>
+            <div class="modal-animal-profile">
+                <div class="modal-emoji" id="modal-emoji">🐄</div>
+                <div class="modal-profile-text">
+                    <h3 id="modal-subtitle">Loading...</h3>
+                    <div class="modal-vitals-grid">
+                        <div class="modal-vital" id="modal-temp"></div>
+                        <div class="modal-vital" id="modal-hr"></div>
+                        <div class="modal-vital" id="modal-act"></div>
+                    </div>
+                </div>
             </div>
-            <div class="modal-chart-wrap"><canvas id="modal-chart"></canvas></div>
+            <div class="modal-chart-wrap">
+                <p class="chart-label"><i class="fa-solid fa-chart-line"></i> 7-Day Health Trend</p>
+                <canvas id="modal-chart"></canvas>
+            </div>
         </div>
       </div>
     </div>
@@ -501,7 +510,7 @@
 
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" id="cancel-add-animal">Cancel</button>
-              <button type="submit" class="btn btn-primary" id="process-btn">Add Animal / पशु जोड़ें</button>
+              <button type="submit" class="btn btn-primary" id="add-animal-submit-btn">Add Animal / पशु जोड़ें</button>
             </div>
           </form>
         </div>
