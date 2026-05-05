@@ -19,10 +19,20 @@ const ProfileModule = (function () {
   const showToast = (msg) => window.showToast && window.showToast(msg);
 
   async function fetchFarmerData() {
+    if (!auth.currentUser) {
+      console.warn('ProfileModule: No user logged in yet.');
+      return;
+    }
     const uid = auth.currentUser.uid;
-    const doc = await db.collection('farmers').doc(uid).get();
-    if (doc.exists) {
-      farmerData = doc.data();
+    try {
+      const doc = await db.collection('farmers').doc(uid).get();
+      if (doc.exists) {
+        farmerData = doc.data();
+      } else {
+        console.warn('ProfileModule: Farmer profile not found in Firestore.');
+      }
+    } catch (err) {
+      console.error('ProfileModule: Error fetching farmer data:', err);
     }
   }
 
@@ -146,7 +156,18 @@ const ProfileModule = (function () {
   }
 
   function init() {
-    fetchFarmerData().then(render);
+    // If auth is already ready, fetch immediately
+    if (auth.currentUser) {
+      fetchFarmerData().then(render);
+    } else {
+      // Otherwise wait for auth state change
+      const unsubscribe = auth.onAuthStateChanged(user => {
+        if (user) {
+          fetchFarmerData().then(render);
+          unsubscribe(); // Only run once on first auth
+        }
+      });
+    }
     document.addEventListener('kisanTrack:stateUpdated', render);
   }
 
