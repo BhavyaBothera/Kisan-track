@@ -920,6 +920,57 @@
   </div>
 
   <!-- ═══════════════════════════════════════════════════════
+     COMPLETE PROFILE MODAL (Welcome Nudge)
+  ═══════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="complete-profile-modal" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width:500px;">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <div class="modal-emoji">👋</div>
+          <div>
+            <h2 class="modal-title">Welcome to KisanTrack!</h2>
+            <p class="modal-subtitle">Please complete your profile to get started / अपनी प्रोफ़ाइल पूरी करें</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-body">
+        <form id="complete-profile-form" novalidate autocomplete="off">
+          <div class="form-group" style="margin-bottom:16px;">
+            <label class="form-label">Farm Name / खेत का नाम <span class="form-required">*</span></label>
+            <input type="text" id="cp-farm-name" class="form-input" placeholder="e.g. Green Valley Farm" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Village / गाँव <span class="form-required">*</span></label>
+              <input type="text" id="cp-village" class="form-input" placeholder="Enter village" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">District / जिला <span class="form-required">*</span></label>
+              <input type="text" id="cp-district" class="form-input" placeholder="Enter district" required />
+            </div>
+          </div>
+          <div class="form-row" style="margin-top:16px;">
+            <div class="form-group">
+              <label class="form-label">State / राज्य <span class="form-required">*</span></label>
+              <input type="text" id="cp-state" class="form-input" placeholder="Enter state" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Farm Size (Acres) / खेत का आकार <span class="form-required">*</span></label>
+              <input type="number" id="cp-farm-size" class="form-input" placeholder="e.g. 5" step="0.5" required />
+            </div>
+          </div>
+          
+          <div style="margin-top:24px;">
+            <button type="submit" class="btn btn-primary" id="btn-complete-profile" style="width:100%;">
+              Complete Profile & Continue / जारी रखें
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
      TOAST NOTIFICATION
 ═══════════════════════════════════════════════════════ -->
   <div class="toast" id="app-toast" role="alert" aria-live="polite">

@@ -81,10 +81,11 @@ document.addEventListener('DOMContentLoaded', () => {
       farmerRef.get().then(async (doc) => {
         if (!doc.exists) {
           // First time user - create profile with auth data
+          const farmName = localStorage.getItem('kisanTrack_farmName') || 'My Farm';
           await farmerRef.set({
             fullName: user.displayName || 'Farmer',
             email: user.email,
-            farmName: localStorage.getItem('kisanTrack_farmName') || 'My Farm',
+            farmName: farmName,
             registeredAt: firebase.firestore.FieldValue.serverTimestamp(),
             lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
             village: '',
@@ -95,6 +96,11 @@ document.addEventListener('DOMContentLoaded', () => {
             primaryAnimal: 'Cow',
             sensorSystemId: 'PENDING'
           });
+          
+          // Show nudge for first time user
+          if (isDashboardPage) {
+            showCompleteProfileModal(farmName);
+          }
         } else {
           // Returning user - update last login
           await farmerRef.update({
@@ -103,10 +109,8 @@ document.addEventListener('DOMContentLoaded', () => {
           
           // Check for missing profile data to show nudge
           const data = doc.data();
-          if (!data.village || !data.farmSizeAcres) {
-             localStorage.setItem('kisanTrack_nudgeProfile', 'true');
-          } else {
-             localStorage.removeItem('kisanTrack_nudgeProfile');
+          if (isDashboardPage && (!data.village || !data.district || !data.state || !data.farmSizeAcres)) {
+            showCompleteProfileModal(data.farmName);
           }
         }
         
@@ -422,6 +426,62 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       console.log('TOAST:', msg);
     }
+  }
+
+  // --- 11. Complete Profile Logic ---
+  const cpModal = document.getElementById('complete-profile-modal');
+  const cpForm = document.getElementById('complete-profile-form');
+
+  function showCompleteProfileModal(currentFarmName) {
+    if (!cpModal || !cpForm) return;
+    
+    const farmInput = document.getElementById('cp-farm-name');
+    if (farmInput && currentFarmName) farmInput.value = currentFarmName;
+    
+    cpModal.classList.add('open');
+  }
+
+  if (cpForm) {
+    cpForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const farmName = document.getElementById('cp-farm-name').value.trim();
+      const village = document.getElementById('cp-village').value.trim();
+      const district = document.getElementById('cp-district').value.trim();
+      const state = document.getElementById('cp-state').value.trim();
+      const farmSize = parseFloat(document.getElementById('cp-farm-size').value) || 0;
+
+      if (!farmName || !village || !district || !state || !farmSize) {
+        showToast('Please fill all required fields.', 'error');
+        return;
+      }
+
+      setLoadingState('btn-complete-profile', true);
+
+      try {
+        const uid = auth.currentUser.uid;
+        await db.collection('farmers').doc(uid).update({
+          farmName,
+          village,
+          district,
+          state,
+          farmSizeAcres: farmSize
+        });
+
+        cpModal.classList.remove('open');
+        showToast('Profile completed! Welcome to KisanTrack.');
+        
+        // Refresh profile module if visible
+        if (window.ProfileModule) {
+          window.ProfileModule.init();
+        }
+      } catch (error) {
+        console.error('Profile Update Error:', error);
+        showToast('Error saving profile. Try again.', 'error');
+      } finally {
+        setLoadingState('btn-complete-profile', false);
+      }
+    });
   }
 
 });
