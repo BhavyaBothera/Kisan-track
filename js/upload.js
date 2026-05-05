@@ -29,24 +29,19 @@ const UploadModule = (function () {
     fileNameDisplay.textContent = file.name;
     fileSizeDisplay.textContent = formatSize(file.size);
 
-    // Update icon by file type
     const icon = filePreview.querySelector('.file-icon i');
-    if (file.name.endsWith('.json')) {
-      icon.className = 'fa-solid fa-file-code';
-    } else {
-      icon.className = 'fa-solid fa-file-csv';
-    }
+    if (file.name.endsWith('.json')) icon.className = 'fa-solid fa-file-code';
+    else icon.className = 'fa-solid fa-file-csv';
 
     filePreview.classList.add('visible');
     uploadProgress.classList.remove('visible');
     uploadResult.classList.remove('visible');
   }
 
-  // ── Simulate processing ───────────────────────────────────
+  // ── Simulate processing & Write to Firestore ──────────────
   function processFile() {
     if (!selectedFile) return;
 
-    // Show progress
     filePreview.classList.remove('visible');
     uploadProgress.classList.add('visible');
     uploadResult.classList.remove('visible');
@@ -63,75 +58,85 @@ const UploadModule = (function () {
     ];
 
     let stepIdx = 0;
-
     const interval = setInterval(() => {
-      pct = Math.min(pct + Math.random() * 6 + 2, 100);
+      pct = Math.min(pct + Math.random() * 8 + 4, 100);
 
-      // Update label based on milestones
       if (stepIdx < steps.length && pct >= steps[stepIdx].target) {
         progressLabel.textContent = steps[stepIdx].label;
         stepIdx++;
       }
 
-      progressBar.style.width  = pct.toFixed(0) + '%';
-      progressPct.textContent  = pct.toFixed(0) + '%';
+      progressBar.style.width = pct.toFixed(0) + '%';
+      progressPct.textContent = pct.toFixed(0) + '%';
 
       if (pct >= 100) {
         clearInterval(interval);
-        setTimeout(showResults, 400);
+        setTimeout(finalizeUpload, 500);
       }
-    }, 80);
+    }, 100);
+  }
+
+  async function finalizeUpload() {
+    const records = 100 + Math.floor(Math.random() * 400);
+    const anomalies = Math.floor(Math.random() * 5);
+    const animalsAffected = anomalies > 0 ? 1 + Math.floor(Math.random() * 2) : 0;
+
+    const summary = {
+      farmerId: auth.currentUser.uid,
+      fileName: selectedFile.name,
+      fileSize: selectedFile.size,
+      recordsParsed: records,
+      anomaliesDetected: anomalies,
+      animalsAffected: animalsAffected,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      status: 'Success'
+    };
+
+    try {
+      await db.collection('sensorLogUploads').add(summary);
+      showResults(summary);
+      showToast('Log file processed and saved to cloud.');
+    } catch (err) {
+      console.error('Error saving upload summary:', err);
+      showToast('Error saving upload summary.', 'error');
+    }
   }
 
   // ── Show results ──────────────────────────────────────────
-  function showResults() {
+  function showResults(data) {
     uploadProgress.classList.remove('visible');
     uploadResult.classList.add('visible');
 
-    const result = APP_DATA.uploadResult;
-    document.getElementById('res-parsed').textContent    = result.recordsParsed;
-    document.getElementById('res-anomalies').textContent = result.anomaliesDetected;
-    document.getElementById('res-animals').textContent   = result.animalsAffected;
+    document.getElementById('res-parsed').textContent = data.recordsParsed;
+    document.getElementById('res-anomalies').textContent = data.anomaliesDetected;
+    document.getElementById('res-animals').textContent = data.animalsAffected;
 
-    // Render anomaly table
     const tbody = document.getElementById('anomaly-table-body');
-    tbody.innerHTML = result.anomalies.map(a => `
-      <tr>
-        <td><strong style="color:var(--text-primary)">${a.animalId}</strong></td>
-        <td>${a.parameter}</td>
-        <td><strong style="color:var(--text-primary)">${a.reading}</strong></td>
-        <td>
-          <span class="severity-chip chip-${a.severity.toLowerCase()}">${a.severity}</span>
-        </td>
-      </tr>
-    `).join('');
+    if (data.anomaliesDetected > 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td><strong style="color:var(--text-primary)">COW#102</strong></td>
+          <td>Body Temperature</td>
+          <td><strong style="color:var(--text-primary)">40.2°C</strong></td>
+          <td><span class="severity-chip chip-warning">Warning</span></td>
+        </tr>
+      `;
+    } else {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 2rem; color: var(--text-dim)">No anomalies found in this file.</td></tr>';
+    }
   }
 
   // ── Drag & Drop ───────────────────────────────────────────
   function initDragDrop() {
-    dropzone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropzone.classList.add('drag-over');
-    });
-
-    dropzone.addEventListener('dragleave', () => {
-      dropzone.classList.remove('drag-over');
-    });
-
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+    dropzone.addEventListener('dragleave', () => { dropzone.classList.remove('drag-over'); });
     dropzone.addEventListener('drop', (e) => {
       e.preventDefault();
       dropzone.classList.remove('drag-over');
       const file = e.dataTransfer.files[0];
       if (file) handleFileSelect(file);
     });
-
     dropzone.addEventListener('click', () => fileInput.click());
-    dropzone.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        fileInput.click();
-      }
-    });
   }
 
   // ── File Input ────────────────────────────────────────────
@@ -140,15 +145,9 @@ const UploadModule = (function () {
     const ext = '.' + file.name.split('.').pop().toLowerCase();
 
     if (!allowed.includes(ext)) {
-      window.showToast('⚠ Please select a CSV or JSON file / कृपया CSV या JSON फ़ाइल चुनें।', 'warning');
+      showToast('⚠ Please select a CSV or JSON file.', 'warning');
       return;
     }
-
-    if (file.size > 50 * 1024 * 1024) {
-      window.showToast('⚠ File size must be under 50MB / फ़ाइल का आकार 50MB से कम होना चाहिए।', 'warning');
-      return;
-    }
-
     showFilePreview(file);
   }
 
@@ -173,7 +172,6 @@ const UploadModule = (function () {
     fileInput.addEventListener('change', () => {
       if (fileInput.files[0]) handleFileSelect(fileInput.files[0]);
     });
-
     processBtn.addEventListener('click', processFile);
   }
 

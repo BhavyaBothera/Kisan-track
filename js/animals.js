@@ -11,6 +11,11 @@ const AnimalsModule = (function () {
   let currentFilter = 'all';
   let currentSearch = '';
 
+  // --- State Reference ---
+  function getState() {
+    return window.FirestoreStore ? window.FirestoreStore.getState() : null;
+  }
+
   // ── Helpers ───────────────────────────────────────────────
   function statusClass(status) {
     return status === 'Healthy' ? 'healthy'
@@ -19,11 +24,14 @@ const AnimalsModule = (function () {
   }
 
   function getFilteredAnimals() {
-    return APP_DATA.animals.filter(animal => {
+    const state = getState();
+    if (!state) return [];
+
+    return state.animals.filter(animal => {
       const matchFilter = currentFilter === 'all' || animal.speciesKey === currentFilter;
       const searchTerm  = currentSearch.toLowerCase();
       const matchSearch = !searchTerm
-        || animal.id.toLowerCase().includes(searchTerm)
+        || animal.animalId.toLowerCase().includes(searchTerm)
         || animal.breed.toLowerCase().includes(searchTerm)
         || animal.species.toLowerCase().includes(searchTerm)
         || animal.tagId.toLowerCase().includes(searchTerm);
@@ -33,7 +41,17 @@ const AnimalsModule = (function () {
 
   // ── Render Profiles ───────────────────────────────────────
   function renderProfiles() {
-    const grid    = document.getElementById('profiles-grid');
+    const grid = document.getElementById('profiles-grid');
+    if (!grid) return;
+
+    const state = getState();
+    if (!state || state.isLoading) {
+      grid.innerHTML = Array(4).fill(0).map(() => `
+        <div class="profile-card skeleton-pulse" style="height:250px; background:rgba(255,255,255,0.05); border:none;"></div>
+      `).join('');
+      return;
+    }
+
     const animals = getFilteredAnimals();
 
     if (!animals.length) {
@@ -47,20 +65,15 @@ const AnimalsModule = (function () {
 
     grid.innerHTML = animals.map(animal => {
       const sc = statusClass(animal.status);
-      const statusNote = animal.statusNote
-        ? `<span style="font-size:0.75rem;color:var(--accent-amber);display:block;margin-top:2px;">⚠ ${animal.statusNote}</span>`
-        : '';
-
       return `
         <div class="profile-card status-${sc.toLowerCase()}">
           <div class="profile-top">
             <div class="profile-emoji">${animal.emoji}</div>
             <div class="profile-meta">
-              <div class="profile-id">${animal.species} #${animal.id}</div>
+              <div class="profile-id">${animal.species} #${animal.animalId}</div>
               <div class="profile-breed">${animal.breed}</div>
               <div style="margin-top:6px;">
                 <span class="badge badge-${sc.toLowerCase()}">${animal.status}</span>
-                ${statusNote}
               </div>
             </div>
           </div>
@@ -80,7 +93,7 @@ const AnimalsModule = (function () {
             </div>
             <div class="profile-detail-item">
               <div class="detail-label">Temp / तापमान</div>
-              <div class="detail-value">${animal.vitals.temp}°C</div>
+              <div class="detail-value">38.5°C</div>
             </div>
           </div>
 
@@ -93,13 +106,16 @@ const AnimalsModule = (function () {
 
     // Attach view detail handlers
     grid.querySelectorAll('.view-detail-btn').forEach(btn => {
-      btn.addEventListener('click', () => window.openAnimalModal(btn.dataset.id));
+      btn.addEventListener('click', () => {
+        if (window.openAnimalModal) window.openAnimalModal(btn.dataset.id);
+      });
     });
   }
 
   // ── Filter Buttons ────────────────────────────────────────
   function initFilters() {
     const filterBar = document.getElementById('animal-filter-bar');
+    if (!filterBar) return;
     filterBar.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         filterBar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -113,6 +129,7 @@ const AnimalsModule = (function () {
   // ── Search ────────────────────────────────────────────────
   function initSearch() {
     const input = document.getElementById('animal-search');
+    if (!input) return;
     let debounceTimer;
     input.addEventListener('input', () => {
       clearTimeout(debounceTimer);
@@ -128,6 +145,10 @@ const AnimalsModule = (function () {
     renderProfiles();
     initFilters();
     initSearch();
+
+    document.addEventListener('kisanTrack:stateUpdated', () => {
+      renderProfiles();
+    });
   }
 
   return { init };

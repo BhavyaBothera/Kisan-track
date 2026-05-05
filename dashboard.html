@@ -23,6 +23,23 @@
   <!-- Firebase App (the core Firebase SDK) -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+  <style>
+    body { visibility: hidden; background: #0A0A06; }
+  </style>
+
+  <script>
+    // Prevent back-button access after logout
+    window.addEventListener('pageshow', (e) => {
+      if (e.persisted && window.firebase) {
+        firebase.auth().onAuthStateChanged(user => {
+          if (!user) window.location.href = 'index.html';
+        });
+      }
+    });
+  </script>
 </head>
 
 <body>
@@ -310,24 +327,81 @@
         <!-- SECTION 8: CAMERA -->
         <section class="tab-section" id="section-camera" aria-label="Camera">
           <div class="page-header">
-            <h1><i class="fa-solid fa-camera"></i> Camera Monitor</h1>
+            <h1><i class="fa-solid fa-camera" style="color:var(--accent-green);margin-right:10px;"></i>Camera Monitor / <span style="color:var(--text-muted);">कैमरा मॉनिटर</span></h1>
+            <p class="subtitle">AI-powered visual health and movement analysis</p>
           </div>
+
           <div class="cam-settings-bar">
-            <label class="toggle-switch"><input type="checkbox" id="cam-toggle" checked /><span class="toggle-track"><span class="toggle-thumb"></span></span></label>
-            <input type="number" id="capture-interval-input" class="cam-num-input" value="120" />
-            <input type="text" id="cam-location-input" class="cam-text-input" value="Main Barn" />
+            <div class="cam-setting">
+              <label>Status</label>
+              <label class="toggle-switch">
+                <input type="checkbox" id="cam-toggle" checked />
+                <span class="toggle-track"><span class="toggle-thumb"></span></span>
+              </label>
+              <span id="cam-status-label" style="font-weight:700;color:var(--accent-green)">ON</span>
+            </div>
+            <div class="cam-setting">
+              <label>Interval (s)</label>
+              <input type="number" id="capture-interval-input" class="cam-num-input" value="120" min="10" />
+            </div>
+            <div class="cam-setting" style="flex:1">
+              <label>Location</label>
+              <input type="text" id="cam-location-input" class="cam-text-input" value="Main Barn" />
+            </div>
           </div>
+
           <div class="camera-main-grid">
             <div class="camera-feed-card">
-              <canvas id="camera-feed-canvas" width="640" height="360"></canvas>
-              <button class="btn btn-primary" id="capture-now-btn" style="width:100%; margin-top:10px;">Capture Now</button>
+              <div class="cam-view-wrap">
+                <canvas id="camera-feed-canvas" width="640" height="360"></canvas>
+                <canvas id="detection-canvas" width="640" height="360" style="position:absolute;top:0;left:0;pointer-events:none;"></canvas>
+                <div class="cam-flash" id="cam-flash"></div>
+                <div class="cam-live-badge" id="camera-live-badge">LIVE</div>
+                <div class="cam-countdown-wrap">Next capture in: <span id="cam-countdown">02:00</span></div>
+              </div>
+              <div class="cam-actions">
+                <button class="btn btn-primary" id="capture-now-btn" style="flex:1">
+                  <i class="fa-solid fa-camera"></i> Capture Now / अभी कैप्चर करें
+                </button>
+              </div>
             </div>
+
             <div class="camera-analysis-card">
-              <div id="no-key-prompt" class="no-key-prompt">API Key Needed</div>
-              <div id="analysis-results" class="analysis-results-area"></div>
+              <div class="card-header">
+                <h3><i class="fa-solid fa-brain"></i> AI Analysis / विश्लेषण</h3>
+                <div id="last-capture-time" class="last-capture-ts">No capture yet</div>
+              </div>
+              
+              <!-- API Key Control -->
+              <div class="api-key-control">
+                <div class="api-key-input-wrap">
+                  <input type="password" id="gemini-api-key-input" placeholder="Enter Gemini API Key..." />
+                  <button id="toggle-key-vis-btn" title="Toggle Visibility"><i class="fa-solid fa-eye"></i></button>
+                  <button id="save-gemini-key-btn" class="btn btn-secondary btn-sm">Save</button>
+                </div>
+                <div id="api-key-status" class="api-key-status disconnected">
+                  <i class="fa-solid fa-circle-xmark"></i> Not Connected / कनेक्ट नहीं
+                </div>
+              </div>
+
+              <div id="analysis-results" class="analysis-results-area">
+                <div class="analysis-placeholder">
+                  <i class="fa-solid fa-robot"></i>
+                  <p>Capture an image to start AI health analysis.</p>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="filmstrip-card"><div class="filmstrip" id="filmstrip"></div></div>
+
+          <div class="filmstrip-card">
+            <div class="filmstrip-header">
+              <h3><i class="fa-solid fa-images"></i> Capture History / इतिहास</h3>
+              <button class="btn-text" id="view-all-history-btn">View All</button>
+            </div>
+            <div class="filmstrip" id="filmstrip">
+              <!-- Items added by camera.js -->
+            </div>
+          </div>
         </section>
 
       </div>
@@ -368,17 +442,76 @@
       </div>
     </div>
 
+    <!-- Add Animal Modal -->
     <div class="modal-overlay" id="add-animal-modal">
-        <div class="modal-box">
-            <div class="modal-header"><h2>Add New Animal</h2><button class="modal-close" id="add-animal-close">×</button></div>
-            <div class="modal-body">
-                <form id="add-animal-form">
-                    <input type="text" id="new-animal-id" placeholder="ID" />
-                    <select id="new-species"><option value="Cow">Cow</option></select>
-                    <button type="submit" class="btn btn-primary">Add</button>
-                </form>
-            </div>
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2><i class="fa-solid fa-plus-circle"></i> Register New Animal</h2>
+          <button class="modal-close" id="add-animal-close"><i class="fa-solid fa-xmark"></i></button>
         </div>
+        <div class="modal-body">
+          <form id="add-animal-form" class="standard-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="new-animal-id">Animal ID / पशु आईडी</label>
+                <input type="text" id="new-animal-id" class="form-input" placeholder="e.g. COW#104" required />
+                <span class="form-error" id="err-animal-id">Required field</span>
+              </div>
+              <div class="form-group">
+                <label for="new-species">Species / प्रजाति</label>
+                <select id="new-species" class="form-input" required>
+                  <option value="" disabled selected>Select Species</option>
+                  <option value="Cow">Cow / गाय</option>
+                  <option value="Buffalo">Buffalo / भैंस</option>
+                  <option value="Goat">Goat / बकरी</option>
+                </select>
+                <span class="form-error" id="err-species">Required field</span>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="new-breed">Breed / नस्ल</label>
+                <input type="text" id="new-breed" class="form-input" placeholder="e.g. Gir / Murrah" required />
+                <span class="form-error" id="err-breed">Required field</span>
+              </div>
+              <div class="form-group">
+                <label for="new-tag-id">RFID Tag ID / टैग आईडी</label>
+                <input type="text" id="new-tag-id" class="form-input" placeholder="e.g. RF-9021" required />
+                <span class="form-error" id="err-tag-id">Required field</span>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="new-age">Age (Years) / आयु</label>
+                <input type="number" id="new-age" class="form-input" min="0" max="30" value="4" required />
+                <span class="form-error" id="err-age">Invalid age</span>
+              </div>
+              <div class="form-group">
+                <label for="new-weight">Weight (kg) / वजन</label>
+                <input type="number" id="new-weight" class="form-input" min="1" value="450" required />
+                <span class="form-error" id="err-weight">Invalid weight</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="new-status">Initial Status / प्रारंभिक स्थिति</label>
+              <select id="new-status" class="form-input" required>
+                <option value="Healthy">Healthy / स्वस्थ</option>
+                <option value="Warning">Warning / चेतावनी</option>
+                <option value="Critical">Critical / गंभीर</option>
+              </select>
+              <span class="form-error" id="err-status">Required field</span>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" id="cancel-add-animal">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="process-btn">Add Animal / पशु जोड़ें</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
 
     <div class="toast" id="app-toast">
@@ -391,7 +524,8 @@
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <script src="js/utils.js"></script>
-  <script src="js/data.js"></script>
+  <script src="js/firestore-store.js"></script>
+  <script src="js/seed-data.js"></script>
   <script src="js/dashboard.js"></script>
   <script src="js/animals.js"></script>
   <script src="js/vitals.js"></script>

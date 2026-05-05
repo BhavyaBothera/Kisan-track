@@ -51,27 +51,6 @@
     }, 3500);
   }
 
-  /**
-   * Show an error message for login or signup forms.
-   * @param {string} formType - 'login' or 'signup'.
-   * @param {string} message - Error text.
-   * @param {HTMLElement[]} [inputsToHighlight=[]] - Inputs that should receive error styling.
-   */
-  function showError(formType, message, inputsToHighlight = []) {
-    const errorEl = document.getElementById(`${formType}-error`);
-    if (errorEl) errorEl.textContent = message;
-    inputsToHighlight.forEach(input => input.classList.add('error-border'));
-  }
-
-  /** Clear error messages from both forms. */
-  function clearErrors() {
-    const loginError = document.getElementById('login-error');
-    const signupError = document.getElementById('signup-error');
-    if (loginError) loginError.textContent = '';
-    if (signupError) signupError.textContent = '';
-    document.querySelectorAll('.auth-field input').forEach(input => input.classList.remove('error-border'));
-  }
-
   /** Validate email with a simple regex. */
   function validateEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -93,8 +72,6 @@
 
   // Export to global scope
   window.showToast = showToast;
-  window.showError = showError;
-  window.clearErrors = clearErrors;
   window.validateEmail = validateEmail;
   window.setLoadingState = setLoadingState;
 })();

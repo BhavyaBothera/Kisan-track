@@ -125,4 +125,22 @@ document.addEventListener('DOMContentLoaded', () => {
         statsObserver.observe(statsStrip);
     }
 
+    // 6. CTA Button Click Handlers
+    const ctaButtons = [
+        'btn-landing-login',
+        'btn-landing-signup',
+        'btn-hero-getstarted',
+        'btn-final-signup'
+    ];
+
+    ctaButtons.forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.location.href = 'login.html';
+            });
+        }
+    });
+
 });

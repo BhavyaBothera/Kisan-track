@@ -120,3 +120,34 @@
 .animate-spin {
   animation: spin 1s linear infinite;
 }
+
+/* ── Skeleton Pulse ───────────────────────────────────────── */
+@keyframes skeleton-pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+.skeleton-pulse {
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+/* ── Camera Flash ────────────────────────────────────────── */
+@keyframes cam-flash {
+  0% { opacity: 0; }
+  20% { opacity: 0.9; }
+  100% { opacity: 0; }
+}
+.cam-flash.active {
+  animation: cam-flash 0.4s ease-out forwards;
+}
+
+/* ── Analysis Spinner ────────────────────────────────────── */
+.analysis-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(124, 181, 24, 0.2);
+  border-top-color: var(--accent-green);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}

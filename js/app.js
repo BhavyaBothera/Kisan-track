@@ -1,7 +1,12 @@
 /**
  * ============================================================
- * KisanTrack — App Controller (app.js)
- * Navigation, sidebar toggle, ripple effects, initialization
+ * KisanTrack — Main Application Controller & Orchestrator (app.js)
+ * 
+ * ROLE:
+ * - Bootstraps all feature modules (Dashboard, Animals, Vitals, etc.)
+ * - Handles top-level navigation and Tab Switching
+ * - Manages global UI components like the Sidebar and Animal Detail Modal
+ * - Provides centralized utility listeners (Ripple effects, Mutation Observers)
  * ============================================================
  */
 
@@ -129,27 +134,53 @@
   }
 
   // ── Modal Helper ──────────────────────────────────────────
-  // Exposed globally so other modules can use it
   window.openAnimalModal = function (animalId) {
-    const animal = APP_DATA.animals.find(a => a.id === animalId);
+    const state = window.FirestoreStore ? window.FirestoreStore.getState() : { animals: [] };
+    const animal = state.animals.find(a => a.id === animalId || a.animalId === animalId);
     if (!animal) return;
 
-    document.getElementById('modal-emoji').textContent    = animal.emoji;
-    document.getElementById('modal-title').textContent    = `${animal.species} #${animal.id}`;
-    document.getElementById('modal-subtitle').textContent = `${animal.breed} · ${animal.age} years · Tag: ${animal.tagId}`;
-    document.getElementById('modal-temp').textContent     = animal.vitals.temp + '°C';
-    document.getElementById('modal-hr').textContent       = animal.vitals.hr + ' bpm';
-    document.getElementById('modal-act').textContent      = animal.vitals.activity;
-    document.getElementById('modal-breed').textContent    = animal.breed;
-    document.getElementById('modal-age').textContent      = animal.age + ' yrs';
-    document.getElementById('modal-weight').textContent   = animal.weight + ' kg';
+    // Map fields
+    const vitals = animal.vitals || {};
+    const temp = vitals.lastTemp || '—';
+    const hr = vitals.lastHeartRate || '—';
+    const act = vitals.lastActivity || '—';
 
-    // Render 7-day chart
-    renderModalChart(animal);
+    const emojiEl = document.getElementById('modal-emoji');
+    if (emojiEl) emojiEl.textContent = animal.emoji || '🐄';
+    
+    document.getElementById('modal-title').textContent = `${animal.species || 'Animal'} #${animal.animalId || '000'}`;
+    
+    const sub = document.getElementById('modal-subtitle');
+    if (sub) sub.textContent = `${animal.breed || 'Standard'} · ${animal.age || '?'} years · Tag: ${animal.tagId || 'N/A'}`;
+
+    const tEl = document.getElementById('modal-temp');
+    if (tEl) tEl.innerHTML = `<i class="fa-solid fa-thermometer-half"></i> ${temp}°C`;
+    
+    const hEl = document.getElementById('modal-hr');
+    if (hEl) hEl.innerHTML = `<i class="fa-solid fa-heart-pulse"></i> ${hr} bpm`;
+    
+    const aEl = document.getElementById('modal-act');
+    if (aEl) aEl.innerHTML = `<i class="fa-solid fa-running"></i> ${act}`;
+
+    // Render 7-day chart (Mocking history if not in Firestore yet)
+    const history = animal.history7d || generateMockHistory(animal);
+    renderModalChart(history);
 
     document.getElementById('animal-modal').classList.add('open');
     document.body.style.overflow = 'hidden';
   };
+
+  function generateMockHistory(animal) {
+    const labels = ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'Now'];
+    const baseT = animal.vitals?.lastTemp || 38.5;
+    const baseH = animal.vitals?.lastHeartRate || 68;
+    return {
+      labels,
+      temp: labels.map(() => baseT + (Math.random() - 0.5) * 0.4),
+      hr: labels.map(() => Math.round(baseH + (Math.random() - 0.5) * 5)),
+      activity: labels.map(() => Math.round(50 + Math.random() * 20))
+    };
+  }
 
   window.closeAnimalModal = function () {
     document.getElementById('animal-modal').classList.remove('open');
@@ -160,77 +191,42 @@
     }
   };
 
-  function renderModalChart(animal) {
+  function renderModalChart(history) {
     const ctx = document.getElementById('modal-chart').getContext('2d');
     if (window._modalChart) window._modalChart.destroy();
 
     window._modalChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: animal.history7d.labels,
+        labels: history.labels,
         datasets: [
           {
             label: 'Temp (°C)',
-            data: animal.history7d.temp,
+            data: history.temp,
             borderColor: '#7CB518',
             backgroundColor: 'rgba(124,181,24,0.08)',
             tension: 0.4,
-            pointRadius: 4,
-            pointBackgroundColor: '#7CB518',
             fill: true,
           },
           {
             label: 'Heart Rate (bpm)',
-            data: animal.history7d.hr,
+            data: history.hr,
             borderColor: '#E5A100',
             backgroundColor: 'rgba(229,161,0,0.06)',
             tension: 0.4,
-            pointRadius: 4,
-            pointBackgroundColor: '#E5A100',
             fill: true,
-          },
-          {
-            label: 'Activity (%)',
-            data: animal.history7d.activity,
-            borderColor: '#3B82F6',
-            backgroundColor: 'rgba(59,130,246,0.06)',
-            tension: 0.4,
-            pointRadius: 4,
-            pointBackgroundColor: '#3B82F6',
-            fill: true,
-          },
+          }
         ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        animation: { duration: 600, easing: 'easeInOutQuart' },
         plugins: {
-          legend: {
-            labels: {
-              color: '#A89F8C',
-              font: { family: "'Noto Sans', sans-serif", size: 11 },
-              boxWidth: 12,
-              padding: 14,
-            },
-          },
-          tooltip: {
-            backgroundColor: '#2C2C1A',
-            titleColor: '#F0EAD6',
-            bodyColor: '#A89F8C',
-            borderColor: '#3D3D28',
-            borderWidth: 1,
-          },
+          legend: { labels: { color: '#A89F8C', font: { size: 10 } } }
         },
         scales: {
-          x: {
-            ticks: { color: '#706860', font: { size: 11 } },
-            grid: { color: 'rgba(61,61,40,0.4)' },
-          },
-          y: {
-            ticks: { color: '#706860', font: { size: 11 } },
-            grid: { color: 'rgba(61,61,40,0.4)' },
-          },
+          x: { ticks: { color: '#706860', font: { size: 10 } }, grid: { color: 'rgba(61,61,40,0.2)' } },
+          y: { ticks: { color: '#706860', font: { size: 10 } }, grid: { color: 'rgba(61,61,40,0.2)' } },
         },
       },
     });

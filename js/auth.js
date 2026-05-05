@@ -22,7 +22,19 @@ if (!firebase.apps.length) {
 }
 
 const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
 const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+// Enable Persistence for offline handling
+db.enablePersistence()
+  .catch((err) => {
+    if (err.code == 'failed-precondition') {
+      console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+    } else if (err.code == 'unimplemented') {
+      console.warn('The current browser does not support all of the features required to enable persistence');
+    }
+  });
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -68,6 +80,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnSignOut = document.getElementById('btn-sign-out');
   const btnGoProfile = document.getElementById('btn-go-profile');
 
+  // --- Utility Functions for Auth Forms ---
+  function showError(formType, message, inputsToHighlight = []) {
+    const errorEl = document.getElementById(`${formType}-error`);
+    if (errorEl) errorEl.textContent = message;
+    inputsToHighlight.forEach(input => input && input.classList.add('error-border'));
+  }
+
+  function clearErrors() {
+    if (loginError) loginError.textContent = '';
+    if (signupError) signupError.textContent = '';
+    document.querySelectorAll('.auth-field input').forEach(input => input.classList.remove('error-border'));
+  }
+
   // --- 2. Auth State Listener ---
   auth.onAuthStateChanged((user) => {
     const path = window.location.pathname;
@@ -82,6 +107,46 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      // Upsert Farmer Profile & Update Last Login
+      const farmerRef = db.collection('farmers').doc(user.uid);
+      farmerRef.get().then(async (doc) => {
+        if (!doc.exists) {
+          // First time user - create profile with auth data
+          await farmerRef.set({
+            fullName: user.displayName || 'Farmer',
+            email: user.email,
+            farmName: localStorage.getItem('kisanTrack_farmName') || 'My Farm',
+            registeredAt: firebase.firestore.FieldValue.serverTimestamp(),
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+            village: '',
+            district: '',
+            state: '',
+            farmSizeAcres: 0,
+            yearsOfFarming: 0,
+            primaryAnimal: 'Cow',
+            sensorSystemId: 'PENDING'
+          });
+        } else {
+          // Returning user - update last login
+          await farmerRef.update({
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          
+          // Check for missing profile data to show nudge
+          const data = doc.data();
+          if (!data.village || !data.farmSizeAcres) {
+             localStorage.setItem('kisanTrack_nudgeProfile', 'true');
+          } else {
+             localStorage.removeItem('kisanTrack_nudgeProfile');
+          }
+        }
+        
+        // Initialize real-time data store
+        if (isDashboardPage && window.FirestoreStore) {
+          window.FirestoreStore.init(user.uid);
+        }
+      });
+
       // Setup user details if on dashboard
       if (isDashboardPage) {
         const displayName = user.displayName || user.email.split('@')[0];
@@ -93,14 +158,28 @@ document.addEventListener('DOMContentLoaded', () => {
         if (authAvatar) authAvatar.textContent = initial;
 
         showToast(`Welcome back, ${firstName}! / नमस्ते!`);
+        document.body.style.visibility = 'visible';
+      } else {
+        // If logged in but on a page that doesn't need data fetch (e.g. index/login before redirect)
+        // the redirect logic above handles it, but let's be safe
+        document.body.style.visibility = 'visible';
       }
     } else {
       // User is NOT logged in
+      
+      // Cleanup Firestore listeners
+      if (window.FirestoreStore) {
+        window.FirestoreStore.unsubscribeAll();
+      }
+
       if (isDashboardPage) {
         window.location.href = 'index.html';
         return;
       }
       
+      // Make visible for guests on landing/login
+      document.body.style.visibility = 'visible';
+
       // Reset forms if on login page
       if (isLoginPage) {
         if (loginForm) loginForm.reset();

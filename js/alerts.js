@@ -8,22 +8,14 @@
 const AlertsModule = (function () {
   'use strict';
 
-  // ── State ─────────────────────────────────────────────────
-  // Work with a local copy so we can mutate resolved state
-  let alertsState = APP_DATA.alerts.map(a => ({ ...a }));
   let currentFilter = 'all';
 
+  // --- State Reference ---
+  function getState() {
+    return window.FirestoreStore ? window.FirestoreStore.getState() : null;
+  }
+
   // ── Helpers ───────────────────────────────────────────────
-  function getAnimalEmoji(id) {
-    const a = APP_DATA.animals.find(x => x.id === id);
-    return a ? a.emoji : '🐄';
-  }
-
-  function getAnimalSpecies(id) {
-    const a = APP_DATA.animals.find(x => x.id === id);
-    return a ? a.species : 'Animal';
-  }
-
   function getSeverityClass(severity) {
     return severity === 'Critical' ? 'critical'
          : severity === 'Warning'  ? 'warning'
@@ -32,11 +24,14 @@ const AlertsModule = (function () {
 
   // ── Stats Row ─────────────────────────────────────────────
   function renderStats() {
-    const total    = alertsState.length;
-    const resolved = alertsState.filter(a => a.resolved).length;
+    const state = getState();
+    const statsRow = document.getElementById('alert-stats-row');
+    if (!statsRow || !state) return;
+
+    const total    = state.alerts.length;
+    const resolved = state.alerts.filter(a => a.resolved).length;
     const pending  = total - resolved;
 
-    const statsRow = document.getElementById('alert-stats-row');
     statsRow.innerHTML = `
       <div class="alert-stat-card">
         <div class="alert-stat-icon amber"><i class="fa-solid fa-bell"></i></div>
@@ -61,7 +56,6 @@ const AlertsModule = (function () {
       </div>
     `;
 
-    // Update sidebar badge
     const badge = document.getElementById('alert-badge');
     if (badge) {
       badge.textContent = pending;
@@ -71,16 +65,29 @@ const AlertsModule = (function () {
 
   // ── Alert Feed ────────────────────────────────────────────
   function getFilteredAlerts() {
-    return alertsState.filter(a => {
+    const state = getState();
+    if (!state) return [];
+
+    return state.alerts.filter(a => {
       if (currentFilter === 'all')      return true;
       if (currentFilter === 'resolved') return a.resolved;
       return a.severity === currentFilter && !a.resolved;
-    }).sort((a, b) => a.resolved - b.resolved); // unresolved first
+    }).sort((a, b) => a.resolved - b.resolved);
   }
 
   function renderFeed() {
-    const feed    = document.getElementById('alert-feed');
-    const alerts  = getFilteredAlerts();
+    const feed = document.getElementById('alert-feed');
+    if (!feed) return;
+
+    const state = getState();
+    if (!state || state.isLoading) {
+      feed.innerHTML = Array(3).fill(0).map(() => `
+        <div class="alert-card skeleton-pulse" style="height:120px; background:rgba(255,255,255,0.05); border:none; margin-bottom:1rem;"></div>
+      `).join('');
+      return;
+    }
+
+    const alerts = getFilteredAlerts();
 
     if (!alerts.length) {
       feed.innerHTML = `
@@ -92,9 +99,10 @@ const AlertsModule = (function () {
     }
 
     feed.innerHTML = alerts.map(a => {
-      const sc      = getSeverityClass(a.severity);
-      const emoji   = getAnimalEmoji(a.animalId);
-      const species = getAnimalSpecies(a.animalId);
+      const sc = getSeverityClass(a.severity);
+      const animal = state.animals.find(x => x.animalId === a.animalId);
+      const emoji = animal ? animal.emoji : '🐄';
+      const species = animal ? animal.species : 'Animal';
 
       const actionBtns = a.resolved
         ? `<div class="resolved-mark"><i class="fa-solid fa-circle-check"></i> Resolved / हल हुआ</div>`
@@ -103,7 +111,7 @@ const AlertsModule = (function () {
             <button class="btn btn-sm btn-secondary resolve-btn" data-id="${a.id}">
               <i class="fa-solid fa-check"></i> Mark Resolved
             </button>
-            <button class="btn btn-sm btn-secondary view-animal-btn" data-id="${a.animalId}">
+            <button class="btn btn-sm btn-secondary view-animal-btn" data-id="${animal ? animal.id : ''}">
               <i class="fa-solid fa-eye"></i> View Animal
             </button>
           </div>
@@ -120,18 +128,15 @@ const AlertsModule = (function () {
               ${a.resolved ? '✓ Resolved' : a.severity}
             </span>
           </div>
-
           <div class="alert-reading">
             <i class="fa-solid fa-${sc === 'critical' ? 'circle-exclamation' : sc === 'warning' ? 'triangle-exclamation' : 'circle-info'}"></i>
-            ${a.parameter}: <strong>${a.value}</strong>
+            ${a.parameter}: <strong>${a.reading}</strong>
           </div>
-
-          <p class="alert-note">${a.note}</p>
-
+          <p class="alert-note">${a.alertType || a.parameter}</p>
           <div class="alert-meta">
             <span class="alert-time">
               <i class="fa-regular fa-clock"></i>
-              ${a.timestamp}
+              ${a.timestamp.toLocaleString()}
               &nbsp;·&nbsp;
               <span class="badge" style="background:rgba(59,130,246,0.12);color:#60a5fa;border:1px solid rgba(59,130,246,0.2);padding:2px 8px;font-size:0.7rem;">
                 Confidence: ${a.confidence}%
@@ -143,33 +148,28 @@ const AlertsModule = (function () {
       `;
     }).join('');
 
-    // Attach resolve handlers
     feed.querySelectorAll('.resolve-btn').forEach(btn => {
-      btn.addEventListener('click', () => resolveAlert(btn.dataset.id));
+      btn.addEventListener('click', async () => {
+        try {
+          await window.FirestoreStore.resolveAlert(btn.dataset.id);
+          showToast('Alert resolved successfully!');
+        } catch (err) {
+          showToast('Failed to resolve alert.', 'error');
+        }
+      });
     });
 
-    // Attach view-animal handlers
     feed.querySelectorAll('.view-animal-btn').forEach(btn => {
-      btn.addEventListener('click', () => window.openAnimalModal(btn.dataset.id));
+      btn.addEventListener('click', () => {
+        if (window.openAnimalModal) window.openAnimalModal(btn.dataset.id);
+      });
     });
-  }
-
-  // ── Mark Resolved ─────────────────────────────────────────
-  function resolveAlert(alertId) {
-    const alert = alertsState.find(a => a.id === alertId);
-    if (alert) {
-      alert.resolved = true;
-      render();
-
-      // Also update the APP_DATA for global consistency
-      const globalAlert = APP_DATA.alerts.find(a => a.id === alertId);
-      if (globalAlert) globalAlert.resolved = true;
-    }
   }
 
   // ── Filter Bar ────────────────────────────────────────────
   function initFilters() {
     const bar = document.getElementById('alert-filter-bar');
+    if (!bar) return;
     bar.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         bar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -189,6 +189,10 @@ const AlertsModule = (function () {
   function init() {
     render();
     initFilters();
+
+    document.addEventListener('kisanTrack:stateUpdated', () => {
+      render();
+    });
   }
 
   return { init, render };
