@@ -27,11 +27,9 @@ const googleProvider = new firebase.auth.GoogleAuthProvider();
 document.addEventListener('DOMContentLoaded', () => {
 
   // --- UI Elements ---
-  // Defensive checks for elements
   const landingScreen = document.getElementById('landing-screen');
   const authScreen = document.getElementById('auth-screen');
   const appDashboard = document.getElementById('app-dashboard');
-  if (!landingScreen || !authScreen || !appDashboard) return;
 
   const btnLandingLogin = document.getElementById('btn-landing-login');
   const btnLandingSignup = document.getElementById('btn-landing-signup');
@@ -69,57 +67,54 @@ document.addEventListener('DOMContentLoaded', () => {
   const profileDropdownMenu = document.getElementById('profile-dropdown-menu');
   const btnSignOut = document.getElementById('btn-sign-out');
   const btnGoProfile = document.getElementById('btn-go-profile');
-  if (!profileDropdownBtn) console.warn('Profile dropdown button missing');
 
   // --- 2. Auth State Listener ---
   auth.onAuthStateChanged((user) => {
+    const path = window.location.pathname;
+    const isLoginPage = path.includes('login.html');
+    const isDashboardPage = path.includes('dashboard.html');
+    const isLandingPage = path.includes('index.html') || path === '/' || path.endsWith('/');
+
     if (user) {
       // User is logged in
-      landingScreen.style.display = 'none';
-      authScreen.style.display = 'none';
-      appDashboard.style.display = 'block';
+      if (isLandingPage || isLoginPage) {
+        window.location.href = 'dashboard.html';
+        return;
+      }
 
-      // Setup user details
-      const displayName = user.displayName || user.email.split('@')[0];
-      const firstName = displayName.split(' ')[0];
-      const initial = displayName.charAt(0).toUpperCase();
+      // Setup user details if on dashboard
+      if (isDashboardPage) {
+        const displayName = user.displayName || user.email.split('@')[0];
+        const firstName = displayName.split(' ')[0];
+        const initial = displayName.charAt(0).toUpperCase();
 
-      if (authFirstName) authFirstName.textContent = firstName;
-      if (authFirstNameHi) authFirstNameHi.textContent = firstName;
-      if (authAvatar) authAvatar.textContent = initial;
+        if (authFirstName) authFirstName.textContent = firstName;
+        if (authFirstNameHi) authFirstNameHi.textContent = firstName;
+        if (authAvatar) authAvatar.textContent = initial;
 
-      showToast(`Welcome back, ${firstName}! / नमस्ते!`);
+        showToast(`Welcome back, ${firstName}! / नमस्ते!`);
+      }
     } else {
       // User is NOT logged in
-      appDashboard.style.display = 'none';
-      authScreen.style.display = 'none';
-      landingScreen.style.display = 'block';
+      if (isDashboardPage) {
+        window.location.href = 'index.html';
+        return;
+      }
       
-      // Reset forms
-      loginForm.reset();
-      signupForm.reset();
-      clearErrors();
+      // Reset forms if on login page
+      if (isLoginPage) {
+        if (loginForm) loginForm.reset();
+        if (signupForm) signupForm.reset();
+        clearErrors();
+      }
     }
   });
 
 
   // --- 3. UI Tab Switching Logic ---
-  function showAuthScreen(tab) {
-    landingScreen.style.display = 'none';
-    appDashboard.style.display = 'none';
-    authScreen.style.display = 'flex';
-    switchTab(tab);
-  }
-
-  if (btnLandingLogin) btnLandingLogin.addEventListener('click', () => showAuthScreen('login'));
-  if (btnLandingSignup) btnLandingSignup.addEventListener('click', () => showAuthScreen('signup'));
-  if (btnHeroGetStarted) btnHeroGetStarted.addEventListener('click', () => showAuthScreen('signup'));
-  if (btnFinalSignup) btnFinalSignup.addEventListener('click', () => showAuthScreen('signup'));
-
-  tabLogin.addEventListener('click', () => switchTab('login'));
-  tabSignup.addEventListener('click', () => switchTab('signup'));
-
   function switchTab(tab) {
+    if (!tabLogin || !tabSignup || !authTabSlider || !loginForm || !signupForm) return;
+    
     if (tab === 'login') {
       tabLogin.classList.add('active');
       tabSignup.classList.remove('active');
@@ -138,10 +133,15 @@ document.addEventListener('DOMContentLoaded', () => {
     clearErrors();
   }
 
+  if (tabLogin) tabLogin.addEventListener('click', () => switchTab('login'));
+  if (tabSignup) tabSignup.addEventListener('click', () => switchTab('signup'));
+
   // --- 4. Password Toggle logic ---
   const toggleVisibility = (inputId, iconId) => {
     const input = document.getElementById(inputId);
     const iconBtn = document.getElementById(iconId);
+    if (!input || !iconBtn) return;
+    
     const icon = iconBtn.querySelector('i');
 
     iconBtn.addEventListener('click', () => {
@@ -192,175 +192,189 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   // --- 6. Signup Logic ---
-  signupForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    clearErrors();
+  if (signupForm) {
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearErrors();
 
-    const name = signupName.value.trim();
-    const farm = signupFarm.value.trim();
-    const email = signupEmail.value.trim();
-    const pass = signupPass.value;
-    const confirm = signupConfirm.value;
+      const name = signupName.value.trim();
+      const farm = signupFarm.value.trim();
+      const email = signupEmail.value.trim();
+      const pass = signupPass.value;
+      const confirm = signupConfirm.value;
 
-    let hasError = false;
+      let hasError = false;
 
-    if (!name || !farm || !email || !pass || !confirm) {
-      showError('signup', 'All fields are required.', []);
-      hasError = true;
-    } else if (!validateEmail(email)) {
-      showError('signup', 'Please enter a valid email.', [signupEmail]);
-      hasError = true;
-    } else if (pass.length < 6) {
-      showError('signup', 'Password must be at least 6 characters.', [signupPass]);
-      hasError = true;
-    } else if (pass !== confirm) {
-      showError('signup', 'Passwords do not match.', [signupPass, signupConfirm]);
-      hasError = true;
-    }
+      if (!name || !farm || !email || !pass || !confirm) {
+        showError('signup', 'All fields are required.', []);
+        hasError = true;
+      } else if (!validateEmail(email)) {
+        showError('signup', 'Please enter a valid email.', [signupEmail]);
+        hasError = true;
+      } else if (pass.length < 6) {
+        showError('signup', 'Password must be at least 6 characters.', [signupPass]);
+        hasError = true;
+      } else if (pass !== confirm) {
+        showError('signup', 'Passwords do not match.', [signupPass, signupConfirm]);
+        hasError = true;
+      }
 
-    if (hasError) return;
+      if (hasError) return;
 
-    setLoadingState('btn-signup-submit', true);
+      setLoadingState('btn-signup-submit', true);
 
-    try {
-      const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
-      const user = userCredential.user;
+      try {
+        const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
+        const user = userCredential.user;
 
-      // Update Firebase Profile
-      await user.updateProfile({
-        displayName: name
-      });
+        // Update Firebase Profile
+        await user.updateProfile({
+          displayName: name
+        });
 
-      // Save farm name
-      localStorage.setItem('kisanTrack_farmName', farm);
+        // Save farm name
+        localStorage.setItem('kisanTrack_farmName', farm);
 
-      // (onAuthStateChanged handles the routing from here)
+        // (onAuthStateChanged handles the routing from here)
 
-    } catch (error) {
-      showError('signup', getFriendlyErrorMessage(error));
-    } finally {
-      setLoadingState('btn-signup-submit', false);
-    }
-  });
+      } catch (error) {
+        showError('signup', getFriendlyErrorMessage(error));
+      } finally {
+        setLoadingState('btn-signup-submit', false);
+      }
+    });
+  }
 
 
   // --- 7. Login Logic ---
-  loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    clearErrors();
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearErrors();
 
-    const email = loginEmail.value.trim();
-    const pass = loginPass.value;
+      const email = loginEmail.value.trim();
+      const pass = loginPass.value;
 
-    let hasError = false;
-    
-    if (!email || !pass) {
-      showError('login', 'Please fill in both email and password.');
-      hasError = true;
-    } else if (!validateEmail(email)) {
-      showError('login', 'Please enter a valid email.', [loginEmail]);
-      hasError = true;
-    }
-    
-    if (hasError) return;
+      let hasError = false;
+      
+      if (!email || !pass) {
+        showError('login', 'Please fill in both email and password.');
+        hasError = true;
+      } else if (!validateEmail(email)) {
+        showError('login', 'Please enter a valid email.', [loginEmail]);
+        hasError = true;
+      }
+      
+      if (hasError) return;
 
-    setLoadingState('btn-login-submit', true);
+      setLoadingState('btn-login-submit', true);
 
-    try {
-      await auth.signInWithEmailAndPassword(email, pass);
-      // (onAuthStateChanged handles the routing)
-    } catch (error) {
-      showError('login', getFriendlyErrorMessage(error));
-    } finally {
-      setLoadingState('btn-login-submit', false);
-    }
-  });
+      try {
+        await auth.signInWithEmailAndPassword(email, pass);
+        // (onAuthStateChanged handles the routing)
+      } catch (error) {
+        showError('login', getFriendlyErrorMessage(error));
+      } finally {
+        setLoadingState('btn-login-submit', false);
+      }
+    });
+  }
 
 
   // --- 8. Google Login Logic ---
-  btnGoogle.addEventListener('click', async () => {
-    try {
-      await auth.signInWithPopup(googleProvider);
-      // Success handled by state listener
-    } catch (error) {
-      if (error.code !== 'auth/popup-closed-by-user') {
-        showError(loginForm.classList.contains('active') ? 'login' : 'signup', getFriendlyErrorMessage(error));
+  if (btnGoogle) {
+    btnGoogle.addEventListener('click', async () => {
+      try {
+        await auth.signInWithPopup(googleProvider);
+        // Success handled by state listener
+      } catch (error) {
+        if (error.code !== 'auth/popup-closed-by-user') {
+          const type = (loginForm && loginForm.classList.contains('active')) ? 'login' : 'signup';
+          showError(type, getFriendlyErrorMessage(error));
+        }
       }
-    }
-  });
+    });
+  }
 
 
   // --- 9. Forgot Password Logic ---
-  btnForgot.addEventListener('click', async () => {
-    clearErrors();
-    const email = loginEmail.value.trim();
-    if (!email || !validateEmail(email)) {
-      showError('login', 'Please enter a valid email address first.', [loginEmail]);
-      return;
-    }
+  if (btnForgot) {
+    btnForgot.addEventListener('click', async () => {
+      clearErrors();
+      const email = loginEmail ? loginEmail.value.trim() : '';
+      if (!email || !validateEmail(email)) {
+        showError('login', 'Please enter a valid email address first.', [loginEmail]);
+        return;
+      }
 
-    try {
-      await auth.sendPasswordResetEmail(email);
-      showToast('✓ Reset link sent to your email / रीसेट लिंक आपके ईमेल पर भेजा गया');
-    } catch (error) {
-      showError('login', getFriendlyErrorMessage(error));
-    }
-  });
+      try {
+        await auth.sendPasswordResetEmail(email);
+        showToast('✓ Reset link sent to your email / रीसेट लिंक आपके ईमेल पर भेजा गया');
+      } catch (error) {
+        showError('login', getFriendlyErrorMessage(error));
+      }
+    });
+  }
 
 
   // --- 10. Topbar and Sign Out logic ---
 
   // Handle dropdown toggle
-  profileDropdownBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    profileDropdownMenu.classList.toggle('show');
-  });
+  if (profileDropdownBtn && profileDropdownMenu) {
+    profileDropdownBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      profileDropdownMenu.classList.toggle('show');
+    });
 
-  // Close dropdown when clicking outside
-  document.addEventListener('click', () => {
-    if (profileDropdownMenu.classList.contains('show')) {
-      profileDropdownMenu.classList.remove('show');
-    }
-  });
+    // Close dropdown when clicking outside
+    document.addEventListener('click', () => {
+      if (profileDropdownMenu.classList.contains('show')) {
+        profileDropdownMenu.classList.remove('show');
+      }
+    });
 
-  profileDropdownMenu.addEventListener('click', (e) => {
-    e.stopPropagation(); // prevent closing immediately before action runs
-  });
+    profileDropdownMenu.addEventListener('click', (e) => {
+      e.stopPropagation(); // prevent closing immediately before action runs
+    });
+  }
 
   // Handle Sign Out
-  btnSignOut.addEventListener('click', async () => {
-    profileDropdownMenu.classList.remove('show');
-    try {
-      await auth.signOut();
-      showToast('You have been signed out / आप साइन आउट हो गए');
-      switchTab('login'); // ensure they land back on login tab
-    } catch (error) {
-      console.error('Sign Out Error', error);
-      showToast('Error signing out. Try again.', 'error');
-    }
-  });
+  if (btnSignOut) {
+    btnSignOut.addEventListener('click', async () => {
+      if (profileDropdownMenu) profileDropdownMenu.classList.remove('show');
+      try {
+        await auth.signOut();
+        showToast('You have been signed out / आप साइन आउट हो गए');
+        // Redirection handled by onAuthStateChanged
+      } catch (error) {
+        console.error('Sign Out Error', error);
+        showToast('Error signing out. Try again.', 'error');
+      }
+    });
+  }
 
   // Tie Go Profile directly to existing mobile-nav/sidebar navigation logic
-  btnGoProfile.addEventListener('click', () => {
-    profileDropdownMenu.classList.remove('show');
-    // Simulate click on the actual profile tab if nav profile tab exists
-    const navProfile = document.getElementById('nav-profile');
-    const mnavProfile = document.getElementById('mnav-profile');
-    if (navProfile) navProfile.click();
-    else if (mnavProfile) mnavProfile.click();
-  });
+  if (btnGoProfile) {
+    btnGoProfile.addEventListener('click', () => {
+      if (profileDropdownMenu) profileDropdownMenu.classList.remove('show');
+      // Simulate click on the actual profile tab if nav profile tab exists
+      const navProfile = document.getElementById('nav-profile');
+      const mnavProfile = document.getElementById('mnav-profile');
+      if (navProfile) navProfile.click();
+      else if (mnavProfile) mnavProfile.click();
+    });
+  }
 
 
   // Re-use Global ShowToast function if exists, else define minimal one here
   // Note: dashboard already has `#app-toast` and global `showToast` in `alerts.js`, 
   // but if auth.js loads before or separately we can use it, standard app.js loading order means it handles it
   // Use global showToast from utils
-  function showToast(msg, type='success') { if (window.showToast) window.showToast(msg, type); }
-    // Rely on global showToast from alerts.js if exists
-    if (typeof window.showToast === 'function') {
+  // Use global showToast from utils
+  function showToast(msg, type = 'success') {
+    if (window.showToast) {
       window.showToast(msg, type);
     } else {
-      // Fallback
       console.log('TOAST:', msg);
     }
   }

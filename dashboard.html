@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Dashboard — KisanTrack | पशु स्वास्थ्य निगरानी</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- App Stylesheets -->
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/sidebar.css" />
+  <link rel="stylesheet" href="css/components.css" />
+
+  <!-- Firebase App (the core Firebase SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+</head>
+
+<body>
+
+  <div id="app-dashboard">
+
+    <!-- ═══════════════════════════════════════════════════════
+       SIDEBAR
+    ═══════════════════════════════════════════════════════ -->
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main Navigation">
+      <!-- Brand -->
+      <div class="sidebar-brand">
+        <div class="brand-icon">🌾</div>
+        <div class="brand-text">
+          <span class="brand-name">KisanTrack</span>
+          <span class="brand-sub">Animal Health Monitor</span>
+        </div>
+      </div>
+
+      <!-- System Status -->
+      <div class="sidebar-status">
+        <div class="status-dot" id="status-dot"></div>
+        <span class="status-text" id="status-text">System Online / ऑनलाइन</span>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="sidebar-nav">
+        <div class="nav-label">Main Menu / मुख्य मेन्यू</div>
+        <div class="nav-link active" data-tab="dashboard" role="button" tabindex="0" id="nav-dashboard">
+          <i class="fa-solid fa-gauge-high"></i>
+          <span class="nav-text">Dashboard<span class="nav-hi">डैशबोर्ड</span></span>
+        </div>
+        <div class="nav-link" data-tab="animals" role="button" tabindex="0" id="nav-animals">
+          <i class="fa-solid fa-paw"></i>
+          <span class="nav-text">Animal Profiles<span class="nav-hi">पशु प्रोफ़ाइल</span></span>
+        </div>
+        <div class="nav-link" data-tab="vitals" role="button" tabindex="0" id="nav-vitals">
+          <i class="fa-solid fa-heartbeat"></i>
+          <span class="nav-text">Live Vitals<span class="nav-hi">लाइव जीवन संकेत</span></span>
+        </div>
+        <div class="nav-link" data-tab="camera" role="button" tabindex="0" id="nav-camera">
+          <i class="fa-solid fa-camera"></i>
+          <span class="nav-text">Camera Monitor<span class="nav-hi">कैमरा मॉनिटर</span></span>
+        </div>
+        <div class="nav-link" data-tab="alerts" role="button" tabindex="0" id="nav-alerts">
+          <i class="fa-solid fa-bell"></i>
+          <span class="nav-text">Alerts<span class="nav-hi">अलर्ट</span></span>
+          <span id="alert-badge" style="background:var(--accent-red);color:#fff;font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:100px;margin-left:auto;">0</span>
+        </div>
+        <div class="nav-link" data-tab="reports" role="button" tabindex="0" id="nav-reports">
+          <i class="fa-solid fa-chart-column"></i>
+          <span class="nav-text">Reports<span class="nav-hi">रिपोर्ट</span></span>
+        </div>
+        <div class="nav-link" data-tab="upload" role="button" tabindex="0" id="nav-upload">
+          <i class="fa-solid fa-upload"></i>
+          <span class="nav-text">Upload Sensor Log<span class="nav-hi">सेंसर डेटा अपलोड</span></span>
+        </div>
+        <div class="nav-label" style="margin-top:8px;">Account / खाता</div>
+        <div class="nav-link" data-tab="profile" role="button" tabindex="0" id="nav-profile">
+          <i class="fa-solid fa-circle-user"></i>
+          <span class="nav-text">Farmer Profile<span class="nav-hi">किसान प्रोफ़ाइल</span></span>
+        </div>
+      </nav>
+
+      <!-- Footer -->
+      <div class="sidebar-footer">
+        <div class="last-sync">
+          <i class="fa-solid fa-rotate"></i>
+          Last sync: <strong id="last-sync-time">2 min ago</strong>
+        </div>
+        <div class="farm-info">
+          <i class="fa-solid fa-location-dot" style="color:var(--text-dim)"></i>
+          <span id="farm-location">Anandpur, Gujarat</span>
+        </div>
+      </div>
+    </aside>
+
+    <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- ═══════════════════════════════════════════════════════
+       MAIN CONTENT
+    ═══════════════════════════════════════════════════════ -->
+    <main class="main-content" id="main-content">
+      <header class="dashboard-topbar">
+        <div class="topbar-left"></div>
+        <div class="topbar-right">
+          <div class="topbar-welcome">Welcome, <span id="auth-first-name">User</span> / नमस्ते, <span id="auth-first-name-hi">User</span></div>
+          <div class="topbar-profile" id="topbar-profile-dropdown-btn" role="button" tabindex="0">
+            <div class="avatar" id="auth-avatar">U</div>
+            <div class="profile-dropdown-menu" id="profile-dropdown-menu">
+              <div class="dropdown-item" id="btn-go-profile">
+                <i class="fa-solid fa-user"></i> My Profile / मेरी प्रोफ़ाइल
+              </div>
+              <div class="dropdown-item" id="btn-sign-out">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out / साइन आउट
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <!-- SECTION 1: DASHBOARD HOME -->
+        <section class="tab-section active" id="section-dashboard" aria-label="Dashboard Home">
+          <div class="page-header">
+            <h1><i class="fa-solid fa-gauge-high" style="color:var(--accent-green);margin-right:10px;"></i>Herd Overview / <span style="color:var(--text-muted);">झुंड की स्थिति</span></h1>
+            <p class="subtitle">Real-time health monitoring for your entire livestock | आपके सभी पशुओं की स्वास्थ्य निगरानी</p>
+          </div>
+          <div class="kpi-grid" id="kpi-grid"></div>
+          <p class="section-title"><i class="fa-solid fa-grip"></i> Herd Status / झुंड की स्थिति</p>
+          <div class="herd-grid" id="herd-grid"></div>
+          <div class="ticker-section" id="alert-ticker">
+            <span class="ticker-label">⚠ LIVE ALERTS</span>
+            <div class="ticker-wrap">
+              <div class="ticker-track" id="ticker-track"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 2: ANIMAL PROFILES -->
+        <section class="tab-section" id="section-animals" aria-label="Animal Profiles">
+          <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+            <div>
+              <h1><i class="fa-solid fa-paw" style="color:var(--accent-green);margin-right:10px;"></i>Animal Profiles / <span style="color:var(--text-muted);">पशु प्रोफ़ाइल</span></h1>
+              <p class="subtitle">Full registry of monitored animals | निगरानी में सभी पशुओं की सूची</p>
+            </div>
+            <button class="btn btn-primary" id="open-add-animal-btn">
+              <i class="fa-solid fa-plus"></i>
+              <span>+ Add Animal / + पशु जोड़ें</span>
+            </button>
+          </div>
+          <div class="filter-bar" id="animal-filter-bar">
+            <button class="filter-btn active" data-filter="all">All / सभी</button>
+            <button class="filter-btn" data-filter="cows">🐄 Cows / गाय</button>
+            <button class="filter-btn" data-filter="buffaloes">🐃 Buffaloes / भैंस</button>
+            <button class="filter-btn" data-filter="goats">🐐 Goats / बकरी</button>
+          </div>
+          <div class="search-wrap">
+            <i class="fa-solid fa-search"></i>
+            <input type="search" class="search-input" id="animal-search" placeholder="Search by ID or name... | ID या नाम से खोजें" />
+          </div>
+          <div class="profiles-grid" id="profiles-grid"></div>
+        </section>
+
+        <!-- SECTION 3: LIVE VITALS -->
+        <section class="tab-section" id="section-vitals" aria-label="Live Vitals Monitor">
+          <div class="page-header">
+            <h1><i class="fa-solid fa-heartbeat" style="color:var(--accent-green);margin-right:10px;"></i>Live Vitals / <span style="color:var(--text-muted);">लाइव जीवन संकेत</span></h1>
+            <p class="subtitle">Real-time sensor readings with AI health analysis</p>
+          </div>
+          <div class="vitals-selector-bar">
+            <label for="vitals-animal-select">Select Animal / पशु चुनें:</label>
+            <select class="styled-select" id="vitals-animal-select" style="flex:1;max-width:300px;"></select>
+            <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+          </div>
+          <div class="gauges-row" id="gauges-row">
+            <!-- Gauges for Temp, HR, Activity -->
+            <div class="gauge-card">
+              <div class="gauge-title"><i class="fa-solid fa-thermometer-half"></i> Body Temp</div>
+              <div class="gauge-svg-wrap">
+                <svg viewBox="0 0 100 100">
+                  <circle class="gauge-bg" cx="50" cy="50" r="40" stroke-dasharray="251.2" />
+                  <circle class="gauge-fill green" id="gauge-temp-fill" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="251.2" />
+                </svg>
+                <div class="gauge-label"><div class="gauge-value" id="gauge-temp-val">--</div><div class="gauge-unit">°C</div></div>
+              </div>
+            </div>
+            <div class="gauge-card">
+              <div class="gauge-title"><i class="fa-solid fa-heart-pulse"></i> Heart Rate</div>
+              <div class="gauge-svg-wrap">
+                <svg viewBox="0 0 100 100">
+                  <circle class="gauge-bg" cx="50" cy="50" r="40" stroke-dasharray="251.2" />
+                  <circle class="gauge-fill amber" id="gauge-hr-fill" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="251.2" />
+                </svg>
+                <div class="gauge-label"><div class="gauge-value" id="gauge-hr-val">--</div><div class="gauge-unit">bpm</div></div>
+              </div>
+            </div>
+            <div class="gauge-card">
+              <div class="gauge-title"><i class="fa-solid fa-running"></i> Activity</div>
+              <div class="gauge-svg-wrap">
+                <svg viewBox="0 0 100 100">
+                  <circle class="gauge-bg" cx="50" cy="50" r="40" stroke-dasharray="251.2" />
+                  <circle class="gauge-fill blue" id="gauge-act-fill" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="251.2" />
+                </svg>
+                <div class="gauge-label"><div class="gauge-value" id="gauge-act-val">--</div><div class="gauge-unit">%</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="live-charts-grid">
+            <div class="live-chart-card"><canvas id="chart-temp"></canvas></div>
+            <div class="live-chart-card"><canvas id="chart-hr"></canvas></div>
+            <div class="live-chart-card"><canvas id="chart-activity"></canvas></div>
+          </div>
+          <div class="ai-summary-card">
+            <div class="ai-summary-header"><i class="fa-solid fa-robot"></i><h3>AI Health Summary</h3></div>
+            <p class="ai-summary-text" id="ai-summary-text">Select an animal to view summary.</p>
+            <div class="confidence-bar-wrap">
+              <div class="confidence-label">Confidence <span id="confidence-pct">—</span></div>
+              <div class="confidence-bar"><div class="confidence-bar-fill" id="confidence-fill" style="width:0%"></div></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 4: ALERTS -->
+        <section class="tab-section" id="section-alerts" aria-label="Alerts">
+          <div class="page-header">
+            <h1><i class="fa-solid fa-bell"></i> Alerts / <span style="color:var(--text-muted);">अलर्ट</span></h1>
+          </div>
+          <div class="alert-stats-row" id="alert-stats-row"></div>
+          <div class="filter-bar" id="alert-filter-bar">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="Critical">🔴 Critical</button>
+            <button class="filter-btn" data-filter="Warning">🟡 Warning</button>
+            <button class="filter-btn" data-filter="resolved">✅ Resolved</button>
+          </div>
+          <div class="alert-feed" id="alert-feed"></div>
+        </section>
+
+        <!-- SECTION 5: REPORTS -->
+        <section class="tab-section" id="section-reports" aria-label="Reports">
+          <div class="page-header">
+            <h1><i class="fa-solid fa-chart-column"></i> Reports / <span style="color:var(--text-muted);">रिपोर्ट</span></h1>
+          </div>
+          <div class="report-controls">
+            <label for="date-range">Date Range:</label>
+            <select class="styled-select" id="date-range">
+              <option value="7">Last 7 Days</option>
+              <option value="14" selected>Last 14 Days</option>
+              <option value="30">Last 30 Days</option>
+            </select>
+          </div>
+          <div class="charts-row">
+            <div class="chart-card"><canvas id="report-alerts-chart"></canvas></div>
+            <div class="chart-card"><canvas id="report-temp-chart"></canvas></div>
+          </div>
+          <div class="data-table-wrap">
+            <div class="data-table-header">
+              <h3>Event Log</h3>
+              <button class="btn btn-secondary btn-sm" id="export-csv-btn">Export CSV</button>
+            </div>
+            <div class="table-scroll">
+              <table class="data-table">
+                <thead><tr><th>Date</th><th>Animal ID</th><th>Parameter</th><th>Reading</th><th>Severity</th><th>Confidence</th><th>Status</th></tr></thead>
+                <tbody id="report-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 6: UPLOAD -->
+        <section class="tab-section" id="section-upload" aria-label="Upload">
+          <div class="page-header">
+            <h1><i class="fa-solid fa-upload"></i> Upload Sensor Log</h1>
+          </div>
+          <div class="upload-container">
+            <div class="dropzone" id="dropzone">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <h3>Drop file here</h3>
+              <p>CSV or JSON (Max 50MB)</p>
+            </div>
+            <input type="file" id="file-input" accept=".csv,.json" style="display:none;" />
+            <button class="btn btn-secondary" id="browse-btn" style="margin-top:14px;">Browse Files</button>
+            <div class="file-preview" id="file-preview">
+              <div class="file-name" id="file-name-display"></div>
+              <button class="btn btn-primary btn-sm" id="process-btn">Process File</button>
+            </div>
+            <div class="upload-progress" id="upload-progress">
+              <div class="progress-bar-outer"><div class="progress-bar-inner" id="progress-bar-fill"></div></div>
+            </div>
+            <div class="upload-result" id="upload-result"></div>
+          </div>
+        </section>
+
+        <!-- SECTION 7: PROFILE -->
+        <section class="tab-section" id="section-profile" aria-label="Profile">
+          <div class="page-header">
+            <h1><i class="fa-solid fa-circle-user"></i> Farmer Profile</h1>
+          </div>
+          <div id="profile-section-root"></div>
+        </section>
+
+        <!-- SECTION 8: CAMERA -->
+        <section class="tab-section" id="section-camera" aria-label="Camera">
+          <div class="page-header">
+            <h1><i class="fa-solid fa-camera"></i> Camera Monitor</h1>
+          </div>
+          <div class="cam-settings-bar">
+            <label class="toggle-switch"><input type="checkbox" id="cam-toggle" checked /><span class="toggle-track"><span class="toggle-thumb"></span></span></label>
+            <input type="number" id="capture-interval-input" class="cam-num-input" value="120" />
+            <input type="text" id="cam-location-input" class="cam-text-input" value="Main Barn" />
+          </div>
+          <div class="camera-main-grid">
+            <div class="camera-feed-card">
+              <canvas id="camera-feed-canvas" width="640" height="360"></canvas>
+              <button class="btn btn-primary" id="capture-now-btn" style="width:100%; margin-top:10px;">Capture Now</button>
+            </div>
+            <div class="camera-analysis-card">
+              <div id="no-key-prompt" class="no-key-prompt">API Key Needed</div>
+              <div id="analysis-results" class="analysis-results-area"></div>
+            </div>
+          </div>
+          <div class="filmstrip-card"><div class="filmstrip" id="filmstrip"></div></div>
+        </section>
+
+      </div>
+    </main>
+
+    <nav class="mobile-nav" id="mobile-nav">
+      <div class="mobile-nav-inner">
+        <div class="mobile-nav-item active" data-tab="dashboard">
+          <i class="fa-solid fa-gauge-high"></i><span>Home</span>
+        </div>
+        <div class="mobile-nav-item" data-tab="animals">
+          <i class="fa-solid fa-paw"></i><span>Animals</span>
+        </div>
+        <div class="mobile-nav-item" data-tab="vitals">
+          <i class="fa-solid fa-heartbeat"></i><span>Vitals</span>
+        </div>
+        <div class="mobile-nav-item" data-tab="alerts">
+          <i class="fa-solid fa-bell"></i><span>Alerts</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Shared Modals -->
+    <div class="modal-overlay" id="animal-modal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2 id="modal-title">Animal Detail</h2>
+          <button class="modal-close" id="modal-close"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-vitals-grid">
+                <div class="modal-vital"><div id="modal-temp"></div></div>
+                <div class="modal-vital"><div id="modal-hr"></div></div>
+                <div class="modal-vital"><div id="modal-act"></div></div>
+            </div>
+            <div class="modal-chart-wrap"><canvas id="modal-chart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="add-animal-modal">
+        <div class="modal-box">
+            <div class="modal-header"><h2>Add New Animal</h2><button class="modal-close" id="add-animal-close">×</button></div>
+            <div class="modal-body">
+                <form id="add-animal-form">
+                    <input type="text" id="new-animal-id" placeholder="ID" />
+                    <select id="new-species"><option value="Cow">Cow</option></select>
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="app-toast">
+        <i class="fa-solid fa-circle-check toast-icon"></i>
+        <span class="toast-msg" id="toast-msg"></span>
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/animals.js"></script>
+  <script src="js/vitals.js"></script>
+  <script src="js/alerts.js"></script>
+  <script src="js/reports.js"></script>
+  <script src="js/upload.js"></script>
+  <script src="js/add-animal.js"></script>
+  <script src="js/profile.js"></script>
+  <script src="js/camera.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/auth.js"></script>
+
+</body>
+
+</html>
