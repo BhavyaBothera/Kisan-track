@@ -128,6 +128,7 @@ const CameraModule = (function () {
   // ── Capture & Upload ─────────────────────────────────────
   async function doCapture() {
     if (!cameraOn || isAnalyzing) return;
+    if (!auth.currentUser) return;
     const uid = auth.currentUser.uid;
     const animals = genScene();
     
@@ -244,6 +245,7 @@ const CameraModule = (function () {
 
   // ── History Filmstrip ─────────────────────────────────────
   async function fetchHistory() {
+    if (!auth.currentUser) return;
     const uid = auth.currentUser.uid;
     const strip = $('filmstrip');
     if (!strip) return;
@@ -369,9 +371,22 @@ const CameraModule = (function () {
 
     initSettings();
     updateKeyStatus();
-    fetchHistory();
-    startCountdown();
-    setTimeout(doCapture, 2000);
+    
+    // Wait for auth to fetch history and start captures
+    if (auth.currentUser) {
+      fetchHistory();
+      startCountdown();
+      setTimeout(doCapture, 2000);
+    } else {
+      const unsubscribe = auth.onAuthStateChanged(user => {
+        if (user) {
+          fetchHistory();
+          startCountdown();
+          setTimeout(doCapture, 2000);
+          unsubscribe();
+        }
+      });
+    }
   }
 
   return { init };

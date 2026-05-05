@@ -230,7 +230,17 @@ const VitalsModule = (function () {
 
     populateSelector();
     createCharts();
-    fetchHistoricalVitals();
+    
+    if (auth.currentUser) {
+      fetchHistoricalVitals();
+    } else {
+      const unsubscribe = auth.onAuthStateChanged(user => {
+        if (user) {
+          fetchHistoricalVitals();
+          unsubscribe();
+        }
+      });
+    }
     
     if (liveInterval) clearInterval(liveInterval);
     liveInterval = setInterval(generateSimulatedReading, 30000); // Generate every 30s for demo

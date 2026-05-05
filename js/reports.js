@@ -209,6 +209,7 @@ const ReportsModule = (function () {
   }
 
   function onActivate() {
+    if (!auth.currentUser) return;
     const days = parseInt(document.getElementById('date-range').value) || 14;
     renderReports(days);
   }
