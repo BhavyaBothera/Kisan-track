@@ -99,6 +99,16 @@ const ProfileModule = (function () {
           ${profileField('fa-id-badge', 'Farmer ID', null, auth.currentUser.uid, null, true)}
           ${profileField('fa-envelope', 'Email', null, f.email, null, true)}
           ${profileField('fa-calendar-plus', 'Registered', null, f.registeredAt ? f.registeredAt.toDate().toLocaleDateString() : '—', null, true)}
+          
+          <div class="debug-recovery-section" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px dashed rgba(255,255,255,0.1);">
+            <div style="color: var(--accent-amber); font-weight: bold; margin-bottom: 0.5rem;"><i class="fa-solid fa-bug"></i> Dashboard Empty?</div>
+            <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1rem;">
+              Click below to manually import the 500-animal dataset to this account.
+            </p>
+            <button id="reseed-dataset-btn" class="btn btn-secondary btn-sm" style="width: 100%; border-color: var(--accent-amber); color: var(--accent-amber);">
+              <i class="fa-solid fa-database"></i> Import Full Dataset (500 Animals)
+            </button>
+          </div>
         </div>
       </div>
 
@@ -172,6 +182,38 @@ const ProfileModule = (function () {
       });
     }
     document.addEventListener('kisanTrack:stateUpdated', render);
+
+    // Delegate reseed button click
+    document.addEventListener('click', (e) => {
+      if (e.target.id === 'reseed-dataset-btn' || e.target.closest('#reseed-dataset-btn')) {
+        handleReseed();
+      }
+    });
+  }
+
+  async function handleReseed() {
+    const btn = document.getElementById('reseed-dataset-btn');
+    if (!btn) return;
+    
+    if (!confirm("This will import 500 animals and 1000+ vitals to your dashboard. Continue?")) return;
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Importing...';
+    
+    try {
+      if (window.SeedDataModule && window.SeedDataModule.importLargeDataset) {
+        await window.SeedDataModule.importLargeDataset(auth.currentUser.uid);
+        showToast('✅ 500 Animals imported successfully!');
+        window.location.reload();
+      } else {
+        throw new Error("Dataset Module not found.");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('❌ Import failed: ' + err.message, 'error');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-database"></i> Import Full Dataset';
+    }
   }
 
   return { init };
