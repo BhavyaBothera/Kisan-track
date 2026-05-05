@@ -24,9 +24,300 @@
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/sidebar.css" />
   <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+  <link rel="stylesheet" href="css/landing.css" />
+
+  <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <!-- Add Firebase products that you want to use -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 </head>
 
 <body>
+
+  <!-- ═══════════════════════════════════════════════════════
+     LANDING SCREEN
+═══════════════════════════════════════════════════════ -->
+  <div id="landing-screen">
+    
+    <!-- Navbar -->
+    <nav class="landing-navbar" id="landing-navbar">
+      <div class="landing-logo">🐄 KisanTrack</div>
+      <div class="landing-nav-btns">
+        <button class="l-btn l-btn-outline" id="btn-landing-login">Login / लॉगिन</button>
+        <button class="l-btn l-btn-fill nav-txt-hide" id="btn-landing-signup">Sign Up / साइन अप</button>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-hills-2"></div>
+      <div class="hero-hills"></div>
+      <div class="hero-stars"></div>
+      <div class="fireflies-container" id="fireflies-container"></div>
+      
+      <div class="hero-content fade-up">
+        <div class="hero-chip">🌿 AI-Powered · IoT · Real-Time</div>
+        <h1 class="hero-title">
+          Smart Health Monitoring
+          <span class="title-hl">for Your Livestock</span>
+        </h1>
+        <p class="hero-sub">
+          Track vitals, detect illness early, and protect your herd with AI-powered sensors and real-time alerts.
+          <span class="hero-sub-hi">AI सेंसर और रियल-टाइम अलर्ट से अपने पशुओं की देखभाल करें।</span>
+        </p>
+        <div class="hero-actions">
+          <button class="l-btn l-btn-fill btn-large" id="btn-hero-getstarted">🚀 Get Started Free / शुरू करें</button>
+          <button class="l-btn btn-outline-dark btn-large" id="btn-watch-works">▶ Watch How It Works</button>
+        </div>
+        <div class="hero-trust">
+          ✓ Free to use &nbsp;·&nbsp; ✓ No technical knowledge needed &nbsp;·&nbsp; ✓ Works on any phone
+        </div>
+      </div>
+      
+      <div class="scroll-indicator"><i class="fa-solid fa-chevron-down"></i></div>
+    </section>
+
+    <!-- Stats Strip -->
+    <section class="stats-strip" id="stats-strip">
+      <div class="stats-grid fade-up">
+        <div class="stat-item">
+          <div class="stat-icon"><i class="fa-solid fa-cow"></i></div>
+          <div class="stat-num" data-target="500+">0</div>
+          <div class="stat-label">Animals Tracked <span class="stat-label-hi">पशु ट्रैक किए</span></div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon"><i class="fa-solid fa-tower-broadcast"></i></div>
+          <div class="stat-num" data-target="24/7">0</div>
+          <div class="stat-label">Real-Time Monitoring <span class="stat-label-hi">रियल-टाइम निगरानी</span></div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon"><i class="fa-solid fa-check-double"></i></div>
+          <div class="stat-num" data-target="88%">0</div>
+          <div class="stat-label">Detection Accuracy <span class="stat-label-hi">सटीकता</span></div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon"><i class="fa-regular fa-bell-slash"></i></div>
+          <div class="stat-num" data-target="42%">0</div>
+          <div class="stat-label">Fewer False Alerts <span class="stat-label-hi">गलत अलर्ट कम</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="l-section" id="section-how-it-works">
+      <div class="section-head fade-up">
+        <h2>How KisanTrack Works <br><span style="font-size: 20px; opacity: 0.8; font-weight: 500;">कैसे काम करता है</span></h2>
+      </div>
+      <div class="steps-row fade-up">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-title"><i class="fa-solid fa-satellite-dish" style="color:var(--b-accent)"></i> Attach Sensors / सेंसर लगाएं</div>
+          <div class="step-desc">Attach IoT wearable tags to each animal. Sensors track temperature, heart rate, and movement.</div>
+        </div>
+        <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-title"><i class="fa-solid fa-robot" style="color:var(--b-accent)"></i> AI Analyses Data / AI विश्लेषण</div>
+          <div class="step-desc">Our AI model continuously monitors readings and detects any abnormal health patterns in real time.</div>
+        </div>
+        <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-title"><i class="fa-solid fa-bell" style="color:var(--b-accent)"></i> Get Instant Alerts / अलर्ट पाएं</div>
+          <div class="step-desc">Receive alerts on your phone the moment an animal needs attention — before illness spreads.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="l-section" style="background: rgba(44,44,26,0.3); max-width: 100%;">
+      <div style="max-width: 1200px; margin: 0 auto;">
+        <div class="section-head fade-up">
+          <h2>Everything You Need <br><span style="font-size: 20px; opacity: 0.8; font-weight: 500;">सब कुछ जो चाहिए</span></h2>
+        </div>
+        <div class="feat-grid fade-up">
+          <div class="feat-card">
+            <div class="feat-icon"><i class="fa-solid fa-camera"></i></div>
+            <div class="feat-title">Camera Monitoring</div>
+            <div class="feat-desc">ESP32-CAM captures images every 2 minutes, analyzed by Gemini AI for visual health checks.</div>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon"><i class="fa-solid fa-chart-line"></i></div>
+            <div class="feat-title">Live Vitals Dashboard</div>
+            <div class="feat-desc">Real-time graphs of temperature, heart rate, and activity for every animal in your herd.</div>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="feat-title">Smart Alerts</div>
+            <div class="feat-desc">Alerts include animal ID, reading value, and AI confidence score to avoid false alarms.</div>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon"><i class="fa-solid fa-paw"></i></div>
+            <div class="feat-title">Animal Profiles</div>
+            <div class="feat-desc">Complete health history, breed info, and 7-day trend charts for each animal.</div>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon"><i class="fa-solid fa-file-csv"></i></div>
+            <div class="feat-title">Sensor Log Upload</div>
+            <div class="feat-desc">Upload CSV or JSON sensor files directly to analyse offline-collected data.</div>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon"><i class="fa-solid fa-chart-pie"></i></div>
+            <div class="feat-title">Health Reports</div>
+            <div class="feat-desc">Weekly and monthly reports with charts you can export and share with your vet.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="l-section">
+      <div class="section-head fade-up">
+        <h2>Trusted by Farmers <br><span style="font-size: 20px; opacity: 0.8; font-weight: 500;">किसानों का भरोसा</span></h2>
+      </div>
+      <div class="testi-row fade-up">
+        <div class="testi-card">
+          <div class="testi-text">"Since using KisanTrack, I detected a fever in my cow two days before she showed any symptoms."</div>
+          <div class="testi-author">— Ramesh Kumar, Jaipur, Rajasthan</div>
+          <div class="testi-stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+        </div>
+        <div class="testi-card">
+          <div class="testi-text">"The camera feature showed me my buffalo was not moving normally. The vet confirmed early pneumonia."</div>
+          <div class="testi-author">— Sukhdev Singh, Ludhiana, Punjab</div>
+          <div class="testi-stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+        </div>
+        <div class="testi-card">
+          <div class="testi-text">"Very easy to use on my basic Android phone. Hindi labels make it simple to understand."</div>
+          <div class="testi-author">— Meena Patel, Anand, Gujarat</div>
+          <div class="testi-stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="final-cta">
+      <div class="fade-up">
+        <h2 class="cta-title">Start Protecting Your Herd Today <span class="cta-hi">आज ही अपने पशुओं की सुरक्षा शुरू करें</span></h2>
+        <div class="cta-sub">Free to use. No setup fee. Works on any device.</div>
+        <button class="l-btn l-btn-fill btn-large" id="btn-final-signup">🚀 Create Free Account / मुफ्त खाता बनाएं</button>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="landing-footer">
+      <div class="footer-top">
+        <div class="f-brand">🐄 KisanTrack <span>Smart Livestock Monitoring</span></div>
+        <div class="f-center">Built for Indian Farmers · ET-201 Project · Team 1</div>
+        <div class="f-right">Arjavi, Bhavya, Deep</div>
+      </div>
+      <div class="footer-bottom">
+        © 2024 KisanTrack · Empowering Farmers with AI
+      </div>
+    </footer>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+     AUTH SCREEN
+═══════════════════════════════════════════════════════ -->
+  <div id="auth-screen" style="display: none;" class="split-auth">
+    
+    <!-- LEFT PANEL: Brand Image -->
+    <div class="auth-left">
+      <div class="auth-left-overlay"></div>
+      <div class="auth-left-content">
+        <div class="auth-logo-large">🐄</div>
+        <h1 class="auth-brand-title">Next-Gen Farming.</h1>
+        <p class="auth-brand-subtitle">AI-powered livestock monitoring for your herd's safety.</p>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: Forms -->
+    <div class="auth-right">
+      <div class="auth-card">
+        <div class="auth-header">
+          <h2 class="auth-title">Welcome to KisanTrack</h2>
+          <p class="auth-subtitle">Smart Livestock Monitoring <br> स्मार्ट पशु निगरानी</p>
+        </div>
+
+        <div class="auth-tabs">
+          <button class="auth-tab active" id="tab-login" aria-selected="true">Login / लॉगिन</button>
+          <button class="auth-tab" id="tab-signup" aria-selected="false">Sign Up / साइन अप</button>
+          <div class="auth-tab-slider" id="auth-tab-slider"></div>
+        </div>
+
+        <div class="auth-forms-wrapper">
+          <!-- Login Form -->
+          <form id="login-form" class="auth-form active">
+            <div class="auth-field">
+              <i class="fa-solid fa-envelope"></i>
+              <input type="email" id="login-email" placeholder="Email Address" required />
+            </div>
+            <div class="auth-field">
+              <i class="fa-solid fa-lock"></i>
+              <input type="password" id="login-password" placeholder="Password" required />
+              <button type="button" class="auth-eye-btn" id="login-eye" aria-label="Toggle password visibility">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+            
+            <div class="auth-error-msg" id="login-error"></div>
+            
+            <button type="submit" class="btn-auth-primary" id="btn-login-submit">Login / लॉगिन</button>
+            <div style="text-align: center; margin-top: 12px;">
+              <button type="button" class="btn-auth-text" id="btn-forgot-password">Forgot Password?</button>
+            </div>
+          </form>
+
+          <!-- Signup Form -->
+          <form id="signup-form" class="auth-form">
+            <div class="auth-field">
+              <i class="fa-solid fa-user"></i>
+              <input type="text" id="signup-name" placeholder="Full Name" required />
+            </div>
+            <div class="auth-field">
+              <i class="fa-solid fa-tractor"></i>
+              <input type="text" id="signup-farm" placeholder="Farm Name" required />
+            </div>
+            <div class="auth-field">
+              <i class="fa-solid fa-envelope"></i>
+              <input type="email" id="signup-email" placeholder="Email Address" required />
+            </div>
+            <div class="auth-field">
+              <i class="fa-solid fa-lock"></i>
+              <input type="password" id="signup-password" placeholder="Password (min 6 chars)" required />
+              <button type="button" class="auth-eye-btn" id="signup-eye" aria-label="Toggle password visibility">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+            <div class="auth-field">
+              <i class="fa-solid fa-lock"></i>
+              <input type="password" id="signup-confirm" placeholder="Confirm Password" required />
+              <button type="button" class="auth-eye-btn" id="signup-confirm-eye" aria-label="Toggle confirm password visibility">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+            
+            <div class="auth-error-msg" id="signup-error"></div>
+            
+            <button type="submit" class="btn-auth-primary" id="btn-signup-submit">Create Account / खाता बनाएं</button>
+          </form>
+        </div>
+
+        <div class="auth-divider">
+          <div class="divider-line"></div>
+          <span>or log in with</span>
+          <div class="divider-line"></div>
+        </div>
+
+        <button type="button" class="btn-auth-google" id="btn-google-login">
+          <i class="fa-brands fa-google"></i> Continue with Google
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="app-dashboard" style="display: none;">
 
   <!-- ═══════════════════════════════════════════════════════
      SIDEBAR
@@ -122,6 +413,28 @@
      MAIN CONTENT
 ═══════════════════════════════════════════════════════ -->
   <main class="main-content" id="main-content">
+    
+    <!-- DASHBOARD TOP HEADER BAR -->
+    <header class="dashboard-topbar">
+      <div class="topbar-left"></div>
+      <div class="topbar-right">
+        <div class="topbar-welcome">Welcome, <span id="auth-first-name">User</span> / नमस्ते, <span id="auth-first-name-hi">User</span></div>
+        
+        <div class="topbar-profile" id="topbar-profile-dropdown-btn" role="button" tabindex="0">
+          <div class="avatar" id="auth-avatar">U</div>
+          
+          <div class="profile-dropdown-menu" id="profile-dropdown-menu">
+            <div class="dropdown-item" id="btn-go-profile">
+              <i class="fa-solid fa-user"></i> My Profile / मेरी प्रोफ़ाइल
+            </div>
+            <div class="dropdown-item" id="btn-sign-out">
+              <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out / साइन आउट
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
     <div class="content-area">
 
       <!-- ─────────────────────────────────────────────────
@@ -936,6 +1249,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 
   <!-- App JS (order matters) -->
+  <script src="js/utils.js"></script>
   <script src="js/data.js"></script>
   <script src="js/dashboard.js"></script>
   <script src="js/animals.js"></script>
@@ -947,7 +1261,10 @@
   <script src="js/profile.js"></script>
   <script src="js/camera.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/landing.js"></script>
 
+  </div> <!-- /#app-dashboard -->
 </body>
 
 </html>

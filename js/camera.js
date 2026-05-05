@@ -450,19 +450,7 @@ const CameraModule = (function () {
     showCamToast();
   }
 
-  function showCamToast() {
-    const toast = $('app-toast'), msg = $('toast-msg');
-    if (!toast || !msg) return;
-    const icon = toast.querySelector('.toast-icon');
-    if (icon) icon.style.color = 'var(--accent-amber)';
-    toast.style.borderColor = 'var(--accent-amber)';
-    msg.textContent = '⚠ Camera detected a health concern / कैमरे ने स्वास्थ्य समस्या पकड़ी';
-    toast.classList.remove('hide'); toast.classList.add('show');
-    setTimeout(() => {
-      toast.classList.remove('show'); toast.classList.add('hide');
-      setTimeout(() => { toast.classList.remove('hide'); toast.style.borderColor = ''; if (icon) icon.style.color = ''; }, 350);
-    }, 4000);
-  }
+  const showCamToast = () => window.showToast && window.showToast('⚠ Camera detected a health concern / कैमरे ने स्वास्थ्य समस्या पकड़ी', 'warning');
 
   // ── API Key ───────────────────────────────────────────────
   function saveKey() {

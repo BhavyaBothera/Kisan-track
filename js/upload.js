@@ -140,12 +140,12 @@ const UploadModule = (function () {
     const ext = '.' + file.name.split('.').pop().toLowerCase();
 
     if (!allowed.includes(ext)) {
-      alert('⚠ Please select a CSV or JSON file.\nकृपया CSV या JSON फ़ाइल चुनें।');
+      window.showToast('⚠ Please select a CSV or JSON file / कृपया CSV या JSON फ़ाइल चुनें।', 'warning');
       return;
     }
 
     if (file.size > 50 * 1024 * 1024) {
-      alert('⚠ File size must be under 50MB.\nफ़ाइल का आकार 50MB से कम होना चाहिए।');
+      window.showToast('⚠ File size must be under 50MB / फ़ाइल का आकार 50MB से कम होना चाहिए।', 'warning');
       return;
     }
 

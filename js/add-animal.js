@@ -233,26 +233,8 @@ const AddAnimalModule = (function () {
     }
   }
 
-  // ── Toast ─────────────────────────────────────────────────
-  let toastTimer = null;
-
-  function showToast(message) {
-    const toast   = document.getElementById('app-toast');
-    const msgEl   = document.getElementById('toast-msg');
-    msgEl.textContent = message;
-
-    // Clear previous timer
-    if (toastTimer) clearTimeout(toastTimer);
-
-    toast.classList.remove('hide');
-    toast.classList.add('show');
-
-    toastTimer = setTimeout(() => {
-      toast.classList.remove('show');
-      toast.classList.add('hide');
-      setTimeout(() => toast.classList.remove('hide'), 400);
-    }, 3500);
-  }
+  // Use shared toast from utils.js
+  const showToast = (msg) => window.showToast && window.showToast(msg);
 
   // ── Form submit ───────────────────────────────────────────
   function handleSubmit(e) {

@@ -19,22 +19,8 @@ const ProfileModule = (function () {
     'farmName', 'farmSize', 'yearsOfFarming', 'primaryAnimalType', 'sensorSystemId',
   ];
 
-  // ── Toast (shared with add-animal, re-uses same element) ──
-  let toastTimer = null;
-  function showToast(msg) {
-    const toast = document.getElementById('app-toast');
-    const msgEl = document.getElementById('toast-msg');
-    if (!toast || !msgEl) return;
-    msgEl.textContent = msg;
-    if (toastTimer) clearTimeout(toastTimer);
-    toast.classList.remove('hide');
-    toast.classList.add('show');
-    toastTimer = setTimeout(() => {
-      toast.classList.remove('show');
-      toast.classList.add('hide');
-      setTimeout(() => toast.classList.remove('hide'), 400);
-    }, 3500);
-  }
+  // Use shared toast from utils.js
+  const showToast = (msg) => window.showToast && window.showToast(msg);
 
   // ── Render profile section ─────────────────────────────────
   function render() {
