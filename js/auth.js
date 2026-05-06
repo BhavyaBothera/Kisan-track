@@ -72,8 +72,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (user) {
       // User is logged in
       if (isLandingPage || isLoginPage) {
+        // Persist UID for the dashboard page before redirect
+        if (user && user.uid) {
+          sessionStorage.setItem('kisan_uid', user.uid);
+        }
         window.location.href = 'dashboard.html';
-        return;
+        // Do NOT return here; allow profile creation and further init to run
       }
 
       // Upsert Farmer Profile & Update Last Login

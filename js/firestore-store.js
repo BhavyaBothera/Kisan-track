@@ -155,7 +155,14 @@ const FirestoreStore = (function () {
       }, (err) => {
         console.error('Vitals Listener Error:', err);
       });
-  }
+      // Retry init if no animals were loaded after a short delay
+      const retryTimer = setTimeout(() => {
+        if (STATE.animals.length === 0 && !STATE.isLoading) {
+          console.warn('FirestoreStore: No animal data after init – retrying init');
+          init(uid);
+        }
+      }, 1500);
+    }
 
   function unsubscribeAll() {
     if (listeners.farmer) listeners.farmer();
