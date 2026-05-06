@@ -91,8 +91,17 @@ const AddAnimalModule = (function () {
     const species = document.getElementById('new-species').value;
     const emojis = { 'Cow': '🐄', 'Buffalo': '🐃', 'Goat': '🐐', 'Sheep': '🐑' };
 
+    const uid = auth.currentUser ? auth.currentUser.uid : sessionStorage.getItem('kisan_uid');
+    
+    if (!uid) {
+      showToast('Session expired. Please login again.', 'error');
+      processBtn.disabled = false;
+      processBtn.textContent = 'Add Animal / पशु जोड़ें';
+      return;
+    }
+
     const animalData = {
-      farmerId: auth.currentUser.uid,
+      farmerId: uid,
       animalId: document.getElementById('new-animal-id').value.trim().toUpperCase(),
       species: species,
       emoji: emojis[species] || '🐄',
@@ -129,7 +138,7 @@ const AddAnimalModule = (function () {
     closeBtn  = document.getElementById('add-animal-close');
     cancelBtn = document.getElementById('cancel-add-animal');
     openBtn   = document.getElementById('open-add-animal-btn');
-    processBtn = document.getElementById('add-animal-submit-btn');
+    processBtn = document.getElementById('submit-add-animal');
 
     if (openBtn) openBtn.addEventListener('click', openModal);
     if (closeBtn) closeBtn.addEventListener('click', closeModal);
