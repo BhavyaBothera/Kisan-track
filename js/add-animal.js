@@ -110,7 +110,7 @@ const AddAnimalModule = (function () {
     };
 
     try {
-      await db.collection('animals').add(animalData);
+      await FirestoreStore.addAnimal(animalData);
       closeModal();
       showToast('✓ Animal added successfully to cloud.');
     } catch (err) {
