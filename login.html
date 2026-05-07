@@ -203,6 +203,14 @@
       .auth-container.signup-active .panel-signup { display: flex; }
       .auth-container.signup-active .panel-login { display: none; }
     }
+    
+    /* Utility */
+    #aurora {
+      position: fixed; width: 600px; height: 600px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      border-radius: 50%; pointer-events: none; z-index: 1; filter: blur(80px);
+      transform: translate(-50%, -50%); transition: left 0.1s, top 0.1s;
+    }
   </style>
 </head>
 <body>
@@ -213,6 +221,8 @@
     <div class="glow-blob glow-1"></div>
     <div class="glow-blob glow-2"></div>
   </div>
+
+  <div id="aurora"></div>
 
   <div class="auth-container" id="auth-container">
     
@@ -237,6 +247,7 @@
             <input type="password" id="login-password" placeholder="Password" required />
           </div>
         </div>
+        <div id="login-error" style="color: #FF4B2B; font-size: 12px; margin-bottom: 10px;"></div>
         <button type="submit" class="btn-submit" id="btn-login-submit">Authenticate</button>
       </form>
       <button type="button" class="btn-google" id="btn-google-login">
@@ -272,6 +283,7 @@
             <input type="password" id="signup-password" placeholder="Password" required />
           </div>
         </div>
+        <div id="signup-error" style="color: #FF4B2B; font-size: 12px; margin-bottom: 10px;"></div>
         <button type="submit" class="btn-submit" id="btn-signup-submit">Initialize</button>
       </form>
     </div>
@@ -292,44 +304,11 @@
 
   </div>
 
-  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/firebase-init.js"></script>
   <script src="js/auth.js"></script>
-
-  <script>
-    const container = document.getElementById('auth-container');
-    const toSignup = document.getElementById('shifter-to-signup');
-    const toLogin = document.getElementById('shifter-to-login');
-
-    function toggleShift(state) {
-      if(state === 'signup') {
-        container.classList.add('signup-active');
-        container.classList.remove('login-active');
-        setTimeout(() => {
-          toSignup.style.display = 'none';
-          toLogin.style.display = 'block';
-        }, 300);
-      } else {
-        container.classList.add('login-active');
-        container.classList.remove('signup-active');
-        setTimeout(() => {
-          toSignup.style.display = 'block';
-          toLogin.style.display = 'none';
-        }, 300);
-      }
-    }
-
-    // Handle initial state from URL
-    const params = new URLSearchParams(window.location.search);
-    if(params.get('tab') === 'signup') {
-      toggleShift('signup');
-    } else {
-      toggleShift('login');
-    }
-  </script>
 </body>
 </html>

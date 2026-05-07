@@ -1,22 +1,17 @@
 /**
  * ============================================================
  * KisanTrack — Authentication Module
- * Handles Firebase Auth integration, forms, and UI states.
+ * Handles Firebase Auth integration, Dual-Shift UI, and Google Auth.
  * ============================================================
  */
-
-// 1. Firebase Auth Variables (Assuming initialized globally in firebase-init.js)
 
 document.addEventListener('DOMContentLoaded', () => {
 
   // --- UI Elements ---
-  const authScreen = document.getElementById('auth-screen');
-  const appDashboard = document.getElementById('app-dashboard');
+  const container = document.getElementById('auth-container');
+  const toSignup = document.getElementById('shifter-to-signup');
+  const toLogin = document.getElementById('shifter-to-login');
 
-  const tabLogin = document.getElementById('tab-login');
-  const tabSignup = document.getElementById('tab-signup');
-  const authTabSlider = document.getElementById('auth-tab-slider');
-  
   const loginForm = document.getElementById('login-form');
   const signupForm = document.getElementById('signup-form');
 
@@ -26,50 +21,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnLoginSubmit = document.getElementById('btn-login-submit');
   
   const signupName = document.getElementById('signup-name');
-  const signupFarm = document.getElementById('signup-farm');
   const signupEmail = document.getElementById('signup-email');
   const signupPass = document.getElementById('signup-password');
-  const signupConfirm = document.getElementById('signup-confirm');
   const signupError = document.getElementById('signup-error');
   const btnSignupSubmit = document.getElementById('btn-signup-submit');
 
   const btnGoogle = document.getElementById('btn-google-login');
-  const btnForgot = document.getElementById('btn-forgot-password');
 
-  // --- Dashboard Header Elements ---
-  const authFirstName = document.getElementById('auth-first-name');
-  const authFirstNameHi = document.getElementById('auth-first-name-hi');
-  const authAvatar = document.getElementById('auth-avatar');
-  const profileDropdownBtn = document.getElementById('topbar-profile-dropdown-btn');
-  const profileDropdownMenu = document.getElementById('profile-dropdown-menu');
-  const btnSignOut = document.getElementById('btn-sign-out');
-  const btnGoProfile = document.getElementById('btn-go-profile'); // Connect to your internal nav if needed
+  console.log('Auth Module: Initialized');
+  console.log('Auth Module: Google Button found?', !!btnGoogle);
 
-  // --- 2. Auth State Listener ---
-  auth.onAuthStateChanged((user) => {
-    if (user) {
-      // User is logged in -> Go to dashboard
-      // Prevent infinite loop if already on dashboard.html (though auth.js isn't usually there)
-      if (window.location.pathname.includes('login.html')) {
-        window.location.href = 'dashboard.html';
-      }
-    } else {
-      // User is NOT logged in -> Stay on login or redirect to index if trying to access dashboard
-      if (window.location.pathname.includes('dashboard.html') || 
-          window.location.pathname.includes('herd.html') || 
-          window.location.pathname.includes('alerts.html')) {
-        window.location.href = 'index.html';
-      }
-    }
-  });
-
-
-  // --- 3. Dual-Shift UI Logic ---
-  const container = document.getElementById('auth-container');
-  const toSignup = document.getElementById('shifter-to-signup');
-  const toLogin = document.getElementById('shifter-to-login');
-
+  // --- 1. Dual-Shift Logic ---
   window.toggleShift = (state) => {
+    console.log('Auth Module: Shifting to', state);
     if(state === 'signup') {
       container.classList.add('signup-active');
       container.classList.remove('login-active');
@@ -84,61 +48,37 @@ document.addEventListener('DOMContentLoaded', () => {
     clearErrors();
   };
 
-  // Handle URL parameters on load
-  const urlParams = new URLSearchParams(window.location.search);
-  const initialTab = urlParams.get('tab');
-  if (initialTab === 'signup') {
-    window.toggleShift('signup');
-  } else {
-    window.toggleShift('login');
+  // Aurora Mouse Follow
+  const aurora = document.getElementById('aurora');
+  if (aurora) {
+    document.addEventListener('mousemove', (e) => {
+      aurora.style.left = e.clientX + 'px';
+      aurora.style.top = e.clientY + 'px';
+    });
   }
 
-
-  // --- 4. Password Toggle logic ---
-  // (Unchanged)
-  const toggleVisibility = (inputId, iconId) => {
-    const input = document.getElementById(inputId);
-    const iconBtn = document.getElementById(iconId);
-    if (!input || !iconBtn) return;
-    const icon = iconBtn.querySelector('i');
-
-    iconBtn.addEventListener('click', () => {
-      if (input.type === 'password') {
-        input.type = 'text';
-        icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash');
-      } else {
-        input.type = 'password';
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
+  // --- 2. Auth State Listener ---
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      if (window.location.pathname.includes('login.html')) {
+        window.location.href = 'dashboard.html';
       }
-    });
-  };
+    }
+  });
 
-  toggleVisibility('login-password', 'login-eye');
-  toggleVisibility('signup-password', 'signup-eye');
-  toggleVisibility('signup-confirm', 'signup-confirm-eye');
+  // Handle URL parameters
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('tab') === 'signup') window.toggleShift('signup');
 
-
-  // --- 5. Firebase Error Mapping ---
+  // --- 3. Firebase Helpers ---
   function getFriendlyErrorMessage(error) {
     switch (error.code) {
-      case 'auth/email-already-in-use':
-        return 'This email is already registered. Please login.';
-      case 'auth/user-not-found':
-        return 'No account found with this email.';
-      case 'auth/wrong-password':
-        return 'Incorrect password. Please try again.';
-      case 'auth/invalid-credential':
-        return 'Invalid credentials. Please make sure email and password are correct.';
-      case 'auth/too-many-requests':
-        return 'Too many attempts. Please try again later.';
-      case 'auth/weak-password':
-        return 'Password is too weak. Must be at least 6 characters.';
-      case 'auth/invalid-email':
-        return 'Please enter a valid email.';
-      default:
-        return error.message || 'An error occurred. Please try again.';
+      case 'auth/email-already-in-use': return 'Email already registered.';
+      case 'auth/user-not-found': return 'Account not found.';
+      case 'auth/wrong-password': return 'Incorrect password.';
+      case 'auth/invalid-credential': return 'Invalid credentials.';
+      case 'auth/popup-closed-by-user': return ''; // User closed popup
+      default: return error.message;
     }
   }
 
@@ -147,201 +87,73 @@ document.addEventListener('DOMContentLoaded', () => {
     if (signupError) signupError.textContent = '';
   }
 
-  function showError(formType, message) {
-    if (formType === 'login') {
-      if (loginError) loginError.textContent = message;
-    } else {
-      if (signupError) signupError.textContent = message;
-    }
+  function showError(form, msg) {
+    if (form === 'login' && loginError) loginError.textContent = msg;
+    if (form === 'signup' && signupError) signupError.textContent = msg;
   }
 
-  function validateEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  }
-
-  function setLoadingState(btnId, isLoading) {
+  function setLoading(btnId, isLoading) {
     const btn = document.getElementById(btnId);
     if (!btn) return;
     if (isLoading) {
-      btn.dataset.originalText = btn.innerHTML;
+      btn.dataset.old = btn.innerHTML;
       btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
     } else {
       btn.disabled = false;
-      btn.innerHTML = btn.dataset.originalText || (btnId === 'btn-login-submit' ? 'Authenticate' : 'Initialize');
+      btn.innerHTML = btn.dataset.old || (btnId === 'btn-login-submit' ? 'Authenticate' : 'Initialize');
     }
   }
 
+  // --- 4. Authentication Actions ---
 
-  // --- 6. Signup Logic ---
-  if (signupForm) {
-    signupForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    clearErrors();
-
-    const name = signupName.value.trim();
-    const email = signupEmail.value.trim();
-    const pass = signupPass.value;
-
-    let hasError = false;
-
-    if (!name || !email || !pass) {
-      showError('signup', 'All fields are required.');
-      hasError = true;
-    } else if (!validateEmail(email)) {
-      showError('signup', 'Please enter a valid email.');
-      hasError = true;
-    } else if (pass.length < 6) {
-      showError('signup', 'Password must be at least 6 characters.');
-      hasError = true;
-    }
-
-    if (hasError) return;
-
-    setLoadingState('btn-signup-submit', true);
-
-    try {
-      const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
-      await userCredential.user.updateProfile({ displayName: name });
-    } catch (error) {
-      showError('signup', getFriendlyErrorMessage(error));
-    } finally {
-      setLoadingState('btn-signup-submit', false);
-    }
-  });
-  }
-
-
-  // --- 7. Login Logic ---
+  // Email Login
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    clearErrors();
-
-    const email = loginEmail.value.trim();
-    const pass = loginPass.value;
-
-    if (!email || !pass) {
-      showError('login', 'Please fill in both fields.');
-      return;
-    }
-    
-    setLoadingState('btn-login-submit', true);
-
-    try {
-      await auth.signInWithEmailAndPassword(email, pass);
-    } catch (error) {
-      showError('login', getFriendlyErrorMessage(error));
-    } finally {
-      setLoadingState('btn-login-submit', false);
-    }
-  });
+      e.preventDefault();
+      clearErrors();
+      setLoading('btn-login-submit', true);
+      try {
+        await auth.signInWithEmailAndPassword(loginEmail.value, loginPass.value);
+      } catch (error) {
+        showError('login', getFriendlyErrorMessage(error));
+      } finally {
+        setLoading('btn-login-submit', false);
+      }
+    });
   }
 
+  // Email Signup
+  if (signupForm) {
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearErrors();
+      setLoading('btn-signup-submit', true);
+      try {
+        const cred = await auth.createUserWithEmailAndPassword(signupEmail.value, signupPass.value);
+        await cred.user.updateProfile({ displayName: signupName.value });
+      } catch (error) {
+        showError('signup', getFriendlyErrorMessage(error));
+      } finally {
+        setLoading('btn-signup-submit', false);
+      }
+    });
+  }
 
-  // --- 8. Google Login Logic ---
+  // Google Auth
   if (btnGoogle) {
     btnGoogle.addEventListener('click', async () => {
-    try {
-      await auth.signInWithPopup(googleProvider);
-    } catch (error) {
-      if (error.code !== 'auth/popup-closed-by-user') {
-        const activeForm = container.classList.contains('signup-active') ? 'signup' : 'login';
-        showError(activeForm, getFriendlyErrorMessage(error));
-      }
-    }
-    });
-  }
-
-
-  // --- 9. Forgot Password Logic ---
-  if (btnForgot) {
-    btnForgot.addEventListener('click', async () => {
-    clearErrors();
-    const email = loginEmail.value.trim();
-    if (!email || !validateEmail(email)) {
-      showError('login', 'Please enter a valid email address first.', [loginEmail]);
-      return;
-    }
-
-    try {
-      await auth.sendPasswordResetEmail(email);
-      showToast('✓ Reset link sent to your email / रीसेट लिंक आपके ईमेल पर भेजा गया');
-    } catch (error) {
-      showError('login', getFriendlyErrorMessage(error));
-    }
-  });
-  }
-
-
-  // --- 10. Topbar and Sign Out logic ---
-
-  // Handle dropdown toggle
-  if (profileDropdownBtn && profileDropdownMenu) {
-    profileDropdownBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      profileDropdownMenu.classList.toggle('show');
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', () => {
-      if (profileDropdownMenu.classList.contains('show')) {
-        profileDropdownMenu.classList.remove('show');
-      }
-    });
-
-    profileDropdownMenu.addEventListener('click', (e) => {
-      e.stopPropagation(); // prevent closing immediately before action runs
-    });
-  }
-
-  // Handle Sign Out
-  if (btnSignOut) {
-    btnSignOut.addEventListener('click', async () => {
-      if (profileDropdownMenu) profileDropdownMenu.classList.remove('show');
+      console.log('Auth Module: Google Popup Opening...');
       try {
-        await auth.signOut();
-        // Clear local state to prevent leaks between different users on same device
-        localStorage.removeItem('kt_selected_animal_id');
-        localStorage.removeItem('kisanTrack_farmName'); 
-
-        showToast('You have been signed out / आप साइन आउट हो गए');
-        if (window.isLandingPage) {
-          switchTab('login'); // ensure they land back on login tab
-        } else {
-          window.location.href = 'index.html';
-        }
+        await auth.signInWithPopup(googleProvider);
+        console.log('Auth Module: Google Success');
       } catch (error) {
-        console.error('Sign Out Error', error);
-        showToast('Error signing out. Try again.', 'error');
+        console.error('Auth Module: Google Error', error);
+        const activeSide = container.classList.contains('signup-active') ? 'signup' : 'login';
+        const msg = getFriendlyErrorMessage(error);
+        if (msg) showError(activeSide, msg);
       }
     });
-  }
-
-  // Tie Go Profile directly to existing mobile-nav/sidebar navigation logic
-  if (btnGoProfile) {
-    btnGoProfile.addEventListener('click', () => {
-      if (profileDropdownMenu) profileDropdownMenu.classList.remove('show');
-      // Simulate click on the actual profile tab if nav profile tab exists
-      const navProfile = document.getElementById('nav-profile');
-      const mnavProfile = document.getElementById('mnav-profile');
-      if (navProfile) navProfile.click();
-      else if (mnavProfile) mnavProfile.click();
-    });
-  }
-
-
-  // Re-use Global ShowToast function if exists, else define minimal one here
-  // Note: dashboard already has `#app-toast` and global `showToast` in `alerts.js`, 
-  // but if auth.js loads before or separately we can use it, standard app.js loading order means it handles it
-  function showToast(msg, type='success') {
-    // Rely on global showToast from alerts.js if exists
-    if (typeof window.showToast === 'function') {
-      window.showToast(msg, type);
-    } else {
-      // Fallback
-      console.log('TOAST:', msg);
-    }
   }
 
 });
