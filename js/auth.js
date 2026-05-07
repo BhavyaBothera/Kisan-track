@@ -48,39 +48,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- 2. Auth State Listener ---
   auth.onAuthStateChanged((user) => {
     if (user) {
-      // User is logged in
-      if (window.isLandingPage) {
+      // User is logged in -> Go to dashboard
+      // Prevent infinite loop if already on dashboard.html (though auth.js isn't usually there)
+      if (window.location.pathname.includes('login.html')) {
         window.location.href = 'dashboard.html';
-        return;
       }
-
-      if (authScreen) authScreen.style.display = 'none';
-      if (appDashboard) appDashboard.style.display = 'block';
-
-      // Setup user details
-      const displayName = user.displayName || user.email.split('@')[0];
-      const firstName = displayName.split(' ')[0];
-      const initial = displayName.charAt(0).toUpperCase();
-
-      if (authFirstName) authFirstName.textContent = firstName;
-      if (authFirstNameHi) authFirstNameHi.textContent = firstName;
-      if (authAvatar) authAvatar.textContent = initial;
-
-      showToast(`Welcome back, ${firstName}! / नमस्ते!`);
     } else {
-      // User is NOT logged in
-      if (!window.isLandingPage && window.location.pathname.indexOf('index.html') === -1 && window.location.pathname !== '/') {
+      // User is NOT logged in -> Stay on login or redirect to index if trying to access dashboard
+      if (window.location.pathname.includes('dashboard.html') || 
+          window.location.pathname.includes('herd.html') || 
+          window.location.pathname.includes('alerts.html')) {
         window.location.href = 'index.html';
-        return;
       }
-
-      if (authScreen) authScreen.style.display = 'flex';
-      if (appDashboard) appDashboard.style.display = 'none';
-      
-      // Reset forms
-      loginForm.reset();
-      signupForm.reset();
-      clearErrors();
     }
   });
 
@@ -106,6 +85,15 @@ document.addEventListener('DOMContentLoaded', () => {
       loginForm.classList.remove('active');
     }
     clearErrors();
+  }
+
+  // Handle URL parameters on load
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialTab = urlParams.get('tab');
+  if (initialTab === 'signup') {
+    switchTab('signup');
+  } else {
+    switchTab('login');
   }
 
   // --- 4. Password Toggle logic ---

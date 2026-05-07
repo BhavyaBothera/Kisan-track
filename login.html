@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>Login — KisanTrack | स्मार्ट पशु निगरानी</title>
+  <title>Login / Sign Up — KisanTrack</title>
   
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -14,121 +13,357 @@
   <!-- Font Awesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-  <!-- App Stylesheets -->
-  <link rel="stylesheet" href="css/main.css" />
-  <link rel="stylesheet" href="css/animations.css" />
-  <link rel="stylesheet" href="css/auth.css" />
-
   <style>
-    body { visibility: hidden; background: #1A1A0F; }
+    :root {
+      --bg-primary:    #1A1A0F;
+      --bg-card:       #2C2C1A;
+      --accent-green:  #7CB518;
+      --accent-amber:  #E5A100;
+      --accent-red:    #C0392B;
+      --text-primary:  #F0EAD6;
+      --text-muted:    #A89F8C;
+      --border:        #3D3D28;
+      --radius-md:     16px;
+      --radius-pill:   50px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Noto Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+
+    /* Background Effects (Matching Landing) */
+    .auth-bg {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+    .sky-glow {
+      position: absolute;
+      top: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; height: 70%;
+      background: radial-gradient(circle at center, rgba(44, 62, 26, 0.4) 0%, transparent 70%);
+    }
+    .star {
+      position: absolute; width: 2px; height: 2px; background: white; border-radius: 50%; opacity: 0.5;
+      animation: twinkle 3s infinite ease-in-out;
+    }
+    @keyframes twinkle { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+    /* Auth Layout */
+    .auth-container {
+      width: 100%;
+      max-width: 440px;
+      padding: 24px;
+      z-index: 10;
+    }
+
+    .auth-logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .logo-emoji { font-size: 48px; display: block; margin-bottom: 8px; }
+    .logo-text { font-family: 'Poppins', sans-serif; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+    .logo-text span { color: var(--accent-green); }
+
+    .auth-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 40px 32px;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Tabs */
+    .auth-tabs {
+      display: flex;
+      position: relative;
+      background: var(--bg-primary);
+      border-radius: var(--radius-pill);
+      margin-bottom: 32px;
+      padding: 4px;
+      border: 1px solid var(--border);
+    }
+    .auth-tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      z-index: 2;
+      transition: color 0.3s ease;
+    }
+    .auth-tab.active { color: var(--bg-primary); }
+    .auth-tab-slider {
+      position: absolute;
+      top: 4px; left: 4px;
+      width: calc(50% - 4px); height: calc(100% - 8px);
+      background: var(--accent-green);
+      border-radius: var(--radius-pill);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1;
+    }
+
+    /* Forms */
+    .auth-forms-wrapper { position: relative; overflow: hidden; }
+    .auth-form {
+      display: none;
+      animation: fadeIn 0.4s ease forwards;
+    }
+    .auth-form.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; }
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-wrapper i {
+      position: absolute;
+      left: 16px;
+      color: var(--text-dim);
+      font-size: 16px;
+    }
+    .auth-input {
+      width: 100%;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px 12px 48px;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 15px;
+      transition: all 0.2s ease;
+    }
+    .auth-input:focus {
+      outline: none;
+      border-color: var(--accent-green);
+      box-shadow: 0 0 0 3px rgba(124, 181, 24, 0.1);
+    }
+    .password-toggle {
+      position: absolute;
+      right: 16px;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .btn-auth {
+      width: 100%;
+      background: var(--accent-green);
+      color: var(--bg-primary);
+      padding: 14px;
+      border-radius: 12px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      margin-top: 12px;
+      transition: all 0.25s ease;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .btn-auth:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-auth:disabled { opacity: 0.7; cursor: not-allowed; }
+
+    .forgot-pass {
+      display: block;
+      text-align: center;
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .forgot-pass:hover { color: var(--accent-green); }
+
+    .auth-divider {
+      display: flex; align-items: center; gap: 12px; margin: 32px 0;
+    }
+    .divider-line { flex: 1; height: 1px; background: var(--border); }
+    .auth-divider span { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+    .btn-google {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 12px;
+      border-radius: 12px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .btn-google:hover { background: rgba(255,255,255,0.05); border-color: var(--text-muted); }
+
+    .back-home {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-top: 32px;
+      font-size: 14px;
+      color: var(--text-muted);
+      transition: color 0.2s;
+    }
+    .back-home:hover { color: var(--text-primary); }
+
+    .auth-error-msg {
+      color: #ff6b6b;
+      font-size: 13px;
+      margin-top: 8px;
+      text-align: center;
+      min-height: 20px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(100px);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 12px 24px;
+      border-radius: var(--radius-pill);
+      display: flex; align-items: center; gap: 12px;
+      z-index: 1000;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast-icon { color: var(--accent-green); }
+
+    @media (max-width: 480px) {
+      .auth-container { padding: 16px; }
+      .auth-card { padding: 32px 20px; }
+    }
   </style>
 </head>
-
 <body>
 
-  <div id="auth-screen" class="split-auth">
-    
-    <!-- LEFT PANEL: Brand Image -->
-    <div class="auth-left">
-      <div class="auth-left-overlay"></div>
-      <div class="auth-left-content">
-        <div class="auth-logo-large">🐄</div>
-        <h1 class="auth-brand-title">Next-Gen Farming.</h1>
-        <p class="auth-brand-subtitle">AI-powered livestock monitoring for your herd's safety.</p>
-        <div style="margin-top: 2rem;">
-            <a href="index.html" class="btn-auth-text" style="color: rgba(255,255,255,0.7); text-decoration: none;">
-                <i class="fa-solid fa-arrow-left"></i> Back to Home / होम पर वापस जाएं
-            </a>
-        </div>
-      </div>
-    </div>
-
-    <!-- RIGHT PANEL: Forms -->
-    <div class="auth-right">
-      <div class="auth-card">
-        <div class="auth-header">
-          <h2 class="auth-title">Welcome to KisanTrack</h2>
-          <p class="auth-subtitle">Smart Livestock Monitoring <br> स्मार्ट पशु निगरानी</p>
-        </div>
-
-        <div class="auth-tabs">
-          <button class="auth-tab active" id="tab-login" aria-selected="true">Login / लॉगिन</button>
-          <button class="auth-tab" id="tab-signup" aria-selected="false">Sign Up / साइन अप</button>
-          <div class="auth-tab-slider" id="auth-tab-slider"></div>
-        </div>
-
-        <div class="auth-forms-wrapper">
-          <!-- Login Form -->
-          <form id="login-form" class="auth-form active">
-            <div class="auth-field">
-              <i class="fa-solid fa-envelope"></i>
-              <input type="email" id="login-email" placeholder="Email Address" required />
-            </div>
-            <div class="auth-field">
-              <i class="fa-solid fa-lock"></i>
-              <input type="password" id="login-password" placeholder="Password" required />
-              <button type="button" class="auth-eye-btn" id="login-eye" aria-label="Toggle password visibility">
-                <i class="fa-solid fa-eye"></i>
-              </button>
-            </div>
-            
-            <div class="auth-error-msg" id="login-error"></div>
-            
-            <button type="submit" class="btn-auth-primary" id="btn-login-submit">Login / लॉगिन</button>
-            <div style="text-align: center; margin-top: 12px;">
-              <button type="button" class="btn-auth-text" id="btn-forgot-password">Forgot Password?</button>
-            </div>
-          </form>
-
-          <!-- Signup Form -->
-          <form id="signup-form" class="auth-form">
-            <div class="auth-field">
-              <i class="fa-solid fa-user"></i>
-              <input type="text" id="signup-name" placeholder="Full Name" required />
-            </div>
-            <div class="auth-field">
-              <i class="fa-solid fa-tractor"></i>
-              <input type="text" id="signup-farm" placeholder="Farm Name" required />
-            </div>
-            <div class="auth-field">
-              <i class="fa-solid fa-envelope"></i>
-              <input type="email" id="signup-email" placeholder="Email Address" required />
-            </div>
-            <div class="auth-field">
-              <i class="fa-solid fa-lock"></i>
-              <input type="password" id="signup-password" placeholder="Password (min 6 chars)" required />
-              <button type="button" class="auth-eye-btn" id="signup-eye" aria-label="Toggle password visibility">
-                <i class="fa-solid fa-eye"></i>
-              </button>
-            </div>
-            <div class="auth-field">
-              <i class="fa-solid fa-lock"></i>
-              <input type="password" id="signup-confirm" placeholder="Confirm Password" required />
-              <button type="button" class="auth-eye-btn" id="signup-confirm-eye" aria-label="Toggle confirm password visibility">
-                <i class="fa-solid fa-eye"></i>
-              </button>
-            </div>
-            
-            <div class="auth-error-msg" id="signup-error"></div>
-            
-            <button type="submit" class="btn-auth-primary" id="btn-signup-submit">Create Account / खाता बनाएं</button>
-          </form>
-        </div>
-
-        <div class="auth-divider">
-          <div class="divider-line"></div>
-          <span>or log in with</span>
-          <div class="divider-line"></div>
-        </div>
-
-        <button type="button" class="btn-auth-google" id="btn-google-login">
-          <i class="fa-brands fa-google"></i> Continue with Google
-        </button>
-      </div>
-    </div>
+  <div class="auth-bg" id="auth-bg">
+    <div class="sky-glow"></div>
   </div>
 
-  <div class="toast" id="app-toast" role="alert" aria-live="polite">
+  <div class="auth-container" id="auth-screen">
+    <div class="auth-logo">
+      <span class="logo-emoji">🐄</span>
+      <div class="logo-text">Kisan<span>Track</span></div>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tab-login">Login</div>
+        <div class="auth-tab" id="tab-signup">Sign Up</div>
+        <div class="auth-tab-slider" id="auth-tab-slider"></div>
+      </div>
+
+      <div class="auth-forms-wrapper">
+        <!-- Login Form -->
+        <form id="login-form" class="auth-form active">
+          <div class="form-group">
+            <label class="form-label">Email Address / ईमेल</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-envelope"></i>
+              <input type="email" id="login-email" class="auth-input" placeholder="name@farm.com" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password / पासवर्ड</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-lock"></i>
+              <input type="password" id="login-password" class="auth-input" placeholder="••••••••" required />
+              <button type="button" class="password-toggle" id="login-eye">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+          </div>
+          <div class="auth-error-msg" id="login-error"></div>
+          <button type="submit" class="btn-auth" id="btn-login-submit">
+            Login / लॉगिन <i class="fa-solid fa-arrow-right"></i>
+          </button>
+          <span class="forgot-pass" id="btn-forgot-password">Forgot Password? / पासवर्ड भूल गए?</span>
+        </form>
+
+        <!-- Signup Form -->
+        <form id="signup-form" class="auth-form">
+          <div class="form-group">
+            <label class="form-label">Full Name / नाम</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-user"></i>
+              <input type="text" id="signup-name" class="auth-input" placeholder="Enter your name" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Farm Name / खेत का नाम</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-tractor"></i>
+              <input type="text" id="signup-farm" class="auth-input" placeholder="e.g. Green Valley Farm" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address / ईमेल</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-envelope"></i>
+              <input type="email" id="signup-email" class="auth-input" placeholder="name@farm.com" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password / पासवर्ड</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-lock"></i>
+              <input type="password" id="signup-password" class="auth-input" placeholder="At least 6 characters" required />
+              <button type="button" class="password-toggle" id="signup-eye">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm Password / पुष्टि करें</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-lock"></i>
+              <input type="password" id="signup-confirm" class="auth-input" placeholder="Repeat password" required />
+              <button type="button" class="password-toggle" id="signup-confirm-eye">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+          </div>
+          <div class="auth-error-msg" id="signup-error"></div>
+          <button type="submit" class="btn-auth" id="btn-signup-submit">
+            Create Account / साइन अप करें <i class="fa-solid fa-user-plus"></i>
+          </button>
+        </form>
+      </div>
+
+      <div class="auth-divider">
+        <div class="divider-line"></div>
+        <span>or</span>
+        <div class="divider-line"></div>
+      </div>
+
+      <button type="button" class="btn-google" id="btn-google-login">
+        <i class="fa-brands fa-google"></i> Continue with Google
+      </button>
+    </div>
+
+    <a href="index.html" class="back-home">
+      <i class="fa-solid fa-arrow-left"></i> Back to Home / होम पर वापस जाएं
+    </a>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="app-toast">
     <i class="fa-solid fa-circle-check toast-icon"></i>
     <span class="toast-msg" id="toast-msg"></span>
   </div>
@@ -136,10 +371,22 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/firebase-init.js"></script>
   <script src="js/auth.js"></script>
-</body>
 
+  <script>
+    // Generate Stars (Simplified from landing.js for local use)
+    const bg = document.getElementById('auth-bg');
+    for (let i = 0; i < 20; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 60 + '%';
+      star.style.animationDelay = Math.random() * 5 + 's';
+      bg.appendChild(star);
+    }
+  </script>
+</body>
 </html>
+

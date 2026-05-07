@@ -249,6 +249,7 @@
     if (typeof AddAnimalModule  !== 'undefined' && document.getElementById('add-animal-modal')) AddAnimalModule.init();
     if (typeof ProfileModule    !== 'undefined' && document.getElementById('section-profile')) ProfileModule.init();
     if (typeof CameraModule     !== 'undefined' && document.getElementById('section-camera')) CameraModule.init();
+    if (typeof OnboardingModule !== 'undefined') OnboardingModule.init();
 
     attachRipples();
     startSyncTimer();
