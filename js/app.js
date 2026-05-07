@@ -91,6 +91,30 @@
     });
   }
 
+  // ── Top Bar Handlers ─────────────────────────────────────
+  const topbarProfileBtn = document.getElementById('topbar-profile-dropdown-btn');
+  const profileMenu = document.getElementById('profile-dropdown-menu');
+  const globalSearch = document.getElementById('global-search');
+
+  if (topbarProfileBtn && profileMenu) {
+    topbarProfileBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      profileMenu.classList.toggle('show');
+    });
+
+    document.addEventListener('click', () => {
+      profileMenu.classList.remove('show');
+    });
+  }
+
+  if (globalSearch) {
+    globalSearch.addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase();
+      // Simple global search placeholder - could emit event
+      console.log('Global search:', term);
+    });
+  }
+
   // ── Modal Helper ──────────────────────────────────────────
   window.openAnimalModal = function (animalId) {
     const state = window.FirestoreStore ? window.FirestoreStore.getState() : { animals: [] };

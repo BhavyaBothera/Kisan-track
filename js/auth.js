@@ -339,6 +339,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (profileDropdownMenu) profileDropdownMenu.classList.remove('show');
       try {
         await auth.signOut();
+        // Clear local state to prevent leaks between different users on same device
+        localStorage.removeItem('kt_selected_animal_id');
+        localStorage.removeItem('kisanTrack_farmName'); 
+
         showToast('You have been signed out / आप साइन आउट हो गए');
         if (window.isLandingPage) {
           switchTab('login'); // ensure they land back on login tab

@@ -74,7 +74,42 @@
   <button class="hamburger" id="hamburger"><i class="fa-solid fa-bars"></i></button>
   <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-  <main class="main-content">
+  <main class="main-content" id="main-content">
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <div class="search-box">
+          <i class="fa-solid fa-search"></i>
+          <input type="text" placeholder="Search animals or alerts... | खोजें..." id="global-search" />
+        </div>
+      </div>
+      <div class="top-bar-right">
+        <div class="user-profile-dropdown">
+          <button class="profile-dropdown-btn" id="topbar-profile-dropdown-btn" aria-label="User Profile Menu">
+            <div class="user-avatar" id="auth-avatar">K</div>
+            <div class="user-info">
+              <span class="user-name" id="auth-first-name">Farmer</span>
+              <span class="user-role">Premium Plan</span>
+            </div>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="profile-dropdown-menu" id="profile-dropdown-menu">
+            <div class="dropdown-header">
+              <p>Signed in as</p>
+              <strong id="auth-first-name-hi">Farmer</strong>
+            </div>
+            <div class="dropdown-divider"></div>
+            <a href="profile.html" class="dropdown-item" id="btn-go-profile">
+              <i class="fa-solid fa-user-circle"></i> View Profile
+            </a>
+            <a href="#" class="dropdown-item" id="btn-sign-out">
+              <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
     <div class="content-area">
       <section class="tab-section active" id="section-camera" aria-label="Camera Monitor">
         <div class="page-header">
@@ -151,19 +186,95 @@
   </main>
 
   <!-- MOBILE NAV -->
-  <nav class="mobile-nav">
+  <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile Navigation">
     <div class="mobile-nav-inner">
-      <div class="mobile-nav-item" data-tab="dashboard"><i class="fa-solid fa-gauge-high"></i><span>Home</span></div>
-      <div class="mobile-nav-item" data-tab="animals"><i class="fa-solid fa-paw"></i><span>Herd</span></div>
-      <div class="mobile-nav-item" data-tab="alerts"><i class="fa-solid fa-bell"></i><span>Alerts</span></div>
-      <div class="mobile-nav-item active" data-tab="camera"><i class="fa-solid fa-camera"></i><span>Camera</span></div>
-      <div class="mobile-nav-item" data-tab="upload"><i class="fa-solid fa-upload"></i><span>Upload</span></div>
-      <div class="mobile-nav-item" data-tab="profile"><i class="fa-solid fa-circle-user"></i><span>Profile</span></div>
+      <div class="mobile-nav-item" data-tab="dashboard" id="mnav-dashboard">
+        <i class="fa-solid fa-gauge-high"></i>
+        <span>Home</span>
+      </div>
+      <div class="mobile-nav-item" data-tab="animals" id="mnav-animals">
+        <i class="fa-solid fa-paw"></i>
+        <span>Herd</span>
+      </div>
+      <div class="mobile-nav-item" data-tab="alerts" id="mnav-alerts">
+        <i class="fa-solid fa-bell"></i>
+        <span>Alerts</span>
+      </div>
+      <div class="mobile-nav-item active" data-tab="camera" id="mnav-camera">
+        <i class="fa-solid fa-camera"></i>
+        <span>Camera</span>
+      </div>
+      <div class="mobile-nav-item" data-tab="profile" id="mnav-profile">
+        <i class="fa-solid fa-circle-user"></i>
+        <span>Profile</span>
+      </div>
     </div>
   </nav>
 
-  <div class="toast" id="app-toast"><i class="fa-solid fa-circle-check toast-icon"></i><span class="toast-msg" id="toast-msg"></span></div>
+  <!-- ═══════════════════════════════════════════════════════
+     MODALS & TOAST
+  ═══════════════════════════════════════════════════════ -->
+  <!-- Animal Detail Modal -->
+  <div class="modal-overlay" id="animal-modal" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <div class="modal-emoji" id="modal-emoji">🐄</div>
+          <div><h2 class="modal-title" id="modal-title">Animal Detail</h2><p class="modal-subtitle" id="modal-subtitle">Loading...</p></div>
+        </div>
+        <button class="modal-close" id="modal-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-vitals-grid">
+          <div class="modal-vital"><div class="modal-vital-value" id="modal-temp">--</div><div class="modal-vital-label">Temp (°C)</div></div>
+          <div class="modal-vital"><div class="modal-vital-value" id="modal-hr">--</div><div class="modal-vital-label">Heart Rate</div></div>
+          <div class="modal-vital"><div class="modal-vital-value" id="modal-act">--</div><div class="modal-vital-label">Activity</div></div>
+        </div>
+        <div class="modal-chart-wrap"><canvas id="modal-chart"></canvas></div>
+        <div class="divider"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+          <div class="modal-vital"><div class="modal-vital-value" id="modal-breed" style="font-size:1rem;">--</div><div class="modal-vital-label">Breed</div></div>
+          <div class="modal-vital"><div class="modal-vital-value" id="modal-age" style="font-size:1rem;">--</div><div class="modal-vital-label">Age</div></div>
+          <div class="modal-vital"><div class="modal-vital-value" id="modal-weight" style="font-size:1rem;">--</div><div class="modal-vital-label">Weight</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <!-- Add Animal Modal -->
+  <div class="modal-overlay" id="add-animal-modal" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width:560px;">
+      <div class="modal-header">
+        <div class="modal-header-left"><div class="modal-emoji">🐄</div><div><h2 class="modal-title">Add New Animal</h2><p class="modal-subtitle">Fill all fields to register</p></div></div>
+        <button class="modal-close" id="add-animal-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="add-animal-form" novalidate autocomplete="off">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Animal ID *</label><input type="text" id="new-animal-id" class="form-input" placeholder="e.g. A06" /></div>
+            <div class="form-group"><label class="form-label">Species *</label><select id="new-species" class="form-input styled-select"><option value="">Select...</option><option value="Cow">🐄 Cow</option><option value="Buffalo">🐃 Buffalo</option><option value="Goat">🐐 Goat</option></select></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Breed *</label><input type="text" id="new-breed" class="form-input" /></div>
+            <div class="form-group"><label class="form-label">Tag ID *</label><input type="text" id="new-tag-id" class="form-input" /></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:22px;">
+            <button type="button" class="btn btn-secondary" id="cancel-add-animal">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="submit-add-animal">Add Animal</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="app-toast" role="alert" aria-live="polite">
+    <i class="fa-solid fa-circle-check toast-icon"></i>
+    <span class="toast-msg" id="toast-msg"></span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -171,6 +282,7 @@
   <script src="js/utils.js"></script>
   <script src="js/firebase-init.js"></script>
   <script src="js/firestore-store.js"></script>
+  <script src="js/add-animal.js"></script>
   <script src="js/camera.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/app.js"></script>

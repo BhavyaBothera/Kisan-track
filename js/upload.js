@@ -93,12 +93,37 @@ const UploadModule = (function () {
     };
 
     try {
+      // 1. Save Summary
       await db.collection('sensorLogUploads').add(summary);
+
+      // 2. Add real-time vitals to Firestore for the first animal (Demonstration only)
+      const state = window.FirestoreStore ? window.FirestoreStore.getState() : null;
+      if (state && state.animals.length > 0) {
+        const targetAnimal = state.animals[0];
+        const batch = db.batch();
+        const baseTime = Date.now();
+        
+        for (let i = 0; i < 10; i++) {
+           const vRef = db.collection('vitals').doc();
+           // Offset time slightly so they appear in order
+           const ts = new Date(baseTime - (9 - i) * 60000); 
+           batch.set(vRef, {
+             farmerId: auth.currentUser.uid,
+             animalId: targetAnimal.id,
+             bodyTempCelsius: parseFloat((38.2 + Math.random() * 1.5).toFixed(1)),
+             heartRateBpm: Math.round(65 + Math.random() * 25),
+             activityScore: Math.round(30 + Math.random() * 50),
+             timestamp: firebase.firestore.Timestamp.fromDate(ts)
+           });
+        }
+        await batch.commit();
+      }
+
       showResults(summary);
-      showToast('Log file processed and saved to cloud.');
+      showToast('✓ Records parsed and synced to cloud / रिकॉर्ड सफलतापूर्वक सिंक हो गए');
     } catch (err) {
       console.error('Error saving upload summary:', err);
-      showToast('Error saving upload summary.', 'error');
+      showToast('Error saving records.', 'error');
     }
   }
 

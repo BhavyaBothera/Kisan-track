@@ -3,125 +3,1049 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>KisanTrack — Welcome | किसानट्रैक में आपका स्वागत है</title>
-  <meta name="description" content="KisanTrack is a real-time livestock health monitoring dashboard for farmers." />
-  <meta name="theme-color" content="#1F4E22" />
+  <title>KisanTrack — Smart Livestock Health Monitoring</title>
+  <meta name="description" content="AI-powered IoT monitoring for your livestock. Track vitals, detect illness early, and protect your herd with KisanTrack." />
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=Noto+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
 
   <!-- Font Awesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-  <!-- App Stylesheets -->
-  <link rel="stylesheet" href="css/main.css" />
-  <link rel="stylesheet" href="css/auth.css" />
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       DESIGN SYSTEM & VARIABLES
+    ═══════════════════════════════════════════════════════ */
+    :root {
+      --bg-primary:    #1A1A0F;
+      --bg-card:       #2C2C1A;
+      --bg-footer:     #0D0D08;
+      --accent-green:  #7CB518;
+      --accent-amber:  #E5A100;
+      --accent-red:    #C0392B;
+      --accent-blue:   #3B82F6;
+      --text-primary:  #F0EAD6;
+      --text-muted:    #A89F8C;
+      --text-dim:      #6B6455;
+      --border:        #3D3D28;
+      --glow-green:    rgba(124, 181, 24, 0.15);
+      
+      --transition-fast:   0.2s ease;
+      --transition-normal: 0.4s ease;
+      --radius-sm:     8px;
+      --radius-md:     16px;
+      --radius-lg:     24px;
+      --radius-pill:   50px;
+    }
 
-  <!-- Firebase App -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Noto Sans', sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+      opacity: 0; /* Managed by landing.js */
+      transition: opacity 0.5s ease;
+    }
+
+    h1, h2, h3, h4, .poppins {
+      font-family: 'Poppins', sans-serif;
+    }
+
+    ul { list-style: none; }
+    a { text-decoration: none; color: inherit; transition: var(--transition-fast); }
+    button { cursor: pointer; border: none; outline: none; font-family: inherit; }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--accent-green);
+      color: var(--bg-primary);
+      box-shadow: 0 4px 20px rgba(124, 181, 24, 0.3);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 30px rgba(124, 181, 24, 0.45);
+      filter: brightness(1.1);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+    }
+    .btn-outline:hover {
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+      background: rgba(124, 181, 24, 0.05);
+    }
+
+    .btn-pill {
+      border-radius: var(--radius-pill);
+      padding: 12px 28px;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       ANIMATIONS
+    ═══════════════════════════════════════════════════════ */
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.1); }
+    }
+
+    @keyframes firefly {
+      0% { transform: translate(0, 0); opacity: 0; }
+      20% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { transform: translate(100px, -150px); opacity: 0; }
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(10px); }
+    }
+
+    @keyframes fadeInSlideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       NAVBAR
+    ═══════════════════════════════════════════════════════ */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 68px;
+      display: flex;
+      align-items: center;
+      z-index: 1000;
+      transition: all var(--transition-normal);
+      border-bottom: 1px solid transparent;
+    }
+
+    .navbar.scrolled {
+      background: rgba(26, 26, 15, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-emoji { font-size: 24px; }
+    .brand-info { display: flex; flex-direction: column; }
+    .brand-name { font-size: 20px; font-weight: 800; color: var(--text-primary); line-height: 1; }
+    .brand-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    .nav-actions { display: flex; gap: 16px; }
+
+    @media (max-width: 768px) {
+      .brand-sub { display: none; }
+      .nav-actions .btn { padding: 8px 16px; font-size: 13px; }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       HERO SECTION
+    ═══════════════════════════════════════════════════════ */
+    .hero {
+      position: relative;
+      height: 100vh;
+      min-height: 700px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: var(--bg-primary);
+    }
+
+    /* Layers */
+    .hero-sky-glow {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      height: 60%;
+      background: radial-gradient(circle at center, rgba(44, 62, 26, 0.6) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .star-field, .firefly-field {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.5;
+    }
+
+    .firefly {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--accent-green);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--accent-green);
+    }
+
+    /* Hills */
+    .hero-hills {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 35%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .hill-back {
+      position: absolute;
+      bottom: 0;
+      left: -10%;
+      width: 120%;
+      height: 100%;
+      fill: #252D14;
+    }
+
+    .hill-front {
+      position: absolute;
+      bottom: 0;
+      left: -10%;
+      width: 120%;
+      height: 80%;
+      fill: #1F2710;
+    }
+
+    /* Content */
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      max-width: 820px;
+      padding: 140px 24px 0;
+    }
+
+    .tag-chip {
+      display: inline-flex;
+      background: rgba(124, 181, 24, 0.08);
+      border: 1px solid rgba(124, 181, 24, 0.3);
+      color: var(--accent-green);
+      padding: 6px 18px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 28px;
+      animation: fadeInSlideUp 0.6s ease forwards;
+    }
+
+    .hero-title {
+      font-size: clamp(34px, 8vw, 64px);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 24px;
+      animation: fadeInSlideUp 0.8s ease 0.2s forwards;
+      opacity: 0;
+    }
+
+    .hero-title span { color: var(--accent-green); }
+
+    .hero-desc {
+      font-size: clamp(15px, 2vw, 18px);
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 12px;
+      animation: fadeInSlideUp 1s ease 0.4s forwards;
+      opacity: 0;
+    }
+
+    .hero-hi {
+      font-size: 14px;
+      color: var(--text-dim);
+      margin-bottom: 40px;
+      animation: fadeInSlideUp 1s ease 0.4s forwards;
+      opacity: 0;
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      animation: fadeInSlideUp 1s ease 0.6s forwards;
+      opacity: 0;
+    }
+
+    .trust-strip {
+      margin-top: 28px;
+      font-size: 13px;
+      color: var(--text-dim);
+      animation: fadeInSlideUp 1s ease 0.8s forwards;
+      opacity: 0;
+    }
+    .trust-strip b { color: var(--accent-green); margin-right: 4px; }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--text-muted);
+      font-size: 22px;
+      animation: bounce 1.5s infinite;
+      z-index: 10;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       STATS STRIP
+    ═══════════════════════════════════════════════════════ */
+    .stats-strip {
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 48px 0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 40px;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(124, 181, 24, 0.12);
+      border: 1px solid rgba(124, 181, 24, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-green);
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+
+    .stat-value {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .stat-label .hi { display: block; font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+    @media (max-width: 900px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 32px; }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       SECTION HEADERS
+    ═══════════════════════════════════════════════════════ */
+    .section-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: var(--accent-green);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .section-title {
+      font-size: clamp(28px, 4vw, 38px);
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+
+    .section-subtitle {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .header-line {
+      width: 60px;
+      height: 3px;
+      background: var(--accent-green);
+      border-radius: 2px;
+      margin: 16px auto 0;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       HOW IT WORKS
+    ═══════════════════════════════════════════════════════ */
+    .how-section {
+      padding: 100px 0;
+      background: var(--bg-primary);
+    }
+
+    .steps-container {
+      display: flex;
+      gap: 24px;
+      align-items: stretch;
+      position: relative;
+    }
+
+    .step-card {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 48px 32px 40px;
+      text-align: center;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .step-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(124, 181, 24, 0.4);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+    }
+
+    .step-num {
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      font-size: 72px;
+      font-weight: 900;
+      color: rgba(124, 181, 24, 0.06);
+      line-height: 1;
+    }
+
+    .step-icon-box {
+      width: 72px;
+      height: 72px;
+      background: rgba(124, 181, 24, 0.1);
+      border: 1px solid rgba(124, 181, 24, 0.25);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      color: var(--accent-green);
+      font-size: 28px;
+    }
+
+    .step-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .step-hi { font-size: 14px; color: var(--accent-green); font-weight: 600; margin-bottom: 16px; }
+    .step-card p { font-size: 15px; color: var(--text-muted); line-height: 1.7; }
+
+    .step-arrow {
+      display: flex;
+      align-items: center;
+      color: var(--border);
+      font-size: 24px;
+    }
+
+    @media (max-width: 1024px) {
+      .steps-container { flex-direction: column; }
+      .step-arrow { display: none; }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       FEATURES GRID
+    ═══════════════════════════════════════════════════════ */
+    .features-section {
+      padding: 100px 0;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .feat-card {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .feat-card:hover {
+      border-color: rgba(124, 181, 24, 0.4);
+      background: rgba(124, 181, 24, 0.03);
+    }
+
+    .feat-icon-box {
+      width: 40px;
+      height: 40px;
+      background: rgba(124, 181, 24, 0.1);
+      border: 1px solid rgba(124, 181, 24, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-green);
+      font-size: 16px;
+      margin-bottom: 16px;
+    }
+
+    .feat-card h4 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .feat-hi { font-size: 12px; color: var(--accent-green); font-weight: 600; margin-bottom: 12px; }
+    .feat-card p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+    @media (max-width: 1024px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .features-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       TESTIMONIALS
+    ═══════════════════════════════════════════════════════ */
+    .testimonials-section {
+      padding: 100px 0;
+      background: var(--bg-primary);
+    }
+
+    .testi-container {
+      display: flex;
+      gap: 24px;
+      overflow-x: auto;
+      padding: 20px 0 40px;
+      scrollbar-width: none; /* Hide scrollbar Firefox */
+      scroll-snap-type: x mandatory;
+    }
+    .testi-container::-webkit-scrollbar { display: none; }
+
+    .testi-card {
+      min-width: 380px;
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent-green);
+      border-radius: 16px;
+      padding: 36px 28px;
+      position: relative;
+      scroll-snap-align: start;
+    }
+
+    .quote-icon {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      font-size: 32px;
+      color: rgba(124, 181, 24, 0.15);
+    }
+
+    .stars { color: var(--accent-amber); font-size: 14px; margin-bottom: 16px; }
+
+    .testi-text {
+      font-size: 15px;
+      line-height: 1.8;
+      font-style: italic;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+    }
+
+    .testi-divider { height: 1px; background: var(--border); margin-bottom: 24px; }
+
+    .testi-user { display: flex; align-items: center; gap: 14px; }
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-green), #4a7a0f);
+      color: var(--bg-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 16px;
+    }
+    .user-name { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+    .user-loc { font-size: 13px; color: var(--text-muted); }
+
+    @media (max-width: 768px) {
+      .testi-card { min-width: 85vw; }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       FINAL CTA
+    ═══════════════════════════════════════════════════════ */
+    .final-cta {
+      padding: 120px 0;
+      text-align: center;
+      position: relative;
+      background: var(--bg-primary);
+    }
+
+    .cta-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px;
+      height: 400px;
+      background: radial-gradient(circle at center, rgba(124, 181, 24, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cta-content { position: relative; z-index: 2; max-width: 600px; margin: 0 auto; }
+    .cta-emoji { font-size: 56px; margin-bottom: 20px; display: block; }
+    .cta-title { font-size: clamp(28px, 5vw, 40px); font-weight: 800; margin-bottom: 8px; }
+    .cta-hi { font-size: 18px; color: var(--accent-green); font-weight: 600; margin-bottom: 16px; }
+    .cta-sub { color: var(--text-muted); font-size: 16px; margin-bottom: 40px; }
+
+    .login-nudge { margin-top: 24px; font-size: 14px; color: var(--text-muted); }
+    .login-nudge a { color: var(--accent-green); font-weight: 600; }
+    .login-nudge a:hover { text-decoration: underline; }
+
+    /* ═══════════════════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════════════════ */
+    .footer {
+      background: var(--bg-footer);
+      border-top: 1px solid var(--border);
+      padding: 60px 0 24px;
+    }
+
+    .footer-main {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+
+    .footer-col.center { text-align: center; }
+    .footer-col.right { text-align: right; }
+
+    .footer-brand { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+    .footer-desc { font-size: 13px; color: var(--text-muted); max-width: 200px; }
+
+    .footer-team-title { font-size: 13px; color: var(--text-primary); font-weight: 600; margin-bottom: 12px; }
+    .footer-team { font-size: 12px; color: var(--text-dim); line-height: 1.8; }
+
+    .footer-bottom {
+      border-top: 1px solid var(--border);
+      padding-top: 24px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    @media (max-width: 768px) {
+      .footer-main { grid-template-columns: 1fr; text-align: center !important; gap: 48px; }
+      .footer-col.right { text-align: center !important; }
+      .footer-desc { margin: 0 auto; }
+    }
+
+  </style>
 </head>
-
 <body>
-  <div id="auth-screen">
-    <div class="auth-card">
-      <div class="auth-header">
-        <div class="auth-logo">🌾🐄</div>
-        <h2 class="auth-title">KisanTrack</h2>
-        <p class="auth-subtitle">Village Livestock Monitoring <br> ग्राम पशु निगरानी</p>
+
+  <!-- ═══════════════════════════════════════════════════════
+       NAVBAR
+  ═══════════════════════════════════════════════════════ -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <span class="brand-emoji">🐄</span>
+        <div class="brand-info">
+          <span class="brand-name">KisanTrack</span>
+          <span class="brand-sub">Smart Livestock Monitoring</span>
+        </div>
+      </a>
+      <div class="nav-actions">
+        <button class="btn btn-outline btn-pill" onclick="window.location.href='login.html?tab=login'">
+          Login / <span class="poppins">लॉगिन</span>
+        </button>
+        <button class="btn btn-primary btn-pill" onclick="window.location.href='login.html?tab=signup'">
+          Get Started / <span class="poppins">शुरू करें</span>
+        </button>
       </div>
-
-      <div class="auth-tabs">
-        <button class="auth-tab active" id="tab-login" aria-selected="true">Login / लॉगिन</button>
-        <button class="auth-tab" id="tab-signup" aria-selected="false">Sign Up / साइन अप</button>
-        <div class="auth-tab-slider" id="auth-tab-slider"></div>
-      </div>
-
-      <div class="auth-forms-wrapper">
-        <!-- Login Form -->
-        <form id="login-form" class="auth-form active">
-          <div class="auth-field">
-            <i class="fa-solid fa-envelope"></i>
-            <input type="email" id="login-email" placeholder="Email / ईमेल" required />
-          </div>
-          <div class="auth-field">
-            <i class="fa-solid fa-lock"></i>
-            <input type="password" id="login-password" placeholder="Password / पासवर्ड" required />
-            <button type="button" class="auth-eye-btn" id="login-eye" aria-label="Toggle password visibility">
-              <i class="fa-solid fa-eye"></i>
-            </button>
-          </div>
-          
-          <div class="auth-error-msg" id="login-error"></div>
-          
-          <button type="submit" class="btn-auth-primary" id="btn-login-submit">Login / लॉगिन</button>
-          <div style="text-align: center;">
-            <button type="button" class="btn-auth-text" id="btn-forgot-password">Forgot Password? / पासवर्ड भूल गए?</button>
-          </div>
-        </form>
-
-        <!-- Signup Form -->
-        <form id="signup-form" class="auth-form">
-          <div class="auth-field">
-            <i class="fa-solid fa-user"></i>
-            <input type="text" id="signup-name" placeholder="Full Name / पूरा नाम" required />
-          </div>
-          <div class="auth-field">
-            <i class="fa-solid fa-tractor"></i>
-            <input type="text" id="signup-farm" placeholder="Farm Name / खेत का नाम" required />
-          </div>
-          <div class="auth-field">
-            <i class="fa-solid fa-envelope"></i>
-            <input type="email" id="signup-email" placeholder="Email / ईमेल" required />
-          </div>
-          <div class="auth-field">
-            <i class="fa-solid fa-lock"></i>
-            <input type="password" id="signup-password" placeholder="Password (min 6) / पासवर्ड" required />
-            <button type="button" class="auth-eye-btn" id="signup-eye" aria-label="Toggle password visibility">
-              <i class="fa-solid fa-eye"></i>
-            </button>
-          </div>
-          <div class="auth-field">
-            <i class="fa-solid fa-lock"></i>
-            <input type="password" id="signup-confirm" placeholder="Confirm Password / पासवर्ड की पुष्टि" required />
-            <button type="button" class="auth-eye-btn" id="signup-confirm-eye" aria-label="Toggle password visibility">
-              <i class="fa-solid fa-eye"></i>
-            </button>
-          </div>
-          
-          <div class="auth-error-msg" id="signup-error"></div>
-          
-          <button type="submit" class="btn-auth-primary" id="btn-signup-submit">Sign Up / साइन अप</button>
-        </form>
-      </div>
-
-      <div class="auth-divider">
-        <span>OR / या</span>
-      </div>
-
-      <button class="btn-auth-google" id="btn-google-login">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" />
-        Continue with Google
-      </button>
     </div>
-  </div>
+  </nav>
 
-  <!-- Toast Notification -->
-  <div class="toast" id="app-toast" role="alert" aria-live="polite">
-    <i class="fa-solid fa-circle-check toast-icon"></i>
-    <span class="toast-msg" id="toast-msg">Action completed.</span>
-  </div>
+  <!-- ═══════════════════════════════════════════════════════
+       HERO SECTION
+  ═══════════════════════════════════════════════════════ -->
+  <header class="hero" id="hero">
+    <div class="hero-sky-glow"></div>
+    
+    <!-- Hills Background -->
+    <div class="hero-hills">
+      <svg class="hill-back" viewBox="0 0 1000 200" preserveAspectRatio="none">
+        <path d="M0,150 C200,80 400,180 600,100 C800,20 1000,100 1000,150 L1000,200 L0,200 Z"></path>
+      </svg>
+      <svg class="hill-front" viewBox="0 0 1000 200" preserveAspectRatio="none">
+        <path d="M0,180 C150,120 350,220 550,140 C750,60 900,160 1000,180 L1000,200 L0,200 Z"></path>
+      </svg>
+    </div>
+
+    <div class="hero-content">
+      <div class="tag-chip">
+        🌿 AI-Powered  ·  IoT Sensors  ·  Real-Time Alerts
+      </div>
+      <h1 class="hero-title">
+        Smart Health Monitoring<br><span>for Your Livestock 🐄</span>
+      </h1>
+      <p class="hero-desc">
+        Track vitals, detect illness early, and protect your herd with AI-powered IoT sensors and real-time alerts.
+      </p>
+      <p class="hero-hi">AI सेंसर और रियल-टाइम अलर्ट से अपने पशुओं की सुरक्षा करें।</p>
+      
+      <div class="hero-actions">
+        <button class="btn btn-primary btn-pill" style="font-size:16px; padding:15px 36px;" onclick="window.location.href='login.html?tab=signup'">
+          🚀 Get Started Free / मुफ्त शुरू करें
+        </button>
+        <button class="btn btn-outline btn-pill" style="font-size:16px; padding:15px 36px;" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'})">
+          ▶ See How It Works
+        </button>
+      </div>
+
+      <div class="trust-strip">
+        <b>✓</b> Free to use  ·  <b>✓</b> No coding needed  ·  <b>✓</b> Works on any phone  ·  <b>✓</b> Hindi supported
+      </div>
+    </div>
+
+    <div class="scroll-indicator">
+      <i class="fa-solid fa-chevron-down"></i>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════
+       STATS STRIP
+  ═══════════════════════════════════════════════════════ -->
+  <section class="stats-strip">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-item reveal">
+          <div class="stat-icon"><i class="fa-solid fa-cow"></i></div>
+          <div class="stat-value" id="stat-animals">0</div>
+          <div class="stat-label">Animals Tracked <span class="hi">पशु ट्रैक किए</span></div>
+        </div>
+        <div class="stat-item reveal">
+          <div class="stat-icon"><i class="fa-solid fa-tower-broadcast"></i></div>
+          <div class="stat-value" id="stat-realtime">Real-Time</div>
+          <div class="stat-label">Live Monitoring <span class="hi">लाइव निगरानी</span></div>
+        </div>
+        <div class="stat-item reveal">
+          <div class="stat-icon"><i class="fa-solid fa-check-circle"></i></div>
+          <div class="stat-value" id="stat-accuracy">0</div>
+          <div class="stat-label">Detection Accuracy <span class="hi">पहचान सटीकता</span></div>
+        </div>
+        <div class="stat-item reveal">
+          <div class="stat-icon"><i class="fa-solid fa-bell-slash"></i></div>
+          <div class="stat-value" id="stat-reduction">0</div>
+          <div class="stat-label">Fewer False Alerts <span class="hi">कम गलत अलर्ट</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════
+       HOW IT WORKS
+  ═══════════════════════════════════════════════════════ -->
+  <section class="how-section" id="how-it-works">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="eyebrow">SIMPLE PROCESS / सरल प्रक्रिया</span>
+        <h2 class="section-title">How KisanTrack Works</h2>
+        <p class="section-subtitle">कैसे काम करता है</p>
+        <div class="header-line"></div>
+      </div>
+
+      <div class="steps-container">
+        <!-- Step 1 -->
+        <div class="step-card reveal">
+          <span class="step-num">01</span>
+          <div class="step-icon-box"><i class="fa-solid fa-tags"></i></div>
+          <h3>Attach Smart Sensors</h3>
+          <p class="step-hi">स्मार्ट सेंसर लगाएं</p>
+          <p>Clip lightweight IoT sensor tags onto each animal. They continuously track body temperature, heart rate, and movement — 24 hours a day.</p>
+        </div>
+
+        <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+
+        <!-- Step 2 -->
+        <div class="step-card reveal" style="transition-delay:0.15s">
+          <span class="step-num">02</span>
+          <div class="step-icon-box"><i class="fa-solid fa-brain"></i></div>
+          <h3>AI Analyses Instantly</h3>
+          <p class="step-hi">AI तुरंत विश्लेषण करे</p>
+          <p>Our machine learning model monitors every reading in real time, detecting abnormal health patterns before symptoms become visible.</p>
+        </div>
+
+        <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+
+        <!-- Step 3 -->
+        <div class="step-card reveal" style="transition-delay:0.3s">
+          <span class="step-num">03</span>
+          <div class="step-icon-box"><i class="fa-solid fa-bell"></i></div>
+          <h3>Get Alerts & Act</h3>
+          <p class="step-hi">अलर्ट पाएं और कार्य करें</p>
+          <p>Receive instant alerts on your phone with animal ID and AI confidence score — so you know exactly which animal needs attention.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════
+       FEATURES GRID
+  ═══════════════════════════════════════════════════════ -->
+  <section class="features-section">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="eyebrow">POWERFUL TOOLS / शक्तिशाली उपकरण</span>
+        <h2 class="section-title">Everything You Need</h2>
+        <p class="section-subtitle">सब कुछ जो आपको चाहिए</p>
+        <div class="header-line"></div>
+      </div>
+
+      <div class="features-grid">
+        <div class="feat-card reveal">
+          <div class="feat-icon-box"><i class="fa-solid fa-camera"></i></div>
+          <h4>AI Camera Monitor</h4>
+          <p class="feat-hi">AI कैमरा मॉनिटर</p>
+          <p>ESP32-CAM captures images while Gemini Vision AI analyses each frame for health indicators automatically.</p>
+        </div>
+        <div class="feat-card reveal">
+          <div class="feat-icon-box"><i class="fa-solid fa-chart-line"></i></div>
+          <h4>Live Vitals Dashboard</h4>
+          <p class="feat-hi">लाइव डैशबोर्ड</p>
+          <p>Real-time graphs of temperature, heart rate, and activity for every animal — updating every few seconds.</p>
+        </div>
+        <div class="feat-card reveal">
+          <div class="feat-icon-box"><i class="fa-solid fa-bell"></i></div>
+          <h4>Smart Alerts</h4>
+          <p class="feat-hi">स्मार्ट अलर्ट</p>
+          <p>Alerts fire only when AI confidence is high, reducing false alarms by 42% compared to basic systems.</p>
+        </div>
+        <div class="feat-card reveal">
+          <div class="feat-icon-box"><i class="fa-solid fa-cow"></i></div>
+          <h4>Animal Profiles</h4>
+          <p class="feat-hi">पशु प्रोफ़ाइल</p>
+          <p>Full health history, breed info, and 7-day trend charts for every single animal in your herd.</p>
+        </div>
+        <div class="feat-card reveal">
+          <div class="feat-icon-box"><i class="fa-solid fa-upload"></i></div>
+          <h4>Sensor Log Upload</h4>
+          <p class="feat-hi">डेटा अपलोड</p>
+          <p>No internet? Upload your CSV or JSON sensor logs later and let KisanTrack analyse them instantly.</p>
+        </div>
+        <div class="feat-card reveal">
+          <div class="feat-icon-box"><i class="fa-solid fa-file-chart-column"></i></div>
+          <h4>Health Reports</h4>
+          <p class="feat-hi">स्वास्थ्य रिपोर्ट</p>
+          <p>Weekly visual reports you can export and share with your veterinarian for better treatment decisions.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════
+       TESTIMONIALS
+  ═══════════════════════════════════════════════════════ -->
+  <section class="testimonials-section">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="eyebrow">FARMER STORIES / किसानों की कहानियाँ</span>
+        <h2 class="section-title">Trusted by Farmers</h2>
+        <p class="section-subtitle">किसानों का भरोसा</p>
+        <div class="header-line"></div>
+      </div>
+
+      <div class="testi-container reveal">
+        <!-- Card 1 -->
+        <div class="testi-card">
+          <i class="fa-solid fa-quote-left quote-icon"></i>
+          <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+          <p class="testi-text">"Since using KisanTrack, I detected a fever in my cow two days before visible symptoms. The vet said early treatment saved her life."</p>
+          <div class="testi-divider"></div>
+          <div class="testi-user">
+            <div class="avatar">RK</div>
+            <div>
+              <div class="user-name">Ramesh Kumar</div>
+              <div class="user-loc">Jaipur, Rajasthan</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="testi-card">
+          <i class="fa-solid fa-quote-left quote-icon"></i>
+          <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+          <p class="testi-text">"The camera feature showed me my buffalo was not moving normally at night. The AI flagged it immediately as early-stage pneumonia."</p>
+          <div class="testi-divider"></div>
+          <div class="testi-user">
+            <div class="avatar">SS</div>
+            <div>
+              <div class="user-name">Sukhdev Singh</div>
+              <div class="user-loc">Ludhiana, Punjab</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="testi-card">
+          <i class="fa-solid fa-quote-left quote-icon"></i>
+          <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+          <p class="testi-text">"Very easy to use on my basic Android phone. The Hindi labels make everything simple. My whole village is now using it."</p>
+          <div class="testi-divider"></div>
+          <div class="testi-user">
+            <div class="avatar">MP</div>
+            <div>
+              <div class="user-name">Meena Patel</div>
+              <div class="user-loc">Anand, Gujarat</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════
+       FINAL CTA
+  ═══════════════════════════════════════════════════════ -->
+  <section class="final-cta">
+    <div class="cta-glow"></div>
+    <div class="container reveal">
+      <div class="cta-content">
+        <span class="cta-emoji">🐄</span>
+        <h2 class="cta-title">Start Protecting Your Herd Today</h2>
+        <p class="cta-hi">आज ही अपने पशुओं की सुरक्षा शुरू करें</p>
+        <p class="cta-sub">Free to use. No setup fees. Works on any smartphone.</p>
+        
+        <button class="btn btn-primary btn-pill" style="font-size:18px; padding:18px 48px;" onclick="window.location.href='login.html?tab=signup'">
+          🚀 Create Free Account / मुफ्त खाता बनाएं
+        </button>
+
+        <p class="login-nudge">
+          Already have an account? <a href="login.html?tab=login">Login / लॉगिन करें</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-main">
+        <div class="footer-col">
+          <div class="footer-brand">🐄 KisanTrack</div>
+          <p class="footer-desc">Smart Livestock Monitoring / स्मार्ट पशु निगरानी</p>
+        </div>
+        <div class="footer-col center">
+          <p class="footer-team-title">Built with ❤️ for Indian Farmers</p>
+          <p style="font-size:12px; color:var(--text-dim)">ET-201 Project · Team 1</p>
+        </div>
+        <div class="footer-col right">
+          <p class="footer-team-title">Project Team</p>
+          <div class="footer-team">
+            Asvin G. · Harsh Shakya<br>
+            Bhavya Bothera · Ballani Sai K. S.<br>
+            S. Mohith Anand
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        © 2024 KisanTrack · Empowering Farmers with AI
+      </div>
+    </div>
+  </footer>
 
   <!-- Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/firebase-init.js"></script>
-  <script>
-    // We are on landing page. Set global flag so auth.js knows to redirect on login
-    window.isLandingPage = true;
-  </script>
   <script src="js/auth.js"></script>
+  <script src="js/landing.js"></script>
+
 </body>
 </html>

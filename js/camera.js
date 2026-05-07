@@ -9,11 +9,9 @@ const CameraModule = (function () {
   'use strict';
 
   // --- State ---
+  // NOTE: In production, Gemini API calls should be routed through a backend/Cloud Function 
+  // to protect the API key. Client-side storage/usage is for demonstration only.
   let apiKey = 'AIzaSyCYvUbOb13ctYLzpSUhWaPfJV6TCENMxzs'; // User provided key
-  try { 
-    const saved = localStorage.getItem('kt_gemini_key');
-    if (saved) apiKey = saved; 
-  } catch (e) {}
 
   let cameraOn       = true;
   let autoAnalysis   = true;

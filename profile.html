@@ -110,6 +110,41 @@
      MAIN CONTENT
 ═══════════════════════════════════════════════════════ -->
   <main class="main-content" id="main-content">
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <div class="search-box">
+          <i class="fa-solid fa-search"></i>
+          <input type="text" placeholder="Search animals or alerts... | खोजें..." id="global-search" />
+        </div>
+      </div>
+      <div class="top-bar-right">
+        <div class="user-profile-dropdown">
+          <button class="profile-dropdown-btn" id="topbar-profile-dropdown-btn" aria-label="User Profile Menu">
+            <div class="user-avatar" id="auth-avatar">K</div>
+            <div class="user-info">
+              <span class="user-name" id="auth-first-name">Farmer</span>
+              <span class="user-role">Premium Plan</span>
+            </div>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="profile-dropdown-menu" id="profile-dropdown-menu">
+            <div class="dropdown-header">
+              <p>Signed in as</p>
+              <strong id="auth-first-name-hi">Farmer</strong>
+            </div>
+            <div class="dropdown-divider"></div>
+            <a href="profile.html" class="dropdown-item" id="btn-go-profile">
+              <i class="fa-solid fa-user-circle"></i> View Profile
+            </a>
+            <a href="#" class="dropdown-item" id="btn-sign-out">
+              <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
     <div class="content-area">
 
       <!-- ─────────────────────────────────────────────────
@@ -150,11 +185,7 @@
       </div>
       <div class="mobile-nav-item" data-tab="animals" id="mnav-animals">
         <i class="fa-solid fa-paw"></i>
-        <span>Animals</span>
-      </div>
-      <div class="mobile-nav-item" data-tab="vitals" id="mnav-vitals">
-        <i class="fa-solid fa-heartbeat"></i>
-        <span>Vitals</span>
+        <span>Herd</span>
       </div>
       <div class="mobile-nav-item" data-tab="alerts" id="mnav-alerts">
         <i class="fa-solid fa-bell"></i>
@@ -408,6 +439,7 @@
      EXTERNAL SCRIPTS
 ═══════════════════════════════════════════════════════ -->
   <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
