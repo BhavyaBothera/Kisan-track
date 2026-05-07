@@ -106,12 +106,16 @@
       -webkit-backdrop-filter: blur(40px);
       border: 1px solid var(--glass-border);
       border-radius: 24px;
-      padding: 50px 40px; /* Restored original premium padding */
+      padding: 40px; 
       box-shadow: 0 50px 100px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,255,255,0.02);
       position: relative;
-      min-height: 520px; /* Stable base height */
-      display: flex;
-      flex-direction: column;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy 'Pop' transition */
+      width: 100%;
+    }
+
+    /* Zoom Effect Class */
+    .card-zoom {
+      transform: scale(0.96);
     }
 
     .obsidian-card::after {
@@ -160,7 +164,6 @@
     /* Form Layout */
     .form-stack { 
       position: relative; 
-      flex: 1;
       display: grid;
       grid-template-rows: 1fr;
     }
@@ -168,17 +171,14 @@
       grid-area: 1 / 1 / 2 / 2;
       opacity: 0; 
       pointer-events: none;
-      transform: translateY(10px);
-      transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
+      transform: scale(0.9); /* Start zoomed out */
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .obsidian-form.active { 
       opacity: 1; 
       pointer-events: all; 
-      transform: translateY(0);
-      position: relative; /* Takes up space when active */
+      transform: scale(1); /* Zoom in when active */
+      position: relative;
     }
 
     /* Inputs */
@@ -375,16 +375,28 @@
     const fLogin = document.getElementById('login-form');
     const fSignup = document.getElementById('signup-form');
 
+    const card = document.querySelector('.obsidian-card');
+
     function switchTab(t) {
-      if(t === 'login') {
-        tLogin.classList.add('active'); tSignup.classList.remove('active');
-        tSlider.style.transform = 'translateX(0)';
-        fLogin.classList.add('active'); fSignup.classList.remove('active');
-      } else {
-        tSignup.classList.add('active'); tLogin.classList.remove('active');
-        tSlider.style.transform = 'translateX(100%)';
-        fSignup.classList.add('active'); fLogin.classList.remove('active');
-      }
+      // Trigger Zoom Effect
+      card.classList.add('card-zoom');
+      
+      setTimeout(() => {
+        if(t === 'login') {
+          tLogin.classList.add('active'); tSignup.classList.remove('active');
+          tSlider.style.transform = 'translateX(0)';
+          fLogin.classList.add('active'); fSignup.classList.remove('active');
+        } else {
+          tSignup.classList.add('active'); tLogin.classList.remove('active');
+          tSlider.style.transform = 'translateX(100%)';
+          fSignup.classList.add('active'); fLogin.classList.remove('active');
+        }
+        
+        // Release Zoom
+        setTimeout(() => {
+          card.classList.remove('card-zoom');
+        }, 50);
+      }, 100);
     }
 
     tLogin.addEventListener('click', () => switchTab('login'));
