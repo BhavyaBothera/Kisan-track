@@ -20,10 +20,10 @@ if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 
-const auth = firebase.auth();
-const db = firebase.firestore();
-const storage = firebase.storage();
-const googleProvider = new firebase.auth.GoogleAuthProvider();
+window.auth = firebase.auth();
+window.db = firebase.firestore();
+window.storage = firebase.storage();
+window.googleProvider = new firebase.auth.GoogleAuthProvider();
 
 // Enable Persistence for offline handling
 db.enablePersistence()
