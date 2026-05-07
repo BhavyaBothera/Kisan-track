@@ -3,132 +3,614 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>KisanTrack | Secure Access</title>
+  <title>KisanTrack | AI-Powered Herd Intelligence</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─────────────────────────────────────────────────────────────
+       VARIABLES & CORE
+    ───────────────────────────────────────────────────────────── */
+    :root {
+      --bg-dark: #0A0F0D;
+      --bg-darker: #050807;
+      --olive: #4A7C59;
+      --amber: #C8843A;
+      --soil: #6B4C2A;
+      --sage: #8A9E8F;
+      --warm-white: #F0EDE6;
+      --glass: rgba(255, 255, 255, 0.04);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --error: #E05C3A;
+      --success: #52B788;
+      --transition: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--warm-white);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       LAYOUT
+    ───────────────────────────────────────────────────────────── */
+    .auth-container {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    /* LEFT PANEL (60%) */
+    .brand-side {
+      width: 60%;
+      position: relative;
+      background: var(--bg-darker);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 60px;
+      overflow: hidden;
+    }
+
+    .mesh-bg {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 1;
+      background: radial-gradient(circle at 20% 30%, #1A2E22 0%, transparent 50%),
+                  radial-gradient(circle at 80% 70%, #2E251A 0%, transparent 50%),
+                  radial-gradient(circle at 50% 50%, #1F1B16 0%, transparent 60%);
+      filter: blur(80px);
+      animation: meshDrift 20s infinite alternate linear;
+      will-change: transform;
+    }
+
+    @keyframes meshDrift {
+      0% { transform: scale(1) rotate(0deg); }
+      100% { transform: scale(1.2) rotate(5deg); }
+    }
+
+    .brand-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 600px;
+      text-align: center;
+    }
+
+    .logo-box {
+      position: absolute;
+      top: -140px;
+      left: 0;
+      text-align: left;
+    }
+    .logo { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; }
+    .logo span { color: var(--olive); }
+    .tagline { font-size: 14px; color: var(--sage); font-weight: 500; }
+
+    /* SVG Illustration */
+    .cow-svg {
+      width: 100%;
+      max-width: 480px;
+      height: auto;
+      filter: drop-shadow(0 0 30px rgba(74, 124, 89, 0.2));
+      animation: floatCow 6s infinite ease-in-out;
+      will-change: transform;
+    }
+
+    @keyframes floatCow {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+
+    .data-line {
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      animation: drawLine 8s infinite alternate ease-in-out;
+    }
+    @keyframes drawLine { to { stroke-dashoffset: 0; } }
+
+    /* Stat Chips */
+    .stat-chip {
+      position: absolute;
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      padding: 12px 20px;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      animation: floatChip 6s infinite alternate ease-in-out;
+      will-change: transform;
+    }
+    .chip-1 { top: 20%; right: 10%; animation-delay: 0s; }
+    .chip-2 { bottom: 25%; left: 5%; animation-delay: -2s; }
+    .chip-3 { bottom: 15%; right: 15%; animation-delay: -4s; }
+
+    @keyframes floatChip {
+      from { transform: translateY(0); }
+      to { transform: translateY(-10px); }
+    }
+
+    /* RIGHT PANEL (40%) */
+    .form-side {
+      width: 40%;
+      background: var(--bg-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      position: relative;
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 48px;
+      backdrop-filter: blur(24px);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+    }
+
+    .auth-header-text { margin-bottom: 32px; }
+    .auth-header-text h2 { font-size: 28px; font-weight: 600; margin-bottom: 8px; }
+    .auth-header-text p { font-size: 14px; color: var(--sage); }
+
+    /* Tab Switcher */
+    .tab-switcher {
+      display: flex;
+      position: relative;
+      background: rgba(0,0,0,0.2);
+      border-radius: 14px;
+      padding: 4px;
+      margin-bottom: 32px;
+    }
+    .tab-item {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--sage);
+      cursor: pointer;
+      transition: color var(--transition);
+      z-index: 2;
+    }
+    .tab-item.active { color: var(--warm-white); }
+    .tab-pill {
+      position: absolute;
+      top: 4px; left: 4px;
+      width: calc(50% - 4px); height: calc(100% - 8px);
+      background: var(--olive);
+      border-radius: 10px;
+      transition: transform var(--transition);
+      z-index: 1;
+    }
+
+    /* Forms */
+    .form-container { position: relative; min-height: 340px; }
+    .auth-form {
+      position: absolute;
+      top: 0; left: 0; width: 100%;
+      opacity: 0; pointer-events: none;
+      transform: translateY(8px);
+      transition: opacity 250ms ease, transform 250ms ease;
+    }
+    .auth-form.active {
+      opacity: 1; pointer-events: all;
+      transform: translateY(0);
+    }
+
+    /* Input Styling */
+    .field-group { margin-bottom: 24px; position: relative; }
+    .input-wrapper {
+      position: relative;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: border 200ms ease, box-shadow 200ms ease;
+    }
+    .input-wrapper:focus-within {
+      border-color: var(--olive);
+      box-shadow: 0 0 0 4px rgba(74, 124, 89, 0.15);
+    }
+    .input-wrapper i { color: var(--sage); font-size: 18px; }
+
+    .input-field {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--warm-white);
+      font-family: inherit;
+      font-size: 15px;
+      padding: 8px 0;
+      outline: none;
+    }
+    .input-field::placeholder { color: transparent; }
+
+    /* Floating Labels */
+    .floating-label {
+      position: absolute;
+      left: 48px;
+      top: 20px;
+      font-size: 15px;
+      color: var(--sage);
+      pointer-events: none;
+      transition: all 200ms ease;
+    }
+    .input-field:focus + .floating-label,
+    .input-field:not(:placeholder-shown) + .floating-label {
+      top: 6px;
+      left: 48px;
+      font-size: 11px;
+      color: var(--olive);
+      font-weight: 600;
+    }
+    /* Adjust input padding to fit label */
+    .input-field { padding-top: 14px; }
+
+    .show-hide {
+      background: none; border: none; color: var(--sage);
+      cursor: pointer; font-size: 16px;
+    }
+
+    /* Password Strength */
+    .strength-meter {
+      display: flex; gap: 4px; margin-top: -16px; margin-bottom: 24px;
+    }
+    .strength-segment {
+      flex: 1; height: 3px; background: rgba(255,255,255,0.1);
+      border-radius: 2px; transition: background 300ms ease;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      width: 100%;
+      padding: 16px;
+      border-radius: 14px;
+      border: none;
+      background: var(--olive);
+      color: white;
+      font-family: inherit; font-weight: 600; font-size: 15px;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      transition: all 150ms ease;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    .btn-primary:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 20px rgba(200, 132, 58, 0.2);
+      filter: brightness(1.1);
+    }
+
+    .forgot-link {
+      display: block; text-align: right; margin-top: -16px; margin-bottom: 24px;
+      font-size: 13px; color: var(--amber); text-decoration: none; font-weight: 500;
+    }
+
+    .divider {
+      display: flex; align-items: center; gap: 12px; margin: 32px 0;
+      font-size: 12px; color: var(--sage); text-transform: uppercase; letter-spacing: 1px;
+    }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+
+    .btn-google {
+      width: 100%;
+      padding: 14px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--warm-white);
+      font-family: inherit; font-weight: 600; font-size: 14px;
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      cursor: pointer; transition: all 200ms ease;
+    }
+    .btn-google:hover { background: rgba(255,255,255,0.08); transform: translateY(-1px); }
+
+    .checkbox-group {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 24px;
+      font-size: 13px; color: var(--sage);
+    }
+    .custom-checkbox {
+      width: 18px; height: 18px; border: 1.5px solid rgba(255,255,255,0.2);
+      border-radius: 4px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 200ms ease;
+    }
+    .custom-checkbox.checked { background: var(--olive); border-color: var(--olive); }
+    .custom-checkbox i { color: white; font-size: 10px; display: none; }
+    .custom-checkbox.checked i { display: block; }
+
+    /* Shake Error */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+    .shake { animation: shake 400ms ease; }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .brand-side { width: 50%; padding: 40px; }
+      .form-side { width: 50%; }
+      .chip-2, .chip-3 { display: none; }
+    }
+    @media (max-width: 768px) {
+      .auth-container { flex-direction: column; }
+      .brand-side { display: none; }
+      .form-side { 
+        width: 100%; min-height: 100vh; 
+        background: radial-gradient(circle at top right, #1A2E22 0%, #0A0F0D 60%);
+      }
+      .mobile-logo {
+        position: absolute; top: 40px; left: 40px;
+        display: block !important;
+      }
+    }
+  </style>
+
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-  <link rel="stylesheet" href="css/auth.css" />
 </head>
 <body>
 
-  <div class="mesh-bg">
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
-  </div>
-
-  <div class="auth-wrapper" id="auth-wrapper">
-    <div class="auth-header">
-      <div class="logo-container">
-        <div class="logo-emoji">🐄</div>
+  <div class="auth-container">
+    
+    <!-- LEFT PANEL: Brand Side -->
+    <div class="brand-side">
+      <div class="mesh-bg"></div>
+      
+      <div class="logo-box">
+        <div class="logo">Kisan<span>Track</span></div>
+        <div class="tagline">AI-Powered Herd Intelligence</div>
       </div>
-      <h1 class="auth-title">Kisan<span>Track</span></h1>
-      <p class="auth-subtitle">AI-Powered Livestock Intelligence</p>
+
+      <div class="brand-content">
+        <!-- Minimal Cow SVG with Data Lines -->
+        <svg class="cow-svg" viewBox="0 0 500 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Cow Outline -->
+          <path d="M120 200 C120 120, 380 120, 380 200 L380 300 C380 320, 360 340, 340 340 L160 340 C140 340, 120 320, 120 300 Z" stroke="#4A7C59" stroke-width="2" />
+          <path d="M380 180 C420 180, 450 200, 450 240 L450 260 C450 280, 430 280, 420 260" stroke="#4A7C59" stroke-width="2" />
+          <!-- Circuit/Data Lines -->
+          <path class="data-line" d="M150 150 L200 150 L220 180 L300 180" stroke="#C8843A" stroke-width="1.5" stroke-dasharray="5 5" />
+          <path class="data-line" d="M350 250 L300 250 L280 220 L200 220" stroke="#4A7C59" stroke-width="1.5" />
+          <circle cx="150" cy="150" r="4" fill="#C8843A" />
+          <circle cx="300" cy="180" r="4" fill="#4A7C59" />
+          <circle cx="350" cy="250" r="4" fill="#C8843A" />
+        </svg>
+
+        <div class="stat-chip chip-1">🐄 12,400+ Cattle Monitored</div>
+        <div class="stat-chip chip-2">📊 98.2% Health Prediction Accuracy</div>
+        <div class="stat-chip chip-3">⚡ Real-time IoT Alerts</div>
+      </div>
     </div>
 
-    <div class="auth-card" id="auth-card">
-      <div class="tab-container">
-        <div class="tab-btn active" id="tab-login">Login</div>
-        <div class="tab-btn" id="tab-signup">Join Us</div>
-        <div class="tab-slider" id="auth-tab-slider"></div>
+    <!-- RIGHT PANEL: Form Side -->
+    <div class="form-side">
+      <!-- Mobile Logo -->
+      <div class="logo-box mobile-logo" style="display: none;">
+        <div class="logo">Kisan<span>Track</span></div>
       </div>
 
-      <div class="form-stack">
-        <!-- Login -->
-        <form id="login-form" class="auth-form active">
-          <div class="input-group">
-            <i class="fa-solid fa-envelope"></i>
-            <input type="email" id="login-email" class="premium-input" placeholder="Email Address" required />
-          </div>
-          <div class="input-group">
-            <i class="fa-solid fa-lock"></i>
-            <input type="password" id="login-password" class="premium-input" placeholder="Password" required />
-            <button type="button" class="eye-toggle" id="login-eye"><i class="fa-solid fa-eye"></i></button>
-          </div>
-          <div class="auth-error" id="login-error"></div>
-          <button type="submit" class="btn-submit" id="btn-login-submit">
-            Access Dashboard <i class="fa-solid fa-chevron-right"></i>
-          </button>
-          <a class="forgot-link" id="btn-forgot-password">Trouble signing in?</a>
-        </form>
+      <div class="auth-card">
+        <div class="auth-header-text">
+          <h2 id="header-title">Welcome Back</h2>
+          <p id="header-subtitle">Monitor your herd with AI precision</p>
+        </div>
 
-        <!-- Signup -->
-        <form id="signup-form" class="auth-form">
-          <div class="input-group">
-            <i class="fa-solid fa-user"></i>
-            <input type="text" id="signup-name" class="premium-input" placeholder="Full Name" required />
-          </div>
-          <div class="input-group">
-            <i class="fa-solid fa-tractor"></i>
-            <input type="text" id="signup-farm" class="premium-input" placeholder="Farm Name" required />
-          </div>
-          <div class="input-group">
-            <i class="fa-solid fa-envelope"></i>
-            <input type="email" id="signup-email" class="premium-input" placeholder="Email Address" required />
-          </div>
-          <div class="input-group">
-            <i class="fa-solid fa-lock"></i>
-            <input type="password" id="signup-password" class="premium-input" placeholder="Create Password" required />
-            <button type="button" class="eye-toggle" id="signup-eye"><i class="fa-solid fa-eye"></i></button>
-          </div>
-          <div class="input-group">
-            <i class="fa-solid fa-shield-check"></i>
-            <input type="password" id="signup-confirm" class="premium-input" placeholder="Confirm Password" required />
-            <button type="button" class="eye-toggle" id="signup-confirm-eye"><i class="fa-solid fa-eye"></i></button>
-          </div>
-          <div class="auth-error" id="signup-error"></div>
-          <button type="submit" class="btn-submit" id="btn-signup-submit">
-            Create Farm Profile <i class="fa-solid fa-paper-plane"></i>
-          </button>
-        </form>
+        <div class="tab-switcher">
+          <div class="tab-item active" id="tab-login">Login</div>
+          <div class="tab-item" id="tab-signup">Sign Up</div>
+          <div class="tab-pill" id="tab-pill"></div>
+        </div>
+
+        <div class="form-container">
+          
+          <!-- LOGIN FORM -->
+          <form id="login-form" class="auth-form active">
+            <div class="field-group">
+              <div class="input-wrapper">
+                <i class="fa-solid fa-envelope"></i>
+                <input type="email" id="login-email" class="input-field" placeholder=" " required />
+                <label class="floating-label">Email Address</label>
+              </div>
+            </div>
+            
+            <div class="field-group">
+              <div class="input-wrapper">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" id="login-password" class="input-field" placeholder=" " required />
+                <label class="floating-label">Password</label>
+                <button type="button" class="show-hide" id="login-eye">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+            </div>
+            
+            <a href="#" class="forgot-link" id="btn-forgot-password">Forgot Password?</a>
+            
+            <button type="submit" class="btn-primary" id="btn-login-submit">Login</button>
+            
+            <div class="divider"><span>or</span></div>
+            
+            <button type="button" class="btn-google" id="btn-google-login">
+              <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="18" alt="Google">
+              Continue with Google
+            </button>
+          </form>
+
+          <!-- SIGNUP FORM -->
+          <form id="signup-form" class="auth-form">
+            <div class="field-group">
+              <div class="input-wrapper">
+                <i class="fa-solid fa-user"></i>
+                <input type="text" id="signup-name" class="input-field" placeholder=" " required />
+                <label class="floating-label">Full Name</label>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <div class="input-wrapper">
+                <i class="fa-solid fa-tractor"></i>
+                <input type="text" id="signup-farm" class="input-field" placeholder=" " required />
+                <label class="floating-label">Farm Name</label>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <div class="input-wrapper">
+                <i class="fa-solid fa-envelope"></i>
+                <input type="email" id="signup-email" class="input-field" placeholder=" " required />
+                <label class="floating-label">Email Address</label>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <div class="input-wrapper">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" id="signup-password" class="input-field" placeholder=" " required />
+                <label class="floating-label">Create Password</label>
+                <button type="button" class="show-hide" id="signup-eye">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Strength Meter -->
+            <div class="strength-meter" id="strength-meter">
+              <div class="strength-segment"></div>
+              <div class="strength-segment"></div>
+              <div class="strength-segment"></div>
+              <div class="strength-segment"></div>
+            </div>
+
+            <div class="field-group">
+              <div class="input-wrapper">
+                <i class="fa-solid fa-shield-check"></i>
+                <input type="password" id="signup-confirm" class="input-field" placeholder=" " required />
+                <label class="floating-label">Confirm Password</label>
+              </div>
+            </div>
+
+            <div class="checkbox-group">
+              <div class="custom-checkbox" id="terms-check">
+                <i class="fa-solid fa-check"></i>
+              </div>
+              <span>I agree to Terms & Privacy Policy</span>
+            </div>
+
+            <button type="submit" class="btn-primary" id="btn-signup-submit">Create Account</button>
+            
+            <div class="divider"><span>or</span></div>
+            
+            <button type="button" class="btn-google">
+              <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="18" alt="Google">
+              Continue with Google
+            </button>
+          </form>
+
+        </div>
       </div>
-
-      <button type="button" class="btn-google" id="btn-google-login">
-        <i class="fa-brands fa-google"></i> Continue with Google
-      </button>
     </div>
-
-    <a href="index.html" class="back-btn">
-      <i class="fa-solid fa-arrow-left"></i> Return to Landing Page
-    </a>
   </div>
 
-  <div class="toast" id="app-toast">
-    <i class="fa-solid fa-circle-check"></i>
-    <span class="toast-msg" id="toast-msg"></span>
-  </div>
-
+  <!-- Firebase Scripts (Loaded with defer) -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  
+  <!-- App Scripts -->
   <script src="js/utils.js"></script>
   <script src="js/firebase-init.js"></script>
   <script src="js/auth.js"></script>
 
   <script>
-    // 3D Parallax Effect
-    const wrapper = document.getElementById('auth-wrapper');
-    const card = document.getElementById('auth-card');
+    // Tab Switching Logic
+    const tabLogin = document.getElementById('tab-login');
+    const tabSignup = document.getElementById('tab-signup');
+    const tabPill = document.getElementById('tab-pill');
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const headerTitle = document.getElementById('header-title');
 
-    document.addEventListener('mousemove', (e) => {
-      if (window.innerWidth < 768) return; // Disable on mobile
+    function switchTo(tab) {
+      if (tab === 'login') {
+        tabLogin.classList.add('active');
+        tabSignup.classList.remove('active');
+        tabPill.style.transform = 'translateX(0)';
+        loginForm.classList.add('active');
+        signupForm.classList.remove('active');
+        headerTitle.textContent = 'Welcome Back';
+      } else {
+        tabSignup.classList.add('active');
+        tabLogin.classList.remove('active');
+        tabPill.style.transform = 'translateX(100%)';
+        signupForm.classList.add('active');
+        loginForm.classList.remove('active');
+        headerTitle.textContent = 'Join KisanTrack';
+      }
+    }
 
-      const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
-      const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
-      
-      wrapper.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+    tabLogin.addEventListener('click', () => switchTo('login'));
+    tabSignup.addEventListener('click', () => switchTo('signup'));
+
+    // Check URL params for initial tab
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('tab') === 'signup') switchTo('signup');
+
+    // Password Strength Meter
+    const passInput = document.getElementById('signup-password');
+    const segments = document.querySelectorAll('.strength-segment');
+
+    passInput.addEventListener('input', () => {
+      const val = passInput.value;
+      let strength = 0;
+      if (val.length > 5) strength++;
+      if (val.match(/[A-Z]/)) strength++;
+      if (val.match(/[0-9]/)) strength++;
+      if (val.match(/[^A-Za-z0-9]/)) strength++;
+
+      segments.forEach((seg, i) => {
+        if (i < strength) {
+          if (strength <= 1) seg.style.background = '#E05C3A';
+          else if (strength <= 2) seg.style.background = '#C8843A';
+          else seg.style.background = '#52B788';
+        } else {
+          seg.style.background = 'rgba(255,255,255,0.1)';
+        }
+      });
     });
 
-    // Reset on mouse leave
-    document.addEventListener('mouseleave', () => {
-      wrapper.style.transform = `rotateY(0deg) rotateX(0deg)`;
+    // Custom Checkbox
+    const termsCheck = document.getElementById('terms-check');
+    termsCheck.addEventListener('click', () => {
+      termsCheck.classList.toggle('checked');
+    });
+
+    // Password Visibility Toggle (for signup, since auth.js handles login)
+    const signupEye = document.getElementById('signup-eye');
+    const signupPass = document.getElementById('signup-password');
+    signupEye.addEventListener('click', () => {
+      const type = signupPass.type === 'password' ? 'text' : 'password';
+      signupPass.type = type;
+      signupEye.querySelector('i').classList.toggle('fa-eye');
+      signupEye.querySelector('i').classList.toggle('fa-eye-slash');
     });
   </script>
 </body>
 </html>
-</body>
-</html>
-
-
