@@ -49,8 +49,13 @@ document.addEventListener('DOMContentLoaded', () => {
   auth.onAuthStateChanged((user) => {
     if (user) {
       // User is logged in
-      authScreen.style.display = 'none';
-      appDashboard.style.display = 'block';
+      if (window.isLandingPage) {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+
+      if (authScreen) authScreen.style.display = 'none';
+      if (appDashboard) appDashboard.style.display = 'block';
 
       // Setup user details
       const displayName = user.displayName || user.email.split('@')[0];
@@ -64,8 +69,13 @@ document.addEventListener('DOMContentLoaded', () => {
       showToast(`Welcome back, ${firstName}! / नमस्ते!`);
     } else {
       // User is NOT logged in
-      authScreen.style.display = 'flex';
-      appDashboard.style.display = 'none';
+      if (!window.isLandingPage && window.location.pathname.indexOf('index.html') === -1 && window.location.pathname !== '/') {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      if (authScreen) authScreen.style.display = 'flex';
+      if (appDashboard) appDashboard.style.display = 'none';
       
       // Reset forms
       loginForm.reset();
@@ -330,7 +340,11 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         await auth.signOut();
         showToast('You have been signed out / आप साइन आउट हो गए');
-        switchTab('login'); // ensure they land back on login tab
+        if (window.isLandingPage) {
+          switchTab('login'); // ensure they land back on login tab
+        } else {
+          window.location.href = 'index.html';
+        }
       } catch (error) {
         console.error('Sign Out Error', error);
         showToast('Error signing out. Try again.', 'error');

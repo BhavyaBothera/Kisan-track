@@ -13,63 +13,16 @@
 (function () {
   'use strict';
 
-  // ── State ─────────────────────────────────────────────────
-  let currentTab = 'dashboard';
-
-  // ── DOM refs ──────────────────────────────────────────────
-  const sidebar        = document.getElementById('sidebar');
-  const overlay        = document.getElementById('sidebar-overlay');
-  const hamburger      = document.getElementById('hamburger');
-  const navLinks       = document.querySelectorAll('.nav-link');
-  const mobileItems    = document.querySelectorAll('.mobile-nav-item');
-  const sections       = document.querySelectorAll('.tab-section');
-
-  // ── Tab Switching ─────────────────────────────────────────
-  function switchTab(tabName) {
-    if (tabName === currentTab) return;
-    currentTab = tabName;
-
-    // Hide all sections
-    sections.forEach(s => s.classList.remove('active'));
-
-    // Show target section
-    const target = document.getElementById('section-' + tabName);
-    if (target) {
-      target.classList.add('active');
-    }
-
-    // Update sidebar nav active state
-    navLinks.forEach(link => {
-      link.classList.toggle('active', link.dataset.tab === tabName);
-    });
-
-    // Update mobile nav active state
-    mobileItems.forEach(item => {
-      item.classList.toggle('active', item.dataset.tab === tabName);
-    });
-
-    // Close sidebar on mobile after nav
-    if (window.innerWidth < 768) {
-      closeSidebar();
-    }
-
-    // Trigger tab-specific init
-    onTabActivated(tabName);
-  }
-
-  function onTabActivated(tabName) {
-    switch (tabName) {
-      case 'vitals':
-        if (typeof VitalsModule !== 'undefined') VitalsModule.onActivate();
-        break;
-      case 'reports':
-        if (typeof ReportsModule !== 'undefined') ReportsModule.onActivate();
-        break;
-      case 'alerts':
-        if (typeof AlertsModule !== 'undefined') AlertsModule.render();
-        break;
-    }
-  }
+  // ── Multi-page Navigation Mapping ─────────────────────────
+  const tabToUrl = {
+    'dashboard': 'dashboard.html',
+    'animals': 'herd.html',
+    'vitals': 'herd.html#section-vitals',
+    'alerts': 'alerts.html',
+    'reports': 'alerts.html#section-reports',
+    'camera': 'profile.html#section-camera',
+    'profile': 'profile.html'
+  };
 
   // ── Sidebar Toggle ────────────────────────────────────────
   function openSidebar() {
@@ -93,19 +46,23 @@
   overlay.addEventListener('click', closeSidebar);
 
   // ── Nav Link Click Handlers ───────────────────────────────
+  // navLinks are already <a> tags with hrefs, so they navigate natively.
+  // We just close the sidebar on mobile if clicked.
   navLinks.forEach(link => {
-    link.addEventListener('click', () => switchTab(link.dataset.tab));
-    // Keyboard accessibility
-    link.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        switchTab(link.dataset.tab);
+    link.addEventListener('click', () => {
+      if (window.innerWidth < 768) {
+        closeSidebar();
       }
     });
   });
 
   mobileItems.forEach(item => {
-    item.addEventListener('click', () => switchTab(item.dataset.tab));
+    item.addEventListener('click', () => {
+      const tab = item.dataset.tab;
+      if (tabToUrl[tab]) {
+        window.location.href = tabToUrl[tab];
+      }
+    });
   });
 
   // ── Ripple Effect on Buttons ──────────────────────────────
@@ -258,15 +215,15 @@
   // ── Global Init ───────────────────────────────────────────
   function init() {
     // Initialize all modules
-    if (typeof DashboardModule  !== 'undefined') DashboardModule.init();
-    if (typeof AnimalsModule    !== 'undefined') AnimalsModule.init();
-    if (typeof VitalsModule     !== 'undefined') VitalsModule.init();
-    if (typeof AlertsModule     !== 'undefined') AlertsModule.init();
-    if (typeof ReportsModule    !== 'undefined') ReportsModule.init();
-    if (typeof UploadModule     !== 'undefined') UploadModule.init();
-    if (typeof AddAnimalModule  !== 'undefined') AddAnimalModule.init();
-    if (typeof ProfileModule    !== 'undefined') ProfileModule.init();
-    if (typeof CameraModule     !== 'undefined') CameraModule.init();
+    if (typeof DashboardModule  !== 'undefined' && document.getElementById('section-dashboard')) DashboardModule.init();
+    if (typeof AnimalsModule    !== 'undefined' && document.getElementById('section-animals')) AnimalsModule.init();
+    if (typeof VitalsModule     !== 'undefined' && document.getElementById('section-vitals')) VitalsModule.init();
+    if (typeof AlertsModule     !== 'undefined' && document.getElementById('section-alerts')) AlertsModule.init();
+    if (typeof ReportsModule    !== 'undefined' && document.getElementById('section-reports')) ReportsModule.init();
+    if (typeof UploadModule     !== 'undefined' && document.getElementById('section-upload')) UploadModule.init();
+    if (typeof AddAnimalModule  !== 'undefined' && document.getElementById('add-animal-modal')) AddAnimalModule.init();
+    if (typeof ProfileModule    !== 'undefined' && document.getElementById('section-profile')) ProfileModule.init();
+    if (typeof CameraModule     !== 'undefined' && document.getElementById('section-camera')) CameraModule.init();
 
     attachRipples();
     startSyncTimer();

@@ -19,6 +19,13 @@
   z-index: var(--z-sidebar);
   transition: transform var(--transition-normal);
   overflow: hidden;
+
+  /* Theme overrides for dark green sidebar */
+  --text-primary: #FFFFFF;
+  --text-muted: rgba(255, 255, 255, 0.75);
+  --text-dim: rgba(255, 255, 255, 0.5);
+  --border: rgba(255, 255, 255, 0.15);
+  --accent-green: #A5D6A7; /* Lighter green for text accents */
 }
 
 /* ── Sidebar Brand ───────────────────────────────────────── */
@@ -136,15 +143,15 @@
 }
 
 .nav-link:hover {
-  background: rgba(124,181,24,0.06);
-  border-left-color: rgba(124,181,24,0.4);
+  background: rgba(255,255,255,0.06);
+  border-left-color: rgba(255,255,255,0.4);
 }
 
 .nav-link:hover i,
 .nav-link:hover .nav-text { color: var(--text-primary); }
 
 .nav-link.active {
-  background: rgba(124,181,24,0.12);
+  background: rgba(255,255,255,0.12);
   border-left-color: var(--accent-green);
 }
 
@@ -227,6 +234,13 @@
   border-top: 1px solid var(--border);
   z-index: var(--z-mobile-nav);
   padding: 0;
+
+  /* Theme overrides for dark green nav */
+  --text-primary: #FFFFFF;
+  --text-muted: rgba(255, 255, 255, 0.75);
+  --text-dim: rgba(255, 255, 255, 0.5);
+  --border: rgba(255, 255, 255, 0.15);
+  --accent-green: #A5D6A7;
 }
 
 .mobile-nav-inner {
@@ -267,7 +281,7 @@
 
 .mobile-nav-item.active {
   border-top-color: var(--accent-green);
-  background: rgba(124,181,24,0.07);
+  background: rgba(255,255,255,0.07);
 }
 
 .mobile-nav-item.active i     { color: var(--accent-green); }

@@ -50,7 +50,7 @@
     <nav class="sidebar-nav">
       <div class="nav-label">Main Menu / मुख्य मेन्यू</div>
 
-      <a href="dashboard.html" class="nav-link active" id="nav-dashboard">
+      <a href="dashboard.html" class="nav-link" id="nav-dashboard">
         <i class="fa-solid fa-gauge-high"></i>
         <span class="nav-text">Dashboard<span class="nav-hi">डैशबोर्ड</span></span>
       </a>
@@ -60,7 +60,7 @@
         <span class="nav-text">Herd & Vitals<span class="nav-hi">झुंड और जीवन संकेत</span></span>
       </a>
 
-      <a href="alerts.html" class="nav-link" id="nav-alerts">
+      <a href="alerts.html" class="nav-link active" id="nav-alerts">
         <i class="fa-solid fa-bell"></i>
         <span class="nav-text">Alerts & Reports<span class="nav-hi">अलर्ट और रिपोर्ट</span></span>
         <span id="alert-badge"
@@ -102,42 +102,110 @@
   <main class="main-content" id="main-content">
     <div class="content-area">
 
+
+
       <!-- ─────────────────────────────────────────────────
-         SECTION 1: DASHBOARD HOME
+         SECTION 4: ALERTS & NOTIFICATIONS
     ───────────────────────────────────────────────── -->
-      <section class="tab-section active" id="section-dashboard" aria-label="Dashboard Home">
+      <section class="tab-section active" id="section-alerts" aria-label="Alerts and Notifications">
 
         <div class="page-header">
-          <h1><i class="fa-solid fa-gauge-high" style="color:var(--accent-green);margin-right:10px;"></i>Herd Overview /
-            <span style="color:var(--text-muted);">झुंड की स्थिति</span>
-          </h1>
-          <p class="subtitle">Real-time health monitoring for your entire livestock | आपके सभी पशुओं की स्वास्थ्य
-            निगरानी</p>
+          <h1><i class="fa-solid fa-bell" style="color:var(--accent-amber);margin-right:10px;"></i>Alerts / <span
+              style="color:var(--text-muted);">अलर्ट</span></h1>
+          <p class="subtitle">All health alerts and notifications | सभी स्वास्थ्य चेतावनियाँ</p>
         </div>
 
-        <!-- KPI Cards -->
-        <div class="kpi-grid" id="kpi-grid">
-          <!-- Populated by dashboard.js -->
+        <!-- Summary Stats -->
+        <div class="alert-stats-row" id="alert-stats-row">
+          <!-- Populated by alerts.js -->
         </div>
 
-        <!-- Herd Status Grid -->
-        <p class="section-title">
-          <i class="fa-solid fa-grip"></i> Herd Status / झुंड की स्थिति
-        </p>
-        <div class="herd-grid" id="herd-grid">
-          <!-- Populated by dashboard.js -->
+        <!-- Filter -->
+        <div class="filter-bar" id="alert-filter-bar">
+          <button class="filter-btn active" data-filter="all" id="af-all">All / सभी</button>
+          <button class="filter-btn" data-filter="Critical" id="af-critical">🔴 Critical</button>
+          <button class="filter-btn" data-filter="Warning" id="af-warning">🟡 Warning</button>
+          <button class="filter-btn" data-filter="resolved" id="af-resolved">✅ Resolved</button>
         </div>
 
-        <!-- Alert Ticker -->
-        <div class="ticker-section" id="alert-ticker">
-          <span class="ticker-label">⚠ LIVE ALERTS</span>
-          <div class="ticker-wrap">
-            <div class="ticker-track" id="ticker-track">
-              <!-- Populated by dashboard.js -->
+        <!-- Alert Feed -->
+        <div class="alert-feed" id="alert-feed">
+          <!-- Populated by alerts.js -->
+        </div>
+      </section>
+
+      <!-- ─────────────────────────────────────────────────
+         SECTION 5: HISTORICAL REPORTS
+    ───────────────────────────────────────────────── -->
+      <section class="tab-section" id="section-reports" aria-label="Historical Reports">
+
+        <div class="page-header">
+          <h1><i class="fa-solid fa-chart-column" style="color:var(--accent-green);margin-right:10px;"></i>Historical
+            Reports / <span style="color:var(--text-muted);">ऐतिहासिक रिपोर्ट</span></h1>
+          <p class="subtitle">Herd health trends and historical data | झुंड स्वास्थ्य प्रवृत्ति और पुराने डेटा</p>
+        </div>
+
+        <!-- Date Range -->
+        <div class="report-controls">
+          <label for="date-range"><i class="fa-solid fa-calendar"
+              style="color:var(--accent-green);margin-right:4px;"></i> Date Range / तारीख:</label>
+          <select class="styled-select" id="date-range">
+            <option value="7">Last 7 Days / पिछले 7 दिन</option>
+            <option value="14" selected>Last 14 Days / पिछले 14 दिन</option>
+            <option value="30">Last 30 Days / पिछले 30 दिन</option>
+          </select>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="charts-row">
+          <div class="chart-card">
+            <h3 class="chart-card-title">
+              <i class="fa-solid fa-chart-bar"></i>
+              Daily Alert Count / दैनिक अलर्ट
+            </h3>
+            <div class="chart-wrap">
+              <canvas id="report-alerts-chart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <h3 class="chart-card-title">
+              <i class="fa-solid fa-temperature-half"></i>
+              Average Herd Temperature / औसत तापमान
+            </h3>
+            <div class="chart-wrap">
+              <canvas id="report-temp-chart"></canvas>
             </div>
           </div>
         </div>
 
+        <!-- Data Table -->
+        <div class="data-table-wrap">
+          <div class="data-table-header">
+            <h3><i class="fa-solid fa-table" style="color:var(--accent-green);margin-right:8px;"></i>Event Log / घटना
+              लॉग</h3>
+            <button class="btn btn-secondary btn-sm" id="export-csv-btn">
+              <i class="fa-solid fa-download"></i> Export CSV
+            </button>
+          </div>
+          <div class="table-scroll">
+            <table class="data-table" id="report-table">
+              <thead>
+                <tr>
+                  <th>Date / तारीख</th>
+                  <th>Animal ID</th>
+                  <th>Parameter / पैरामीटर</th>
+                  <th>Reading / रीडिंग</th>
+                  <th>Severity / स्तर</th>
+                  <th>Confidence / विश्वास</th>
+                  <th>Status / स्थिति</th>
+                </tr>
+              </thead>
+              <tbody id="report-table-body">
+                <!-- Populated by reports.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
       </section>
 
 
@@ -150,7 +218,7 @@
 ═══════════════════════════════════════════════════════ -->
   <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile Navigation">
     <div class="mobile-nav-inner">
-      <div class="mobile-nav-item active" data-tab="dashboard" id="mnav-dashboard">
+      <div class="mobile-nav-item" data-tab="dashboard" id="mnav-dashboard">
         <i class="fa-solid fa-gauge-high"></i>
         <span>Home</span>
       </div>
@@ -162,7 +230,7 @@
         <i class="fa-solid fa-heartbeat"></i>
         <span>Vitals</span>
       </div>
-      <div class="mobile-nav-item" data-tab="alerts" id="mnav-alerts">
+      <div class="mobile-nav-item active" data-tab="alerts" id="mnav-alerts">
         <i class="fa-solid fa-bell"></i>
         <span>Alerts</span>
       </div>
