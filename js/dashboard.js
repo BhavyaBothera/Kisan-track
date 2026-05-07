@@ -70,9 +70,14 @@ const DashboardModule = (function () {
       grid.innerHTML = `
         <div class="empty-state">
           <div class="empty-icon">🐄</div>
-          <h3>No animals added yet</h3>
-          <p>Click + Add Animal to get started</p>
-          <button class="btn btn-primary" onclick="document.getElementById('open-add-animal-btn').click()">+ Add Animal</button>
+          <h3>Initialize Your Farm</h3>
+          <p>No animals detected. You can add them manually or use our AI seeder for a demo.</p>
+          <div style="display:flex; gap:10px; justify-content:center; margin-top:20px; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="document.getElementById('open-add-animal-btn').click()">+ Add Manually</button>
+            <button class="btn btn-secondary" onclick="DataSeeder.seedInitialData()" style="border-color:var(--accent-green); color:var(--accent-green);">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> AI Quick Setup
+            </button>
+          </div>
         </div>
       `;
       return;

@@ -254,6 +254,15 @@
     attachRipples();
     startSyncTimer();
 
+    // Aurora Mouse Follow
+    const aurora = document.getElementById('aurora');
+    if (aurora) {
+      document.addEventListener('mousemove', (e) => {
+        aurora.style.left = e.clientX + 'px';
+        aurora.style.top = e.clientY + 'px';
+      });
+    }
+
     // Re-attach ripples when DOM changes (for dynamically rendered buttons)
     const observer = new MutationObserver(attachRipples);
     observer.observe(document.body, { childList: true, subtree: true });

@@ -12,7 +12,9 @@
   left: 0;
   width: var(--sidebar-width);
   height: 100vh;
-  background: var(--bg-sidebar);
+  background: rgba(5, 8, 6, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -20,12 +22,12 @@
   transition: transform var(--transition-normal);
   overflow: hidden;
 
-  /* Theme overrides for dark green sidebar */
+  /* Theme overrides for Obsidian sidebar */
   --text-primary: #FFFFFF;
-  --text-muted: rgba(255, 255, 255, 0.75);
-  --text-dim: rgba(255, 255, 255, 0.5);
-  --border: rgba(255, 255, 255, 0.15);
-  --accent-green: #A5D6A7; /* Lighter green for text accents */
+  --text-muted: rgba(255, 255, 255, 0.7);
+  --text-dim: rgba(255, 255, 255, 0.4);
+  --border: rgba(255, 255, 255, 0.05);
+  --accent-green: #7CB518; 
 }
 
 /* ── Sidebar Brand ───────────────────────────────────────── */

@@ -147,8 +147,8 @@ const VitalsModule = (function () {
     if (chartActivity) chartActivity.destroy();
 
     chartTemp     = makeChart('chart-temp',     'Temp', liveReadings.temp,     '#7CB518', '°C',  36, 42, 38, 39.5);
-    chartHR       = makeChart('chart-hr',       'HR',   liveReadings.hr,       '#E5A100', 'bpm', 40, 130, 60, 80);
-    chartActivity = makeChart('chart-activity', 'Act',  liveReadings.activity, '#3B82F6', '%',   0, 100, 40, 80);
+    chartHR       = makeChart('chart-hr',       'HR',   liveReadings.hr,       '#C8843A', 'bpm', 40, 130, 60, 80);
+    chartActivity = makeChart('chart-activity', 'Act',  liveReadings.activity, '#2196F3', '%',   0, 100, 40, 80);
   }
 
   function updateCharts() {

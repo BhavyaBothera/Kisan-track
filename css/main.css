@@ -7,50 +7,46 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600&display=swap');
 
-/* ── CSS Custom Properties ───────────────────────────────── */
+/* ── Obsidian Design Tokens ───────────────────────────────── */
 :root {
-  /* Colors - Village Theme */
-  --bg-primary:    #F9F6F0; /* Light Sand */
-  --bg-card:       #FFFFFF; /* Clean White */
-  --bg-card-hover: #F4F1E8;
-  --bg-input:      #FFFFFF;
-  --bg-sidebar:    #1F4E22; /* Very Deep Green for contrast */
+  --bg-primary:    #030504; 
+  --bg-card:       rgba(10, 15, 12, 0.6); 
+  --bg-card-hover: rgba(20, 25, 22, 0.8);
+  --bg-input:      rgba(0, 0, 0, 0.4);
+  --bg-sidebar:    #050806; 
 
-  --accent-green:  #2E7D32; /* Leafy Green */
-  --accent-amber:  #E65100; /* Deep Orange/Rust */
-  --accent-red:    #D84315; /* Terracotta Red */
-  --accent-blue:   #1976D2; /* River Blue */
-  --accent-info:   #4CAF50;
+  --accent-green:  #7CB518; 
+  --accent-amber:  #C8843A; 
+  --accent-red:    #E05C3A; 
+  --accent-blue:   #2196F3; 
 
-  --text-primary:  #2C2B29; /* Dark Charcoal */
-  --text-muted:    #6D6A65;
-  --text-dim:      #8F8C86;
+  --text-primary:  #FFFFFF; 
+  --text-muted:    #888888;
+  --text-dim:      #555555;
 
-  --border:        #E2DCD0; /* Soft clay */
-  --border-hover:  #C7C0B2;
+  --border:        rgba(255, 255, 255, 0.05);
+  --border-hover:  rgba(255, 255, 255, 0.1);
 
-  --glow-green:    rgba(46, 125, 50, 0.15);
-  --glow-amber:    rgba(230, 81, 0, 0.15);
-  --glow-red:      rgba(216, 67, 21, 0.15);
+  --accent-glow:   rgba(124, 181, 24, 0.15);
 
   /* Sidebar */
-  --sidebar-width:         240px;
+  --sidebar-width:         260px;
   --sidebar-collapsed:     0px;
 
   /* Typography */
-  --font-heading: 'Poppins', sans-serif;
-  --font-body:    'Noto Sans', sans-serif;
+  --font-heading: 'Inter', sans-serif;
+  --font-body:    'Inter', sans-serif;
 
   /* Spacing */
-  --radius-sm:   6px;
-  --radius-md:   12px;
-  --radius-lg:   18px;
-  --radius-xl:   24px;
+  --radius-sm:   8px;
+  --radius-md:   16px;
+  --radius-lg:   24px;
+  --radius-xl:   32px;
 
   /* Transitions */
-  --transition-fast:   0.15s ease;
-  --transition-normal: 0.25s ease;
-  --transition-slow:   0.4s ease;
+  --transition-fast:   0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow:   0.6s cubic-bezier(0.7, 0, 0.3, 1);
 
   /* Z-indexes */
   --z-sidebar:   100;
