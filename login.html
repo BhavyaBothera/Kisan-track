@@ -36,7 +36,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
+      padding: 20px;
+      overflow-y: auto; /* Allow scroll if content too tall */
     }
 
     /* ─────────────────────────────────────────────────────────────
@@ -105,7 +106,7 @@
       -webkit-backdrop-filter: blur(40px);
       border: 1px solid var(--glass-border);
       border-radius: 24px;
-      padding: 50px 40px;
+      padding: 40px; /* Slightly reduced */
       box-shadow: 0 50px 100px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,255,255,0.02);
       position: relative;
     }
@@ -154,15 +155,24 @@
     }
 
     /* Form Layout */
-    .form-stack { position: relative; min-height: 320px; }
+    .form-stack { 
+      position: relative; 
+      display: grid;
+      grid-template-rows: 1fr;
+    }
     .obsidian-form {
-      position: absolute;
-      top: 0; left: 0; width: 100%;
-      opacity: 0; pointer-events: none;
-      transform: scale(0.98);
+      grid-area: 1 / 1 / 2 / 2;
+      opacity: 0; 
+      pointer-events: none;
+      transform: translateY(10px);
       transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
     }
-    .obsidian-form.active { opacity: 1; pointer-events: all; transform: scale(1); }
+    .obsidian-form.active { 
+      opacity: 1; 
+      pointer-events: all; 
+      transform: translateY(0);
+      position: relative; /* Takes up space when active */
+    }
 
     /* Inputs */
     .input-group { margin-bottom: 24px; text-align: left; }
@@ -174,7 +184,7 @@
       background: rgba(0,0,0,0.4);
       border: 1px solid var(--glass-border);
       border-radius: 12px;
-      padding: 14px 16px;
+      padding: 12px 16px; /* Slightly more compact */
       display: flex; align-items: center; gap: 12px;
       transition: all 0.3s;
     }
@@ -185,7 +195,7 @@
     }
     .obsidian-input-box i { color: var(--text-dim); font-size: 16px; }
     .obsidian-input {
-      flex: 1; background: none; border: none; color: white; font-family: inherit; font-size: 15px; outline: none;
+      flex: 1; background: none; border: none; color: white; font-family: inherit; font-size: 14px; outline: none;
     }
     .obsidian-input::placeholder { color: #333; }
 
@@ -238,9 +248,9 @@
 
     /* Mobile */
     @media (max-width: 480px) {
-      .obsidian-card { padding: 40px 24px; border-radius: 0; border: none; background: transparent; box-shadow: none; }
-      .obsidian-logo { margin-bottom: 20px; }
-      body { background: var(--bg); align-items: flex-start; padding-top: 60px; }
+      .obsidian-card { padding: 30px 20px; border-radius: 20px; background: var(--glass-bg); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+      .obsidian-logo { margin-bottom: 24px; font-size: 24px; }
+      body { align-items: flex-start; padding: 40px 15px; }
     }
   </style>
 </head>
