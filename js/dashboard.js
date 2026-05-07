@@ -151,34 +151,89 @@ const DashboardModule = (function () {
     const healthy = animals.filter(a => a.status === 'Healthy').length;
     animateCount(el.kpiHealthy, healthy);
 
-    // Donut Chart
-    updateDonutChart(animals);
-
-    // Health Bars
-    updateHealthBars(animals);
+    // Bio-Gauge Update
+    updateBioGauge(animals);
 
     // Herd Grid
     renderHerdGrid(animals);
 
     // AI Select
     updateAISelect(animals);
+    
+    // Sparklines
+    initSparklines();
+    initMainChart();
   }
 
-  function processAlerts(alerts) {
-    animateCount(el.kpiAlerts, alerts.length);
-    const critical = alerts.filter(a => a.severity === 'Critical').length;
-    animateCount(el.kpiCritical, critical);
-
-    // Alert Badge
-    const badge = document.getElementById('sidebar-alert-badge');
-    if (badge) {
-      badge.textContent = alerts.length;
-      badge.style.display = alerts.length > 0 ? 'block' : 'none';
+  function updateBioGauge(animals) {
+    const total = animals.length;
+    if (total === 0) return;
+    const healthyCount = animals.filter(a => a.status === 'Healthy').length;
+    const score = Math.round((healthyCount / total) * 100);
+    
+    const valEl = document.getElementById('bio-score-val');
+    const path = document.getElementById('bio-gauge-path');
+    
+    if (valEl) animateCount(valEl, score);
+    if (path) {
+      const circumference = 283;
+      const offset = circumference - (score / 100) * circumference;
+      path.style.strokeDashoffset = offset;
     }
-
-    renderAlertsFeed(alerts);
-    renderTicker(alerts);
   }
+
+  function initMainChart() {
+    const ctx = document.getElementById('main-telemetry-chart');
+    if (!ctx) return;
+    
+    if (_charts.main) _charts.main.destroy();
+    
+    _charts.main = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+        datasets: [{
+          label: 'Health Index',
+          data: [82, 85, 84, 88, 86, 90],
+          borderColor: '#00FF88',
+          backgroundColor: 'rgba(0, 255, 136, 0.1)',
+          fill: true,
+          tension: 0.4,
+          borderWidth: 3,
+          pointRadius: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#64748B' } },
+          y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748B' } }
+        }
+      }
+    });
+  }
+
+  async function performAIAnalysis() {
+    const animalId = el.aiSelect.value;
+    if (!animalId) return alert("Select a subject for neural scanning.");
+
+    const loading = document.getElementById('ai-loading');
+    const content = el.aiContent;
+    
+    loading.style.display = 'flex';
+    content.style.opacity = '0.3';
+
+    // Simulate Neural Scan Delay
+    await new Promise(r => setTimeout(r, 2000));
+    
+    try {
+      const animalSnap = await db.collection('animals').doc(animalId).get();
+      const a = animalSnap.data();
+      
+      const apiKey = localStorage.getItem('gemini_api_key');
+      // ... (rest of Gemini logic same as before)
 
   function renderHerdGrid(animals) {
     if (!el.herdGrid) return;

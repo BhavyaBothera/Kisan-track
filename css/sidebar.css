@@ -1,272 +1,151 @@
-/* ── KisanTrack Sidebar Styles ────────────────────────────── */
+/* ── Cyber-Agri Sidebar ───────────────────────────────────── */
 
 .sidebar {
   width: var(--sidebar-width);
-  height: 100vh;
+  height: calc(100vh - 40px);
   position: fixed;
-  top: 0;
-  left: 0;
-  background: var(--bg-deep);
-  border-right: 1px solid var(--border);
+  top: 20px;
+  left: 20px;
+  z-index: 200;
   display: flex;
   flex-direction: column;
-  z-index: var(--z-sidebar);
-  transition: transform var(--transition-normal);
-  overflow-y: auto;
-  overflow-x: hidden;
+  padding: 32px 20px;
+  border-radius: var(--radius-xl) !important;
 }
 
-/* Brand Section */
 .sidebar-brand {
-  height: 68px;
-  min-height: 68px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 0 20px;
-  border-bottom: 1px solid var(--border);
+  gap: 16px;
+  padding: 0 12px;
+  margin-bottom: 48px;
 }
 
-.brand-cow-circle {
-  width: 40px;
-  height: 40px;
-  background: rgba(124, 181, 24, 0.15);
-  border: 1px solid rgba(124, 181, 24, 0.3);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-}
-
-.brand-text {
-  display: flex;
-  flex-direction: column;
+.brand-logo {
+  filter: drop-shadow(0 0 10px var(--accent-primary));
 }
 
 .brand-name {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 16px;
+  display: block;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: -0.5px;
   color: var(--text-primary);
-  line-height: 1.2;
 }
 
-.brand-sub {
+.brand-tag {
+  display: block;
   font-size: 11px;
-  color: var(--text-muted);
+  font-weight: 700;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-/* System Status Pill */
-.sidebar-status-pill {
-  margin: 16px 16px 8px;
-  background: rgba(124, 181, 24, 0.08);
-  border: 1px solid rgba(124, 181, 24, 0.2);
-  border-radius: 50px;
-  padding: 8px 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.status-dot-pulse {
-  width: 8px;
-  height: 8px;
-  background: var(--accent-green);
-  border-radius: 50%;
-  box-shadow: 0 0 8px var(--accent-green);
-  animation: pulse-dot 2s infinite;
-}
-
-@keyframes pulse-dot {
-  0% { transform: scale(0.95); opacity: 0.7; }
-  50% { transform: scale(1.1); opacity: 1; }
-  100% { transform: scale(0.95); opacity: 0.7; }
-}
-
-.status-pill-text {
-  font-size: 12px;
-  font-family: var(--font-heading);
-  color: var(--accent-green);
-}
-
-.status-last-sync {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-left: auto;
-}
-
-/* Navigation */
 .sidebar-nav {
   flex: 1;
-  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .nav-label {
   font-size: 10px;
-  letter-spacing: 2px;
+  font-weight: 800;
   color: var(--text-muted);
-  padding: 16px 20px 8px;
-  font-weight: 600;
+  letter-spacing: 2px;
+  margin: 24px 12px 8px;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 11px 20px;
-  margin: 2px 10px;
-  border-radius: 10px;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
   text-decoration: none;
-  color: var(--text-muted);
-  transition: all var(--transition-fast);
-  cursor: pointer;
-  position: relative;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 15px;
+  transition: var(--transition-smooth);
 }
 
 .nav-item i {
-  font-size: 17px;
+  font-size: 18px;
   width: 24px;
   text-align: center;
-}
-
-.nav-text-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.nav-text-group .en {
-  font-family: var(--font-heading);
-  font-size: 14px;
-}
-
-.nav-text-group .hi {
-  font-size: 11px;
-  opacity: 0.8;
+  color: var(--text-muted);
+  transition: var(--transition-smooth);
 }
 
 .nav-item:hover {
-  background: rgba(124, 181, 24, 0.07);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
 }
 
 .nav-item:hover i {
-  color: var(--accent-green);
+  color: var(--accent-secondary);
+  transform: translateX(2px);
 }
 
 .nav-item.active {
-  background: rgba(124, 181, 24, 0.12);
-  color: var(--text-primary);
-  border-left: 3px solid var(--accent-green);
-  margin-left: 7px;
-  font-weight: 600;
+  background: rgba(0, 255, 136, 0.1);
+  color: var(--accent-primary);
+  border: 1px solid rgba(0, 255, 136, 0.2);
 }
 
 .nav-item.active i {
-  color: var(--accent-green);
+  color: var(--accent-primary);
 }
 
-.nav-badge {
-  background: var(--accent-red);
-  color: white;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 50px;
-  margin-left: auto;
-}
-
-/* Footer & Farmer Mini-Card */
 .sidebar-footer {
-  border-top: 1px solid var(--border);
-  padding: 16px;
+  margin-top: auto;
 }
 
-.farmer-mini-card {
+.user-pill {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  padding: 12px;
+  border-radius: var(--radius-md) !important;
 }
 
-.farmer-avatar {
-  width: 36px;
-  height: 36px;
-  background: linear-gradient(135deg, var(--accent-green), #4a7a0f);
-  border-radius: 50%;
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--bg-deep);
+  color: var(--bg-dark);
   font-weight: 800;
-  font-size: 14px;
-  font-family: var(--font-heading);
+  font-size: 18px;
 }
 
-.farmer-details {
+.user-meta {
   flex: 1;
-  min-width: 0;
 }
 
-.farmer-name {
-  font-family: var(--font-heading);
-  font-weight: 600;
-  font-size: 13px;
+.user-name {
+  font-weight: 700;
+  font-size: 14px;
   color: var(--text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.farm-name {
+.user-status {
   font-size: 11px;
   color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.sign-out-trigger {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 5px;
-  transition: color var(--transition-fast);
-}
-
-.sign-out-trigger:hover {
-  color: var(--accent-red);
-}
-
-/* Mobile Adjustments */
-@media (max-width: 1024px) {
-  .sidebar {
-    width: 64px;
-  }
-  .brand-text, .nav-text-group, .nav-label, .farmer-details, .sidebar-status-pill .status-pill-text, .sidebar-status-pill .status-last-sync {
-    display: none;
-  }
-  .sidebar-status-pill {
-    padding: 8px;
-    justify-content: center;
-  }
-  .nav-item {
-    justify-content: center;
-    padding: 12px 0;
-    margin: 4px;
-  }
-  .nav-item.active {
-    margin-left: 4px;
-    border-left: 3px solid var(--accent-green);
-  }
-}
-
-@media (max-width: 768px) {
-  .sidebar {
-    transform: translateX(-100%);
-  }
-  .sidebar.active {
-    transform: translateX(0);
-    width: 260px;
-  }
-  .sidebar.active .brand-text, .sidebar.active .nav-text-group, .sidebar.active .nav-label, .sidebar.active .farmer-details, .sidebar.active .status-pill-text, .sidebar.active .status-last-sync {
-    display: flex;
-  }
+.dot-online {
+  width: 6px;
+  height: 6px;
+  background: var(--accent-primary);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent-primary);
 }

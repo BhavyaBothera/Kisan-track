@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>KisanTrack Dashboard | पशु स्वास्थ्य निगरानी</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KisanTrack | Command Center</title>
 
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Font Awesome 6 -->
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <!-- App Stylesheets -->
@@ -18,619 +18,253 @@
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/sidebar.css" />
   <link rel="stylesheet" href="css/components.css" />
+
+  <style>
+    /* Cinematic Background */
+    body {
+      background-image: url('aurora_farm_bg_1778182236565.png');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+    
+    .aurora-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 20% 20%, rgba(0, 255, 136, 0.05), transparent),
+                  radial-gradient(circle at 80% 80%, rgba(0, 209, 255, 0.05), transparent);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* Glass Effect Overrides */
+    .glass-panel {
+      background: var(--bg-surface);
+      backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-lg);
+      transition: var(--transition-smooth);
+    }
+    
+    .glass-panel:hover {
+      border-color: var(--border-accent);
+      background: rgba(15, 22, 36, 0.6);
+    }
+  </style>
 </head>
 <body>
 
+  <div class="aurora-overlay"></div>
+
   <!-- ═══════════════════════════════════════════════════════
-     SIDEBAR (Left)
+     SIDEBAR
   ═══════════════════════════════════════════════════════ -->
-  <aside class="sidebar" id="sidebar">
-    <!-- Brand -->
+  <aside class="sidebar glass-panel" id="sidebar">
     <div class="sidebar-brand">
-      <div class="brand-cow-circle">🐄</div>
-      <div class="brand-text">
+      <div class="brand-logo">
+        <img src="cyber_cow_asset_1778182254292.png" alt="Logo" style="width: 40px;">
+      </div>
+      <div class="brand-info">
         <span class="brand-name">KisanTrack</span>
-        <span class="brand-sub">Smart Livestock</span>
+        <span class="brand-tag">AG-Tech Pro</span>
       </div>
     </div>
 
-    <!-- System Status Pill -->
-    <div class="sidebar-status-pill">
-      <div class="status-dot-pulse"></div>
-      <span class="status-pill-text">System Online / सिस्टम चालू है</span>
-      <span class="status-last-sync" id="sidebar-sync-time">2m ago</span>
-    </div>
-
-    <!-- Navigation -->
     <nav class="sidebar-nav">
-      <div class="nav-label">MAIN MENU / मुख्य मेन्यू</div>
+      <div class="nav-label">COMMAND</div>
+      <a href="dashboard.html" class="nav-item active"><i class="fa-solid fa-layer-group"></i><span>Overview</span></a>
+      <a href="herd.html" class="nav-item"><i class="fa-solid fa-cow"></i><span>Live Herd</span></a>
+      <a href="alerts.html" class="nav-item"><i class="fa-solid fa-bolt-lightning"></i><span>Alerts</span></a>
+      <a href="camera.html" class="nav-item"><i class="fa-solid fa-eye"></i><span>Vision AI</span></a>
       
-      <a href="dashboard.html" class="nav-item active" id="nav-dashboard">
-        <i class="fa-solid fa-house"></i>
-        <div class="nav-text-group">
-          <span class="en">Dashboard</span>
-          <span class="hi">डैशबोर्ड</span>
-        </div>
-      </a>
-
-      <a href="herd.html" class="nav-item" id="nav-herd">
-        <i class="fa-solid fa-cow"></i>
-        <div class="nav-text-group">
-          <span class="en">My Herd</span>
-          <span class="hi">मेरा झुंड</span>
-        </div>
-      </a>
-
-      <a href="alerts.html" class="nav-item" id="nav-alerts">
-        <i class="fa-solid fa-bell"></i>
-        <div class="nav-text-group">
-          <span class="en">Alerts</span>
-          <span class="hi">अलर्ट</span>
-        </div>
-        <span id="sidebar-alert-badge" class="nav-badge" style="display:none;">0</span>
-      </a>
-
-      <a href="camera.html" class="nav-item" id="nav-camera">
-        <i class="fa-solid fa-camera"></i>
-        <div class="nav-text-group">
-          <span class="en">AI Camera</span>
-          <span class="hi">कैमरा</span>
-        </div>
-      </a>
-
-      <a href="uploads.html" class="nav-item" id="nav-upload">
-        <i class="fa-solid fa-upload"></i>
-        <div class="nav-text-group">
-          <span class="en">Upload Log</span>
-          <span class="hi">अपलोड</span>
-        </div>
-      </a>
-
-      <a href="profile.html" class="nav-item" id="nav-profile">
-        <i class="fa-solid fa-user"></i>
-        <div class="nav-text-group">
-          <span class="en">Profile</span>
-          <span class="hi">प्रोफ़ाइल</span>
-        </div>
-      </a>
+      <div class="nav-label">LOGISTICS</div>
+      <a href="uploads.html" class="nav-item"><i class="fa-solid fa-database"></i><span>Data Logs</span></a>
+      <a href="profile.html" class="nav-item"><i class="fa-solid fa-user-gear"></i><span>Settings</span></a>
     </nav>
 
-    <!-- Sidebar Footer: Farmer Mini-Card -->
     <div class="sidebar-footer">
-      <div class="farmer-mini-card">
-        <div class="farmer-avatar" id="sidebar-avatar">F</div>
-        <div class="farmer-details">
-          <div class="farmer-name" id="sidebar-farmer-name">Farmer Name</div>
-          <div class="farm-name" id="sidebar-farm-name">My Farm</div>
+      <div class="user-pill glass-panel">
+        <div class="user-avatar" id="sidebar-avatar">F</div>
+        <div class="user-meta">
+          <div class="user-name" id="sidebar-farmer-name">Farmer</div>
+          <div class="user-status"><span class="dot-online"></span> Live Syncing</div>
         </div>
-        <button class="sign-out-trigger" id="btn-sidebar-signout" title="Sign Out">
-          <i class="fa-solid fa-arrow-right-from-bracket"></i>
-        </button>
       </div>
     </div>
   </aside>
 
-  <!-- Hamburger (mobile only) -->
-  <button class="hamburger" id="hamburger" aria-label="Open menu">
-    <i class="fa-solid fa-bars"></i>
-  </button>
-
-  <!-- Sidebar Overlay (mobile) -->
-  <div class="sidebar-overlay" id="sidebar-overlay"></div>
-
   <!-- ═══════════════════════════════════════════════════════
      MAIN CONTENT
   ═══════════════════════════════════════════════════════ -->
-  <main class="main-content" id="main-content">
+  <main class="main-content">
     
-    <!-- TOP HEADER BAR -->
-    <header class="top-header">
-      <div class="header-left">
-        <h1 class="header-title">Dashboard Overview</h1>
-        <span class="header-subtitle">डैशबोर्ड अवलोकन</span>
+    <!-- Top Header -->
+    <header class="top-bar">
+      <div class="search-glass">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" placeholder="Search telemetry data...">
       </div>
-
-      <div class="header-right">
-        <!-- Date-Time Widget -->
-        <div class="datetime-widget">
-          <i class="fa-solid fa-clock"></i>
-          <span id="header-datetime">Friday, 8 May 2026 · 10:30 AM</span>
-        </div>
-
-        <!-- Notification Bell -->
-        <button class="icon-btn-rounded" id="header-notif-btn" title="View Alerts">
-          <i class="fa-solid fa-bell"></i>
-          <div class="notif-dot" id="header-notif-dot" style="display:none;"></div>
-        </button>
-
-        <!-- Profile Dropdown Container -->
-        <div class="profile-dropdown-container">
-          <button class="avatar-dropdown-btn" id="header-avatar-btn">
-            <div class="farmer-avatar" id="header-avatar">F</div>
-          </button>
-          <div class="dropdown-card" id="header-dropdown-menu">
-            <div class="dropdown-item" onclick="window.location.href='profile.html'">
-              <i class="fa-solid fa-user-circle"></i>
-              <span>My Profile / प्रोफ़ाइल</span>
-            </div>
-            <div class="dropdown-item">
-              <i class="fa-solid fa-gear"></i>
-              <span>Settings / सेटिंग्स</span>
-            </div>
-            <div class="dropdown-divider"></div>
-            <div class="dropdown-item" id="btn-header-signout">
-              <i class="fa-solid fa-right-from-bracket"></i>
-              <span>Sign Out / साइन आउट</span>
-            </div>
-          </div>
-        </div>
+      <div class="header-actions">
+        <div class="time-widget glass-panel" id="header-datetime">20:45 · Friday, May 8</div>
+        <button class="notif-btn glass-panel"><i class="fa-solid fa-bell"></i><span class="pulse-dot"></span></button>
+        <button class="logout-btn glass-panel" id="btn-header-signout"><i class="fa-solid fa-power-off"></i></button>
       </div>
     </header>
 
-    <div class="content-area">
+    <div class="content-wrapper">
       
-      <!-- ── CONTENT BLOCK 1: WELCOME BANNER ── -->
-      <div class="welcome-banner" id="welcome-banner">
-        <div class="banner-left">
-          <h2 class="banner-greeting" id="banner-greeting">Good Morning, Farmer 🌅</h2>
-          <div class="banner-farm-info" id="banner-farm-info">My Farm · Rampur, Rajasthan</div>
-          <div class="banner-date" id="banner-date">Friday, 8 May 2026 / शुक्रवार, ८ मई २०२६</div>
+      <!-- HERO: WELCOME & BIO-SCORE -->
+      <section class="hero-section">
+        <div class="welcome-card glass-panel">
+          <div class="welcome-content">
+            <h1 id="banner-greeting">Greetings, Commander 🖖</h1>
+            <p id="banner-farm-info">Monitoring active protocols at Rampur Sector-7</p>
+            <div class="hero-stats">
+              <div class="stat-pill">
+                <span class="label">Uptime</span>
+                <span class="value">99.8%</span>
+              </div>
+              <div class="stat-pill">
+                <span class="label">Network</span>
+                <span class="value">Active</span>
+              </div>
+            </div>
+          </div>
+          <div class="hero-graphic">
+            <img src="cyber_cow_asset_1778182254292.png" alt="Cyber Cow" style="width: 180px; filter: drop-shadow(0 0 20px var(--accent-primary));">
+          </div>
         </div>
-        <div class="banner-right">
-          <div class="banner-illustration">
-            <!-- Simple line-art cow + sun rays -->
-            <svg width="120" height="80" viewBox="0 0 120 80" fill="none">
-              <path d="M10 70H110" stroke="var(--border)" stroke-width="2"/>
-              <path d="M40 70V50C40 45 45 40 50 40H70C75 40 80 45 80 50V70" stroke="var(--accent-green)" stroke-width="2"/>
-              <circle cx="100" cy="20" r="10" stroke="var(--accent-amber)" stroke-width="2"/>
-              <path d="M100 5V10M115 20H110M100 35V30M85 20H90" stroke="var(--accent-amber)" stroke-width="2"/>
+
+        <div class="bio-score-card glass-panel">
+          <div class="gauge-wrap">
+            <svg viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="45" class="gauge-bg"></circle>
+              <circle cx="50" cy="50" r="45" class="gauge-fill" id="bio-gauge-path"></circle>
             </svg>
+            <div class="gauge-text">
+              <span class="val" id="bio-score-val">84</span>
+              <span class="lab">Health Index</span>
+            </div>
           </div>
+          <div class="gauge-status">
+            <h3>Optimal State</h3>
+            <p>Your herd is performing within the top 5% of efficiency metrics.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- KPI GRID -->
+      <div class="kpi-glass-grid">
+        <div class="kpi-panel glass-panel" style="--accent: var(--accent-primary)">
+          <div class="kpi-head">
+            <i class="fa-solid fa-cow"></i>
+            <span>Population</span>
+          </div>
+          <div class="kpi-body">
+            <span class="val" id="kpi-total-animals">12</span>
+            <span class="trend pos">↑ 2</span>
+          </div>
+          <div class="spark-line-mini"><canvas id="spark-pop"></canvas></div>
+        </div>
+
+        <div class="kpi-panel glass-panel" style="--accent: var(--accent-secondary)">
+          <div class="kpi-head">
+            <i class="fa-solid fa-heart-pulse"></i>
+            <span>Vital Stability</span>
+          </div>
+          <div class="kpi-body">
+            <span class="val" id="kpi-healthy-animals">10</span>
+            <span class="trend">Stable</span>
+          </div>
+          <div class="spark-line-mini"><canvas id="spark-vitals"></canvas></div>
+        </div>
+
+        <div class="kpi-panel glass-panel" style="--accent: var(--accent-warning)">
+          <div class="kpi-head">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>Active Alerts</span>
+          </div>
+          <div class="kpi-body">
+            <span class="val" id="kpi-active-alerts">2</span>
+            <span class="trend neg">↓ 1</span>
+          </div>
+          <div class="spark-line-mini"><canvas id="spark-alerts"></canvas></div>
+        </div>
+
+        <div class="kpi-panel glass-panel" style="--accent: var(--accent-danger)">
+          <div class="kpi-head">
+            <i class="fa-solid fa-shield-virus"></i>
+            <span>Critical Risks</span>
+          </div>
+          <div class="kpi-body">
+            <span class="val" id="kpi-critical-cases">0</span>
+            <span class="trend pos">All Clear</span>
+          </div>
+          <div class="spark-line-mini"><canvas id="spark-risks"></canvas></div>
         </div>
       </div>
 
-      <!-- ── CONTENT BLOCK 2: KPI CARDS ── -->
-      <div class="section-header">
-        <i class="fa-solid fa-circle-info" style="color:var(--accent-green)"></i>
-        <span>Herd At a Glance / झुंड की स्थिति</span>
-      </div>
-      <div class="kpi-grid" id="kpi-grid">
-        <!-- Card 1: Total -->
-        <div class="kpi-card" style="border-top: 3px solid var(--accent-green);">
-          <div class="kpi-top">
-            <div class="kpi-icon-wrap" style="background:rgba(124,181,24,0.12); color:var(--accent-green);">
-              <i class="fa-solid fa-cow"></i>
-            </div>
-            <div class="trend-pill green">12 registered</div>
-          </div>
-          <div class="kpi-value" id="kpi-total-animals">0</div>
-          <div class="kpi-label-group">
-            <div class="en">Total Animals</div>
-            <div class="hi">कुल पशु</div>
-          </div>
-          <i class="fa-solid fa-cow kpi-bg-icon"></i>
-        </div>
-        <!-- Card 2: Healthy -->
-        <div class="kpi-card" style="border-top: 3px solid var(--accent-green);">
-          <div class="kpi-top">
-            <div class="kpi-icon-wrap" style="background:rgba(124,181,24,0.12); color:var(--accent-green);">
-              <i class="fa-solid fa-heart-pulse"></i>
-            </div>
-            <div class="trend-pill green">↑ All good</div>
-          </div>
-          <div class="kpi-value" id="kpi-healthy-animals">0</div>
-          <div class="kpi-label-group">
-            <div class="en">Healthy</div>
-            <div class="hi">स्वस्थ पशु</div>
-          </div>
-          <i class="fa-solid fa-heart-pulse kpi-bg-icon"></i>
-        </div>
-        <!-- Card 3: Alerts -->
-        <div class="kpi-card" id="kpi-alerts-card" style="border-top: 3px solid var(--accent-amber);">
-          <div class="kpi-top">
-            <div class="kpi-icon-wrap" style="background:rgba(229,161,0,0.12); color:var(--accent-amber);">
-              <i class="fa-solid fa-triangle-exclamation"></i>
-            </div>
-            <div class="trend-pill amber">0 active</div>
-          </div>
-          <div class="kpi-value" id="kpi-active-alerts">0</div>
-          <div class="kpi-label-group">
-            <div class="en">Active Alerts</div>
-            <div class="hi">सक्रिय अलर्ट</div>
-          </div>
-          <i class="fa-solid fa-triangle-exclamation kpi-bg-icon"></i>
-        </div>
-        <!-- Card 4: Critical -->
-        <div class="kpi-card" id="kpi-critical-card" style="border-top: 3px solid var(--accent-red);">
-          <div class="kpi-top">
-            <div class="kpi-icon-wrap" style="background:rgba(192,57,43,0.12); color:var(--accent-red);">
-              <i class="fa-solid fa-circle-exclamation"></i>
-            </div>
-            <div class="trend-pill red">Needs attention</div>
-          </div>
-          <div class="kpi-value" id="kpi-critical-cases">0</div>
-          <div class="kpi-label-group">
-            <div class="en">Critical</div>
-            <div class="hi">गंभीर मामले</div>
-          </div>
-          <i class="fa-solid fa-circle-exclamation kpi-bg-icon"></i>
-        </div>
-      </div>
-
-      <!-- ── CONTENT BLOCK 3: ANALYTICS ROW ── -->
-      <div class="analytics-row">
-        <!-- Donut Chart Card -->
-        <div class="analytics-card">
-          <div class="card-header">
-            <i class="fa-solid fa-chart-pie"></i>
-            <span>Herd Composition / झुंड की संरचना</span>
-          </div>
-          <div class="donut-chart-container">
-            <canvas id="herd-donut-chart"></canvas>
-            <div class="donut-center">
-              <div class="total-num" id="donut-total">0</div>
-              <div class="total-label">Total / कुल</div>
-            </div>
-          </div>
-          <div class="donut-legend" id="donut-legend">
-            <!-- Populated by JS -->
+      <!-- MIDDLE ROW: CHARTS & AI -->
+      <div class="flex-row">
+        <div class="chart-card glass-panel col-60">
+          <div class="card-title">Herd Telemetry Trends</div>
+          <div class="chart-box">
+            <canvas id="main-telemetry-chart"></canvas>
           </div>
         </div>
 
-        <!-- Health Status Breakdown Bar Card -->
-        <div class="analytics-card">
-          <div class="card-header">
-            <i class="fa-solid fa-chart-bar"></i>
-            <span>Health Overview / स्वास्थ्य अवलोकन</span>
-          </div>
-          <div class="health-bars-container">
-            <!-- Healthy Row -->
-            <div class="health-bar-row">
-              <div class="row-info">
-                <span class="dot green"></span>
-                <span>Healthy / स्वस्थ</span>
-              </div>
-              <div class="progress-wrap">
-                <div class="progress-fill green" id="bar-healthy" style="width: 0%"></div>
-              </div>
-              <div class="row-stats" id="stat-healthy">0 (0%)</div>
+        <div class="ai-card glass-panel col-40">
+          <div class="card-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Vision-AI Summary</div>
+          <div class="ai-box">
+            <div class="ai-loading" id="ai-loading" style="display:none;">
+              <div class="scan-line"></div>
+              <span>Decrypting vitals...</span>
             </div>
-            <!-- Warning Row -->
-            <div class="health-bar-row">
-              <div class="row-info">
-                <span class="dot amber"></span>
-                <span>Warning / चेतावनी</span>
-              </div>
-              <div class="progress-wrap">
-                <div class="progress-fill amber" id="bar-warning" style="width: 0%"></div>
-              </div>
-              <div class="row-stats" id="stat-warning">0 (0%)</div>
+            <div class="ai-content" id="ai-content">
+              Select a subject for real-time neural analysis.
             </div>
-            <!-- Critical Row -->
-            <div class="health-bar-row">
-              <div class="row-info">
-                <span class="dot red"></span>
-                <span>Critical / गंभीर</span>
-              </div>
-              <div class="progress-wrap">
-                <div class="progress-fill red" id="bar-critical" style="width: 0%"></div>
-              </div>
-              <div class="row-stats" id="stat-critical">0 (0%)</div>
-            </div>
-          </div>
-          <div class="last-updated-note">
-            <i class="fa-solid fa-clock"></i>
-            <span>Last updated: <span id="sync-status">just now</span></span>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── CONTENT BLOCK 4: HERD GRID ── -->
-      <div class="section-header-flex">
-        <div class="section-header">
-          <i class="fa-solid fa-paw" style="color:var(--accent-green)"></i>
-          <span>My Herd / मेरा झुंड</span>
-        </div>
-        <div class="filter-pills" id="herd-filters">
-          <button class="pill active" data-filter="All">All</button>
-          <button class="pill" data-filter="Cow">Cows</button>
-          <button class="pill" data-filter="Buffalo">Buffaloes</button>
-          <button class="pill" data-filter="Goat">Goats</button>
-          <a href="herd.html" class="view-all-link">View All →</a>
-        </div>
-      </div>
-      <div class="herd-grid" id="herd-grid">
-        <!-- Skeletons while loading -->
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-      </div>
-
-      <!-- ── CONTENT BLOCK 5: ALERTS & AI ROW ── -->
-      <div class="split-row">
-        <!-- Recent Alerts Feed -->
-        <div class="content-card col-60">
-          <div class="card-header-flex">
-            <div class="card-header">
-              <i class="fa-solid fa-bell" style="color:var(--accent-amber)"></i>
-              <span>Recent Alerts / हालिया अलर्ट</span>
-            </div>
-            <a href="alerts.html" class="view-all-link">View All →</a>
-          </div>
-          <div class="alerts-feed" id="alerts-feed">
-            <!-- Populated by JS -->
-            <div class="feed-empty">
-              <i class="fa-solid fa-check-circle"></i>
-              <p>All Clear! / सब ठीक है!</p>
-              <span>No active alerts right now.</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- AI Quick Analysis -->
-        <div class="content-card col-40">
-          <div class="card-header">
-            <i class="fa-solid fa-brain" style="color:var(--accent-green)"></i>
-            <span>AI Health Summary / स्वास्थ्य सारांश</span>
-            <span class="beta-pill">Gemini AI</span>
-          </div>
-          <div class="ai-analysis-box">
-            <p class="ai-instruction">Select an animal for a deep vital analysis.</p>
-            <select id="ai-animal-select" class="styled-select">
-              <option value="">Select Animal...</option>
+            <select id="ai-animal-select" class="cyber-select">
+              <option value="">Choose Animal...</option>
             </select>
-            <button class="btn-ai-analyse" id="btn-ai-analyse">
-              <i class="fa-solid fa-wand-magic-sparkles"></i> Analyse / विश्लेषण करें
-            </button>
-            
-            <div class="ai-result-area" id="ai-result-area" style="display:none;">
-              <div class="ai-loading">
-                <div class="typing-dots"><span></span><span></span><span></span></div>
-                <span>Analysing... / विश्लेषण हो रहा है...</span>
-              </div>
-              <div class="ai-content" id="ai-content"></div>
-              <div class="ai-footer">
-                <div class="ai-confidence">
-                  <span>Confidence:</span>
-                  <div class="conf-bar"><div class="conf-fill" style="width:94%"></div></div>
-                  <span>94%</span>
-                </div>
-                <div class="ai-powered">
-                  <i class="fa-solid fa-sparkles"></i> Powered by Gemini AI
-                </div>
-              </div>
-            </div>
-
-            <!-- API Key Prompt (hidden by default) -->
-            <div id="ai-key-prompt" style="display:none; margin-top:15px; border-top:1px solid var(--border); padding-top:15px;">
-              <p style="font-size:11px; color:var(--text-muted);">Enter Gemini API Key to enable AI analysis:</p>
-              <div style="display:flex; gap:8px; margin-top:5px;">
-                <input type="password" id="gemini-api-key" class="styled-input" style="flex:1;" placeholder="Paste API Key here...">
-                <button class="btn-small" id="btn-save-ai-key">Save</button>
-              </div>
-            </div>
+            <button class="cyber-btn" id="btn-ai-analyse">RUN NEURAL SCAN</button>
           </div>
         </div>
       </div>
 
-      <!-- ── CONTENT BLOCK 6: VITALS SPARKLINES ── -->
-      <div class="section-header-flex" style="margin-top:20px;">
-        <div class="section-header">
-          <i class="fa-solid fa-wave-square" style="color:var(--accent-green)"></i>
-          <span>Live Vitals Snapshot / लाइव वाइटल्स</span>
-        </div>
-        <a href="herd.html" class="view-all-link">Full Monitor →</a>
-      </div>
-      <div class="sparkline-row">
-        <!-- Temp Sparkline -->
-        <div class="spark-card">
-          <div class="spark-header">
-            <i class="fa-solid fa-thermometer-half" style="color:var(--accent-amber)"></i>
-            <span>Avg Temperature / औसत तापमान</span>
-          </div>
-          <div class="spark-body">
-            <div class="spark-val" id="avg-temp-val">38.7°C</div>
-            <div class="spark-trend amber">↑ 0.2° from last hour</div>
-          </div>
-          <div class="spark-chart-wrap">
-            <canvas id="spark-temp-chart"></canvas>
-          </div>
-        </div>
-        <!-- HR Sparkline -->
-        <div class="spark-card">
-          <div class="spark-header">
-            <i class="fa-solid fa-heart-pulse" style="color:var(--accent-red)"></i>
-            <span>Avg Heart Rate / औसत हृदय गति</span>
-          </div>
-          <div class="spark-body">
-            <div class="spark-val" id="avg-hr-val">72 bpm</div>
-            <div class="spark-trend green">→ Stable</div>
-          </div>
-          <div class="spark-chart-wrap">
-            <canvas id="spark-hr-chart"></canvas>
-          </div>
-        </div>
-        <!-- Activity Sparkline -->
-        <div class="spark-card">
-          <div class="spark-header">
-            <i class="fa-solid fa-person-running" style="color:var(--accent-blue)"></i>
-            <span>Herd Activity / झुंड गतिविधि</span>
-          </div>
-          <div class="spark-body">
-            <div class="spark-val" id="avg-activity-val">Normal</div>
-            <div class="activity-bars">
-              <div class="act-bar-mini"><div class="fill" style="width:10%; background:#706860;"></div></div>
-              <div class="act-bar-mini"><div class="fill" style="width:75%; background:var(--accent-green);"></div></div>
-              <div class="act-bar-mini"><div class="fill" style="width:15%; background:var(--accent-blue);"></div></div>
-            </div>
-          </div>
-          <div class="spark-chart-wrap">
-            <canvas id="spark-act-chart"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── CONTENT BLOCK 7: CAMERA & ACTIONS ── -->
-      <div class="split-row">
-        <!-- Camera Last Capture -->
-        <div class="content-card col-50">
-          <div class="card-header-flex">
-            <div class="card-header">
-              <i class="fa-solid fa-camera"></i>
-              <span>Last Camera Capture / अंतिम छवि</span>
-            </div>
-            <a href="camera.html" class="view-all-link">Open Camera →</a>
-          </div>
-          <div class="camera-preview-box" id="camera-preview-box">
-            <div class="camera-placeholder">
-              <i class="fa-solid fa-camera"></i>
-              <p>No captures yet / अभी तक कोई छवि नहीं</p>
-            </div>
-          </div>
-          <div class="camera-meta-chips" id="camera-meta" style="display:none;">
-            <span class="meta-chip">🐄 4 Animals Detected</span>
-            <span class="meta-chip">Score: 8/10</span>
-            <span class="meta-chip" id="cam-time">10:15 AM</span>
-          </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="content-card col-50">
-          <div class="card-header">
-            <i class="fa-solid fa-bolt" style="color:var(--accent-amber)"></i>
-            <span>Quick Actions / त्वरित क्रियाएं</span>
-          </div>
-          <div class="quick-actions-grid">
-            <div class="action-btn" onclick="window.location.href='herd.html'">
-              <div class="action-icon" style="color:var(--accent-green);"><i class="fa-solid fa-plus"></i></div>
-              <div class="action-label">Add Animal</div>
-              <div class="action-hi">पशु जोड़ें</div>
-            </div>
-            <div class="action-btn" onclick="window.location.href='alerts.html'">
-              <div class="action-icon" style="color:var(--accent-amber);"><i class="fa-solid fa-bell-slash"></i></div>
-              <div class="action-label">View Alerts</div>
-              <div class="action-hi">अलर्ट देखें</div>
-            </div>
-            <div class="action-btn" onclick="window.location.href='camera.html'">
-              <div class="action-icon" style="color:var(--accent-blue);"><i class="fa-solid fa-camera"></i></div>
-              <div class="action-label">Camera Feed</div>
-              <div class="action-hi">कैमरा</div>
-            </div>
-            <div class="action-btn" onclick="window.location.href='uploads.html'">
-              <div class="action-icon" style="color:var(--text-muted);"><i class="fa-solid fa-upload"></i></div>
-              <div class="action-label">Upload Logs</div>
-              <div class="action-hi">लॉग अपलोड</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── CONTENT BLOCK 8: ALERT TICKER ── -->
-      <div class="alert-ticker-strip">
-        <div class="ticker-label">
-          <span class="live-dot"></span>
-          <span>LIVE / लाइव</span>
-        </div>
-        <div class="ticker-content-wrap">
-          <div class="ticker-track" id="ticker-track">
+      <!-- BOTTOM ROW: RECENT HERD & ALERTS -->
+      <div class="flex-row">
+        <div class="list-card glass-panel col-50">
+          <div class="card-title">Live Herd Stream</div>
+          <div class="herd-stream" id="herd-grid">
             <!-- Populated by JS -->
-            <span class="ticker-item">✅ All systems normal / सब ठीक है</span>
+          </div>
+        </div>
+
+        <div class="list-card glass-panel col-50">
+          <div class="card-title">Security Feed</div>
+          <div class="alert-feed" id="alerts-feed">
+            <!-- Populated by JS -->
           </div>
         </div>
       </div>
 
-    </div><!-- /.content-area -->
+    </div>
   </main>
 
-  <!-- ═══════════════════════════════════════════════════════
-     MOBILE BOTTOM NAVIGATION
-  ═══════════════════════════════════════════════════════ -->
-  <nav class="mobile-nav">
-    <a href="dashboard.html" class="nav-tab active">
-      <i class="fa-solid fa-house"></i>
-      <span>Home</span>
-    </a>
-    <a href="herd.html" class="nav-tab">
-      <i class="fa-solid fa-cow"></i>
-      <span>Herd</span>
-    </a>
-    <a href="alerts.html" class="nav-tab">
-      <i class="fa-solid fa-bell"></i>
-      <span id="mobile-notif-badge" class="notif-badge" style="display:none;"></span>
-      <span>Alerts</span>
-    </a>
-    <a href="camera.html" class="nav-tab">
-      <i class="fa-solid fa-camera"></i>
-      <span>Camera</span>
-    </a>
-    <a href="profile.html" class="nav-tab">
-      <i class="fa-solid fa-user"></i>
-      <span>Profile</span>
-    </a>
-  </nav>
-
-  <!-- ═══════════════════════════════════════════════════════
-     ANIMAL DETAIL MODAL
-  ═══════════════════════════════════════════════════════ -->
-  <div class="modal-overlay" id="animal-modal">
-    <div class="modal-box">
-      <div class="modal-header">
-        <div class="modal-header-left">
-          <div class="modal-emoji" id="modal-emoji">🐄</div>
-          <div class="modal-title-group">
-            <h2 id="modal-title">Animal Details</h2>
-            <p id="modal-subtitle">Holstein Cow · 4 Years</p>
-          </div>
-        </div>
-        <button class="modal-close" id="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="modal-body">
-        <!-- Vitals Grid -->
-        <div class="modal-vitals-row">
-          <div class="m-vital-card">
-            <div class="val" id="m-temp">38.5°C</div>
-            <div class="lab">Temp / तापमान</div>
-          </div>
-          <div class="m-vital-card">
-            <div class="val" id="m-hr">72 bpm</div>
-            <div class="lab">Heart Rate / हृदय गति</div>
-          </div>
-          <div class="m-vital-card">
-            <div class="val" id="m-act">Normal</div>
-            <div class="lab">Activity / गतिविधि</div>
-          </div>
-        </div>
-        <!-- Chart -->
-        <div class="modal-section-title">
-          <i class="fa-solid fa-chart-line"></i> 7-Day History / 7 दिन का इतिहास
-        </div>
-        <div class="modal-chart-area">
-          <canvas id="modal-history-chart"></canvas>
-        </div>
-        <!-- Details -->
-        <div class="modal-details-grid">
-          <div class="detail-item">
-            <span class="label">Breed / नस्ल</span>
-            <span class="value" id="m-breed">Holstein</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Age / उम्र</span>
-            <span class="value" id="m-age">4 Years</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Tag ID / टैग</span>
-            <span class="value" id="m-tag">TAG-001</span>
-          </div>
-        </div>
-      </div>
+  <!-- Alert Ticker -->
+  <div class="cyber-ticker glass-panel">
+    <div class="ticker-label">LIVE STATUS</div>
+    <div class="ticker-content" id="ticker-track">
+      <span>SYSTEM OPERATIONAL</span>
+      <span>|</span>
+      <span>SYNCING SAT-LINK 4</span>
+      <span>|</span>
+      <span>TEMPERATURE STABLE</span>
     </div>
   </div>
-
-  <!-- ═══════════════════════════════════════════════════════
-     MODALS: TOASTS & LOADING
-  ═══════════════════════════════════════════════════════ -->
-  <div id="toast" class="toast-popup"></div>
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

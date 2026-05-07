@@ -7,48 +7,37 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-/* ── Obsidian Design Tokens ───────────────────────────────── */
+/* ── Cyber-Agri Premium Tokens ────────────────────────────── */
 :root {
-  --bg-primary:       #1A1A0F;
-  --bg-card:          #2C2C1A;
-  --bg-deep:          #0D0D08;
-  --bg-sidebar:       #0D0D08; 
-  --bg-input:         #1A1A0F; 
-
-  --accent-green:     #7CB518; 
-  --accent-amber:     #E5A100; 
-  --accent-red:       #C0392B; 
-  --accent-blue:      #2980B9; 
-
-  --text-primary:     #F0EAD6; 
-  --text-muted:       #A89F8C;
-  --text-dim:         #706860;
-
-  --border:           #3D3D28;
-  --border-hover:     rgba(124, 181, 24, 0.3);
-
-  --glow-green:       rgba(124, 181, 24, 0.15);
-  --glow-amber:       rgba(229, 161, 0, 0.15);
-  --glow-red:         rgba(192, 57, 43, 0.2);
-
-  /* Sidebar */
-  --sidebar-width:         260px;
-  --sidebar-collapsed:     0px;
-
-  /* Typography */
-  --font-heading: 'Inter', sans-serif;
-  --font-body:    'Inter', sans-serif;
-
-  /* Spacing */
-  --radius-sm:   8px;
-  --radius-md:   16px;
-  --radius-lg:   24px;
-  --radius-xl:   32px;
-
-  /* Transitions */
-  --transition-fast:   0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow:   0.6s cubic-bezier(0.7, 0, 0.3, 1);
+  --bg-dark:          #020406;
+  --bg-surface:       rgba(15, 22, 36, 0.4);
+  --bg-glass:         rgba(255, 255, 255, 0.03);
+  --bg-glass-heavy:   rgba(10, 15, 25, 0.8);
+  
+  --accent-primary:   #00FF88; /* Cyber Green */
+  --accent-secondary: #00D1FF; /* Electric Blue */
+  --accent-warning:   #FFB800; /* Neon Amber */
+  --accent-danger:    #FF4B4B; /* Pulse Red */
+  
+  --text-primary:     #FFFFFF;
+  --text-secondary:   #B0B8C4;
+  --text-muted:       #64748B;
+  
+  --border-glass:     rgba(255, 255, 255, 0.08);
+  --border-accent:    rgba(0, 255, 136, 0.2);
+  
+  --shadow-neon:      0 0 20px rgba(0, 255, 136, 0.15);
+  --shadow-blue:      0 0 20px rgba(0, 209, 255, 0.15);
+  
+  --glass-blur:       12px;
+  --radius-xl:        24px;
+  --radius-lg:        16px;
+  --radius-md:        12px;
+  
+  --font-main:        'Outfit', 'Inter', sans-serif;
+  
+  --sidebar-width:    280px;
+  --transition-smooth: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 
   /* Z-indexes */
   --z-sidebar:   100;
