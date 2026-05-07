@@ -3,423 +3,107 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>KisanTrack | AI-Powered Herd Intelligence</title>
+  <title>KisanTrack | Secure Access</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link rel="stylesheet" href="css/auth.css" />
 </head>
 <body>
 
-  <div class="auth-container">
-    
-    <!-- LEFT PANEL: Brand Side -->
-    <div class="brand-side">
-      <div class="mesh-bg"></div>
-      
-      <div class="logo-box">
-        <div class="logo">Kisan<span>Track</span></div>
-        <div class="tagline">AI-Powered Herd Intelligence</div>
-      </div>
-
-      <div class="brand-content">
-        <!-- Minimal Cow SVG with Data Lines -->
-        <svg class="cow-svg" viewBox="0 0 500 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Cow Outline -->
-          <path d="M120 200 C120 120, 380 120, 380 200 L380 300 C380 320, 360 340, 340 340 L160 340 C140 340, 120 320, 120 300 Z" stroke="#4A7C59" stroke-width="2" />
-          <path d="M380 180 C420 180, 450 200, 450 240 L450 260 C450 280, 430 280, 420 260" stroke="#4A7C59" stroke-width="2" />
-          <!-- Circuit/Data Lines -->
-          <path class="data-line" d="M150 150 L200 150 L220 180 L300 180" stroke="#C8843A" stroke-width="1.5" stroke-dasharray="5 5" />
-          <path class="data-line" d="M350 250 L300 250 L280 220 L200 220" stroke="#4A7C59" stroke-width="1.5" />
-          <circle cx="150" cy="150" r="4" fill="#C8843A" />
-          <circle cx="300" cy="180" r="4" fill="#4A7C59" />
-          <circle cx="350" cy="250" r="4" fill="#C8843A" />
-        </svg>
-
-        <div class="stat-chip chip-1">🐄 12,400+ Cattle Monitored</div>
-        <div class="stat-chip chip-2">📊 98.2% Health Prediction Accuracy</div>
-        <div class="stat-chip chip-3">⚡ Real-time IoT Alerts</div>
-      </div>
-    </div>
-
-    <!-- RIGHT PANEL: Form Side -->
-    <div class="form-side">
-      <!-- Mobile Logo -->
-      <div class="logo-box mobile" style="display: none;">
-        <div class="logo">Kisan<span>Track</span></div>
-      </div>
-
-      <div class="auth-card">
-        <div class="auth-header-text">
-          <h2 id="header-title">Welcome Back</h2>
-          <p id="header-subtitle">Monitor your herd with AI precision</p>
-        </div>
-
-        <div class="tab-switcher">
-          <div class="tab-item active" id="tab-login">Login</div>
-          <div class="tab-item" id="tab-signup">Sign Up</div>
-          <div class="tab-pill" id="tab-pill"></div>
-        </div>
-
-        <div class="form-container">
-          
-          <!-- LOGIN FORM -->
-          <form id="login-form" class="auth-form active">
-            <div class="field-group">
-              <div class="input-wrapper">
-                <i class="fa-solid fa-envelope"></i>
-                <input type="email" id="login-email" class="input-field" placeholder=" " required />
-                <label class="floating-label">Email Address</label>
-              </div>
-            </div>
-            
-            <div class="field-group">
-              <div class="input-wrapper">
-                <i class="fa-solid fa-lock"></i>
-                <input type="password" id="login-password" class="input-field" placeholder=" " required />
-                <label class="floating-label">Password</label>
-                <button type="button" class="show-hide" id="login-eye">
-                  <i class="fa-solid fa-eye"></i>
-                </button>
-              </div>
-            </div>
-            
-            <a href="#" class="forgot-link" id="btn-forgot-password">Forgot Password?</a>
-            
-            <button type="submit" class="btn-primary" id="btn-login-submit">Login</button>
-            
-            <div class="divider"><span>or</span></div>
-            
-            <button type="button" class="btn-google" id="btn-google-login">
-              <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="18" alt="Google">
-              Continue with Google
-            </button>
-          </form>
-
-          <!-- SIGNUP FORM -->
-          <form id="signup-form" class="auth-form">
-            <div class="field-group">
-              <div class="input-wrapper">
-                <i class="fa-solid fa-user"></i>
-                <input type="text" id="signup-name" class="input-field" placeholder=" " required />
-                <label class="floating-label">Full Name</label>
-              </div>
-            </div>
-
-            <div class="field-group">
-              <div class="input-wrapper">
-                <i class="fa-solid fa-tractor"></i>
-                <input type="text" id="signup-farm" class="input-field" placeholder=" " required />
-                <label class="floating-label">Farm Name</label>
-              </div>
-            </div>
-
-            <div class="field-group">
-              <div class="input-wrapper">
-                <i class="fa-solid fa-envelope"></i>
-                <input type="email" id="signup-email" class="input-field" placeholder=" " required />
-                <label class="floating-label">Email Address</label>
-              </div>
-            </div>
-
-            <div class="field-group">
-              <div class="input-wrapper">
-                <i class="fa-solid fa-lock"></i>
-                <input type="password" id="signup-password" class="input-field" placeholder=" " required />
-                <label class="floating-label">Create Password</label>
-                <button type="button" class="show-hide" id="signup-eye">
-                  <i class="fa-solid fa-eye"></i>
-                </button>
-              </div>
-            </div>
-
-            <!-- Strength Meter -->
-            <div class="strength-meter" id="strength-meter">
-              <div class="strength-segment"></div>
-              <div class="strength-segment"></div>
-              <div class="strength-segment"></div>
-              <div class="strength-segment"></div>
-            </div>
-
-            <div class="field-group">
-              <div class="input-wrapper">
-                <i class="fa-solid fa-shield-check"></i>
-                <input type="password" id="signup-confirm" class="input-field" placeholder=" " required />
-                <label class="floating-label">Confirm Password</label>
-              </div>
-            </div>
-
-            <div class="checkbox-group">
-              <div class="custom-checkbox" id="terms-check">
-                <i class="fa-solid fa-check"></i>
-              </div>
-              <span>I agree to Terms & Privacy Policy</span>
-            </div>
-
-            <button type="submit" class="btn-primary" id="btn-signup-submit">Create Account</button>
-            
-            <div class="divider"><span>or</span></div>
-            
-            <button type="button" class="btn-google">
-              <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="18" alt="Google">
-              Continue with Google
-            </button>
-          </form>
-
-        </div>
-      </div>
-    </div>
+  <div class="mesh-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
   </div>
 
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-</head>
-<body>
-
-  <div class="auth-container">
-    
-    <!-- LEFT PANEL: Brand Side -->
-    <div class="brand-side">
-      <div class="mesh-bg"></div>
-      
-      <div class="logo-box">
-        <div class="logo">Kisan<span>Track</span></div>
-        <div class="tagline">AI-Powered Herd Intelligence</div>
-      </div>
-
-      <div class="brand-content">
-        <!-- Minimal Cow SVG with Data Lines -->
-        <svg class="cow-svg" viewBox="0 0 500 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Cow Outline -->
-          <path d="M120 200 C120 120, 380 120, 380 200 L380 300 C380 320, 360 340, 340 340 L160 340 C140 340, 120 320, 120 300 Z" stroke="#4A7C59" stroke-width="2" />
-          <path d="M380 180 C420 180, 450 200, 450 240 L450 260 C450 280, 430 280, 420 260" stroke="#4A7C59" stroke-width="2" />
-          <!-- Circuit/Data Lines -->
-          <path class="data-line" d="M150 150 L200 150 L220 180 L300 180" stroke="#C8843A" stroke-width="1.5" stroke-dasharray="5 5" />
-          <path class="data-line" d="M350 250 L300 250 L280 220 L200 220" stroke="#4A7C59" stroke-width="1.5" />
-          <circle cx="150" cy="150" r="4" fill="#C8843A" />
-          <circle cx="300" cy="180" r="4" fill="#4A7C59" />
-          <circle cx="350" cy="250" r="4" fill="#C8843A" />
-        </svg>
-
-        <div class="stat-chip chip-1">🐄 12,400+ Cattle Monitored</div>
-        <div class="stat-chip chip-2">📊 98.2% Health Prediction Accuracy</div>
-        <div class="stat-chip chip-3">⚡ Real-time IoT Alerts</div>
-      </div>
+  <div class="auth-wrapper" id="auth-screen">
+    <div class="auth-header">
+      <div class="logo-emoji">🐄</div>
+      <h1 class="auth-title">Kisan<span>Track</span></h1>
+      <p class="auth-subtitle">AI-Powered Livestock Intelligence</p>
     </div>
 
-    <!-- RIGHT PANEL: Form Side -->
-    <div class="form-side">
-      <!-- Mobile Logo -->
-      <div class="logo-box mobile-logo" style="display: none;">
-        <div class="logo">Kisan<span>Track</span></div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tab-login">Login</div>
+        <div class="auth-tab" id="tab-signup">Sign Up</div>
+        <div class="auth-tab-slider" id="auth-tab-slider"></div>
       </div>
 
-      <div class="auth-card">
-        <div class="auth-header-text">
-          <h2 id="header-title">Welcome Back</h2>
-          <p id="header-subtitle">Monitor your herd with AI precision</p>
-        </div>
+      <div class="auth-forms-wrapper">
+        <!-- Login -->
+        <form id="login-form" class="auth-form active">
+          <div class="auth-field">
+            <i class="fa-solid fa-envelope"></i>
+            <input type="email" id="login-email" class="auth-input" placeholder="Email Address" required />
+          </div>
+          <div class="auth-field">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" id="login-password" class="auth-input" placeholder="Password" required />
+            <button type="button" class="auth-eye-btn" id="login-eye"><i class="fa-solid fa-eye"></i></button>
+          </div>
+          <div class="auth-error-msg" id="login-error"></div>
+          <button type="submit" class="btn-auth-primary" id="btn-login-submit">
+            Access Dashboard <i class="fa-solid fa-chevron-right"></i>
+          </button>
+          <button type="button" class="btn-auth-text" id="btn-forgot-password">Trouble signing in?</button>
+        </form>
 
-        <div class="tab-switcher">
-          <div class="tab-item active" id="tab-login">Login</div>
-          <div class="tab-item" id="tab-signup">Sign Up</div>
-          <div class="tab-pill" id="tab-pill"></div>
-        </div>
-
-        <div class="form-container">
-          
-          <!-- LOGIN FORM -->
-          <form id="login-form" class="auth-form active">
-            <div class="field-group">
-              <div class="input-wrapper">
-                <i class="fa-solid fa-envelope"></i>
-                <input type="email" id="login-email" class="input-field" placeholder=" " required />
-                <label class="floating-label">Email Address</label>
-              </div>
-            </div>
-            
-            <div class="field-group">
-              <div class="input-wrapper">
-                <i class="fa-solid fa-lock"></i>
-                <input type="password" id="login-password" class="input-field" placeholder=" " required />
-                <label class="floating-label">Password</label>
-                <button type="button" class="show-hide" id="login-eye">
-                  <i class="fa-solid fa-eye"></i>
-                </button>
-              </div>
-            </div>
-            
-            <a href="#" class="forgot-link" id="btn-forgot-password">Forgot Password?</a>
-            
-            <button type="submit" class="btn-primary" id="btn-login-submit">Login</button>
-            
-            <div class="divider"><span>or</span></div>
-            
-            <button type="button" class="btn-google" id="btn-google-login">
-              <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="18" alt="Google">
-              Continue with Google
-            </button>
-          </form>
-
-          <!-- SIGNUP FORM -->
-          <form id="signup-form" class="auth-form">
-            <div class="field-group">
-              <div class="input-wrapper">
-                <i class="fa-solid fa-user"></i>
-                <input type="text" id="signup-name" class="input-field" placeholder=" " required />
-                <label class="floating-label">Full Name</label>
-              </div>
-            </div>
-
-            <div class="field-group">
-              <div class="input-wrapper">
-                <i class="fa-solid fa-tractor"></i>
-                <input type="text" id="signup-farm" class="input-field" placeholder=" " required />
-                <label class="floating-label">Farm Name</label>
-              </div>
-            </div>
-
-            <div class="field-group">
-              <div class="input-wrapper">
-                <i class="fa-solid fa-envelope"></i>
-                <input type="email" id="signup-email" class="input-field" placeholder=" " required />
-                <label class="floating-label">Email Address</label>
-              </div>
-            </div>
-
-            <div class="field-group">
-              <div class="input-wrapper">
-                <i class="fa-solid fa-lock"></i>
-                <input type="password" id="signup-password" class="input-field" placeholder=" " required />
-                <label class="floating-label">Create Password</label>
-                <button type="button" class="show-hide" id="signup-eye">
-                  <i class="fa-solid fa-eye"></i>
-                </button>
-              </div>
-            </div>
-
-            <!-- Strength Meter -->
-            <div class="strength-meter" id="strength-meter">
-              <div class="strength-segment"></div>
-              <div class="strength-segment"></div>
-              <div class="strength-segment"></div>
-              <div class="strength-segment"></div>
-            </div>
-
-            <div class="field-group">
-              <div class="input-wrapper">
-                <i class="fa-solid fa-shield-check"></i>
-                <input type="password" id="signup-confirm" class="input-field" placeholder=" " required />
-                <label class="floating-label">Confirm Password</label>
-              </div>
-            </div>
-
-            <div class="checkbox-group">
-              <div class="custom-checkbox" id="terms-check">
-                <i class="fa-solid fa-check"></i>
-              </div>
-              <span>I agree to Terms & Privacy Policy</span>
-            </div>
-
-            <button type="submit" class="btn-primary" id="btn-signup-submit">Create Account</button>
-            
-            <div class="divider"><span>or</span></div>
-            
-            <button type="button" class="btn-google">
-              <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="18" alt="Google">
-              Continue with Google
-            </button>
-          </form>
-
-        </div>
+        <!-- Signup -->
+        <form id="signup-form" class="auth-form">
+          <div class="auth-field">
+            <i class="fa-solid fa-user"></i>
+            <input type="text" id="signup-name" class="auth-input" placeholder="Full Name" required />
+          </div>
+          <div class="auth-field">
+            <i class="fa-solid fa-tractor"></i>
+            <input type="text" id="signup-farm" class="auth-input" placeholder="Farm Name" required />
+          </div>
+          <div class="auth-field">
+            <i class="fa-solid fa-envelope"></i>
+            <input type="email" id="signup-email" class="auth-input" placeholder="Email Address" required />
+          </div>
+          <div class="auth-field">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" id="signup-password" class="auth-input" placeholder="Create Password" required />
+            <button type="button" class="auth-eye-btn" id="signup-eye"><i class="fa-solid fa-eye"></i></button>
+          </div>
+          <div class="auth-field">
+            <i class="fa-solid fa-shield-check"></i>
+            <input type="password" id="signup-confirm" class="auth-input" placeholder="Confirm Password" required />
+            <button type="button" class="auth-eye-btn" id="signup-confirm-eye"><i class="fa-solid fa-eye"></i></button>
+          </div>
+          <div class="auth-error-msg" id="signup-error"></div>
+          <button type="submit" class="btn-auth-primary" id="btn-signup-submit">
+            Create Farm Profile <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </form>
       </div>
+
+      <button type="button" class="btn-auth-google" id="btn-google-login">
+        <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="18" alt="Google">
+        Continue with Google
+      </button>
     </div>
+
+    <a href="index.html" class="back-btn">
+      <i class="fa-solid fa-arrow-left"></i> Return to Landing Page
+    </a>
   </div>
 
-  <!-- Firebase Scripts (Loaded with defer) -->
+  <div class="toast" id="app-toast">
+    <i class="fa-solid fa-circle-check"></i>
+    <span class="toast-msg" id="toast-msg"></span>
+  </div>
+
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  
-  <!-- App Scripts -->
   <script src="js/utils.js"></script>
   <script src="js/firebase-init.js"></script>
   <script src="js/auth.js"></script>
-
-  <script>
-    // Tab Switching Logic
-    const tabLogin = document.getElementById('tab-login');
-    const tabSignup = document.getElementById('tab-signup');
-    const tabPill = document.getElementById('tab-pill');
-    const loginForm = document.getElementById('login-form');
-    const signupForm = document.getElementById('signup-form');
-    const headerTitle = document.getElementById('header-title');
-
-    function switchTo(tab) {
-      if (tab === 'login') {
-        tabLogin.classList.add('active');
-        tabSignup.classList.remove('active');
-        tabPill.style.transform = 'translateX(0)';
-        loginForm.classList.add('active');
-        signupForm.classList.remove('active');
-        headerTitle.textContent = 'Welcome Back';
-      } else {
-        tabSignup.classList.add('active');
-        tabLogin.classList.remove('active');
-        tabPill.style.transform = 'translateX(100%)';
-        signupForm.classList.add('active');
-        loginForm.classList.remove('active');
-        headerTitle.textContent = 'Join KisanTrack';
-      }
-    }
-
-    tabLogin.addEventListener('click', () => switchTo('login'));
-    tabSignup.addEventListener('click', () => switchTo('signup'));
-
-    // Check URL params for initial tab
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('tab') === 'signup') switchTo('signup');
-
-    // Password Strength Meter
-    const passInput = document.getElementById('signup-password');
-    const segments = document.querySelectorAll('.strength-segment');
-
-    passInput.addEventListener('input', () => {
-      const val = passInput.value;
-      let strength = 0;
-      if (val.length > 5) strength++;
-      if (val.match(/[A-Z]/)) strength++;
-      if (val.match(/[0-9]/)) strength++;
-      if (val.match(/[^A-Za-z0-9]/)) strength++;
-
-      segments.forEach((seg, i) => {
-        if (i < strength) {
-          if (strength <= 1) seg.style.background = '#E05C3A';
-          else if (strength <= 2) seg.style.background = '#C8843A';
-          else seg.style.background = '#52B788';
-        } else {
-          seg.style.background = 'rgba(255,255,255,0.1)';
-        }
-      });
-    });
-
-    // Custom Checkbox
-    const termsCheck = document.getElementById('terms-check');
-    termsCheck.addEventListener('click', () => {
-      termsCheck.classList.toggle('checked');
-    });
-
-    // Password Visibility Toggle (for signup, since auth.js handles login)
-    const signupEye = document.getElementById('signup-eye');
-    const signupPass = document.getElementById('signup-password');
-    signupEye.addEventListener('click', () => {
-      const type = signupPass.type === 'password' ? 'text' : 'password';
-      signupPass.type = type;
-      signupEye.querySelector('i').classList.toggle('fa-eye');
-      signupEye.querySelector('i').classList.toggle('fa-eye-slash');
-    });
-  </script>
 </body>
 </html>
