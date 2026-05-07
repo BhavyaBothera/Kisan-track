@@ -9,25 +9,7 @@
 const VitalsModule = (function () {
   'use strict';
 
-  // --- State ---
-  let selectedAnimalId  = null;
-  let chartTemp         = null;
-  let chartHR           = null;
-  let chartActivity     = null;
-  let liveInterval      = null;
-  let liveReadings      = {
-    labels: [],
-    temp: [],
-    hr: [],
-    activity: [],
-  };
-  const MAX_READINGS    = 20;
-  const CIRCUMFERENCE   = 2 * Math.PI * 40;
-
-  // --- State Reference ---
-  function getState() {
-    return window.FirestoreStore ? window.FirestoreStore.getState() : null;
-  }
+  let vitalsUnsubscribe = null;
 
   // ── Populate selector ─────────────────────────────────────
   function populateSelector() {
@@ -48,84 +30,36 @@ const VitalsModule = (function () {
     }
   }
 
-  // --- Simulation: Generate Alert ---
-  async function generateSimulatedReading() {
-    const state = getState();
-    if (!state || state.animals.length === 0) return;
+  // ── Fetch Last 20 Vitals (Real-time) ───────────────────────
+  function setupVitalsListener() {
+    if (vitalsUnsubscribe) {
+      vitalsUnsubscribe();
+      vitalsUnsubscribe = null;
+    }
 
-    // Pick a random animal to simulate a vital update
-    const idx = Math.floor(Math.random() * state.animals.length);
-    const animal = state.animals[idx];
-
-    const temp = +(38.5 + (Math.random() * 2.5)).toFixed(1);
-    const hr = Math.round(70 + (Math.random() - 0.5) * 15);
-    const act = Math.round(50 + (Math.random() - 0.5) * 30);
+    if (!selectedAnimalId || !auth.currentUser) return;
     
-    try {
-      // 1. Log the vital reading
-      await db.collection('vitals').add({
-        farmerId: auth.currentUser.uid,
-        animalId: animal.id, // Document ID
-        sensorTagId: animal.tagId,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        bodyTempCelsius: temp,
-        heartRateBpm: hr,
-        activityScore: act,
-        healthStatus: temp > 39.5 ? 'Warning' : 'Healthy'
+    vitalsUnsubscribe = db.collection('vitals')
+      .where('farmerId', '==', auth.currentUser.uid)
+      .where('animalId', '==', selectedAnimalId)
+      .orderBy('timestamp', 'desc')
+      .limit(MAX_READINGS)
+      .onSnapshot((snapshot) => {
+        const readings = snapshot.docs.map(doc => doc.data()).reverse();
+        
+        liveReadings = {
+          labels: readings.map(r => r.timestamp ? formatTime(r.timestamp.toDate()) : '--:--'),
+          temp: readings.map(r => r.bodyTempCelsius),
+          hr: readings.map(r => r.heartRateBpm),
+          activity: readings.map(r => r.activityScore)
+        };
+
+        updateCharts();
+        updateGauges();
+        updateAISummary();
+      }, (err) => {
+        console.error('Error fetching real-time vitals:', err);
       });
-
-      // 2. Threshold check for alert
-      if (temp > 39.5) {
-        await db.collection('alerts').add({
-          farmerId: auth.currentUser.uid,
-          animalId: animal.animalId, // Display ID (e.g. A01)
-          parameter: 'Body Temperature',
-          readingValue: temp + '°C',
-          alertType: 'High Temperature',
-          severity: temp > 40.5 ? 'Critical' : 'Warning',
-          confidenceScore: 85 + Math.floor(Math.random() * 10),
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-          resolved: false,
-          source: 'Sensor'
-        });
-        showToast('⚠ Threshold breach detected! Alert generated.', 'error');
-      }
-
-      // If this was for the selected animal, refresh charts
-      if (animal.id === selectedAnimalId) {
-        fetchHistoricalVitals();
-      }
-    } catch (err) {
-      console.error('Simulation error:', err);
-    }
-  }
-
-  // ── Fetch Last 20 Vitals ──────────────────────────────────
-  async function fetchHistoricalVitals() {
-    if (!selectedAnimalId) return;
-    
-    try {
-      const snapshot = await db.collection('vitals')
-        .where('farmerId', '==', auth.currentUser.uid)
-        .where('animalId', '==', selectedAnimalId)
-        .orderBy('timestamp', 'desc')
-        .limit(MAX_READINGS)
-        .get();
-
-      const readings = snapshot.docs.map(doc => doc.data()).reverse();
-      
-      liveReadings = {
-        labels: readings.map(r => formatTime(r.timestamp.toDate())),
-        temp: readings.map(r => r.bodyTempCelsius),
-        hr: readings.map(r => r.heartRateBpm),
-        activity: readings.map(r => r.activityScore)
-      };
-
-      updateCharts();
-      updateGauges();
-    } catch (err) {
-      console.error('Error fetching historical vitals:', err);
-    }
   }
 
   // ── Gauge Update ──────────────────────────────────────────
@@ -205,15 +139,32 @@ const VitalsModule = (function () {
 
   // ── AI Summary ────────────────────────────────────────────
   function updateAISummary() {
-    const animal = getState().animals.find(a => a.id === selectedAnimalId);
+    const state = getState();
+    if (!state) return;
+    const animal = state.animals.find(a => a.id === selectedAnimalId);
     if (!animal) return;
-    document.getElementById('ai-summary-text').textContent = "Real-time AI monitoring active. Vitals are steady for " + animal.animalId + ".";
-    document.getElementById('confidence-pct').textContent = '95%';
-    document.getElementById('confidence-fill').style.width = '95%';
+    
+    const latestTemp = liveReadings.temp.length ? liveReadings.temp[liveReadings.temp.length - 1] : null;
+    let summaryText = "Select an animal to view health summary.";
+    
+    if (latestTemp) {
+      const isStable = latestTemp >= 38.0 && latestTemp <= 39.5;
+      summaryText = `AI analysis active for #${animal.animalId}. Vitals are ${isStable ? 'stable' : 'deviating from normal'}. Last recorded temperature: ${latestTemp}°C.`;
+    }
+
+    const summaryEl = document.getElementById('ai-summary-text');
+    if (summaryEl) summaryEl.textContent = summaryText;
+    
+    const confPctEl = document.getElementById('confidence-pct');
+    if (confPctEl) confPctEl.textContent = '98%';
+    
+    const confFillEl = document.getElementById('confidence-fill');
+    if (confFillEl) confFillEl.style.width = '98%';
   }
 
   // ── Utils ─────────────────────────────────────────────────
   function formatTime(date) {
+    if (!date) return '--:--';
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
@@ -223,7 +174,7 @@ const VitalsModule = (function () {
     if (select) {
       select.addEventListener('change', () => {
         selectedAnimalId = select.value;
-        fetchHistoricalVitals();
+        setupVitalsListener();
         updateAISummary();
       });
     }
@@ -232,26 +183,27 @@ const VitalsModule = (function () {
     createCharts();
     
     if (auth.currentUser) {
-      fetchHistoricalVitals();
+      setupVitalsListener();
     } else {
       const unsubscribe = auth.onAuthStateChanged(user => {
         if (user) {
-          fetchHistoricalVitals();
+          setupVitalsListener();
           unsubscribe();
         }
       });
     }
     
-    if (liveInterval) clearInterval(liveInterval);
-    liveInterval = setInterval(generateSimulatedReading, 30000); // Generate every 30s for demo
-
     document.addEventListener('kisanTrack:stateUpdated', () => {
       populateSelector();
+      // If we don't have a listener yet and now we have a selected ID, start it
+      if (!vitalsUnsubscribe && selectedAnimalId) {
+        setupVitalsListener();
+      }
     });
   }
 
   function onActivate() {
-    fetchHistoricalVitals();
+    setupVitalsListener();
     updateAISummary();
   }
 
