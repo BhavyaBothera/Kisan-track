@@ -276,6 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (error.code !== 'auth/popup-closed-by-user') {
         showError(loginForm.classList.contains('active') ? 'login' : 'signup', getFriendlyErrorMessage(error));
       }
+    }
     });
   }
 
