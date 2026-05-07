@@ -5,23 +5,7 @@
  * ============================================================
  */
 
-// 1. Firebase Configuration (PLACEHOLDER)
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
-
-// Initialize Firebase
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
-
-const auth = firebase.auth();
-const googleProvider = new firebase.auth.GoogleAuthProvider();
+// 1. Firebase Auth Variables (Assuming initialized globally in firebase-init.js)
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -92,8 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   // --- 3. UI Tab Switching Logic ---
-  tabLogin.addEventListener('click', () => switchTab('login'));
-  tabSignup.addEventListener('click', () => switchTab('signup'));
+  if (tabLogin) tabLogin.addEventListener('click', () => switchTab('login'));
+  if (tabSignup) tabSignup.addEventListener('click', () => switchTab('signup'));
 
   function switchTab(tab) {
     if (tab === 'login') {
@@ -118,6 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const toggleVisibility = (inputId, iconId) => {
     const input = document.getElementById(inputId);
     const iconBtn = document.getElementById(iconId);
+    if (!input || !iconBtn) return;
     const icon = iconBtn.querySelector('i');
 
     iconBtn.addEventListener('click', () => {
@@ -194,7 +179,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   // --- 6. Signup Logic ---
-  signupForm.addEventListener('submit', async (e) => {
+  if (signupForm) {
+    signupForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearErrors();
 
@@ -244,10 +230,12 @@ document.addEventListener('DOMContentLoaded', () => {
       setLoadingState('btn-signup-submit', false);
     }
   });
+  }
 
 
   // --- 7. Login Logic ---
-  loginForm.addEventListener('submit', async (e) => {
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearErrors();
 
@@ -277,10 +265,12 @@ document.addEventListener('DOMContentLoaded', () => {
       setLoadingState('btn-login-submit', false);
     }
   });
+  }
 
 
   // --- 8. Google Login Logic ---
-  btnGoogle.addEventListener('click', async () => {
+  if (btnGoogle) {
+    btnGoogle.addEventListener('click', async () => {
     try {
       await auth.signInWithPopup(googleProvider);
       // Success handled by state listener
@@ -288,12 +278,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (error.code !== 'auth/popup-closed-by-user') {
         showError(loginForm.classList.contains('active') ? 'login' : 'signup', getFriendlyErrorMessage(error));
       }
-    }
-  });
+    });
+  }
 
 
   // --- 9. Forgot Password Logic ---
-  btnForgot.addEventListener('click', async () => {
+  if (btnForgot) {
+    btnForgot.addEventListener('click', async () => {
     clearErrors();
     const email = loginEmail.value.trim();
     if (!email || !validateEmail(email)) {
@@ -308,49 +299,56 @@ document.addEventListener('DOMContentLoaded', () => {
       showError('login', getFriendlyErrorMessage(error));
     }
   });
+  }
 
 
   // --- 10. Topbar and Sign Out logic ---
 
   // Handle dropdown toggle
-  profileDropdownBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    profileDropdownMenu.classList.toggle('show');
-  });
+  if (profileDropdownBtn && profileDropdownMenu) {
+    profileDropdownBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      profileDropdownMenu.classList.toggle('show');
+    });
 
-  // Close dropdown when clicking outside
-  document.addEventListener('click', () => {
-    if (profileDropdownMenu.classList.contains('show')) {
-      profileDropdownMenu.classList.remove('show');
-    }
-  });
+    // Close dropdown when clicking outside
+    document.addEventListener('click', () => {
+      if (profileDropdownMenu.classList.contains('show')) {
+        profileDropdownMenu.classList.remove('show');
+      }
+    });
 
-  profileDropdownMenu.addEventListener('click', (e) => {
-    e.stopPropagation(); // prevent closing immediately before action runs
-  });
+    profileDropdownMenu.addEventListener('click', (e) => {
+      e.stopPropagation(); // prevent closing immediately before action runs
+    });
+  }
 
   // Handle Sign Out
-  btnSignOut.addEventListener('click', async () => {
-    profileDropdownMenu.classList.remove('show');
-    try {
-      await auth.signOut();
-      showToast('You have been signed out / आप साइन आउट हो गए');
-      switchTab('login'); // ensure they land back on login tab
-    } catch (error) {
-      console.error('Sign Out Error', error);
-      showToast('Error signing out. Try again.', 'error');
-    }
-  });
+  if (btnSignOut) {
+    btnSignOut.addEventListener('click', async () => {
+      if (profileDropdownMenu) profileDropdownMenu.classList.remove('show');
+      try {
+        await auth.signOut();
+        showToast('You have been signed out / आप साइन आउट हो गए');
+        switchTab('login'); // ensure they land back on login tab
+      } catch (error) {
+        console.error('Sign Out Error', error);
+        showToast('Error signing out. Try again.', 'error');
+      }
+    });
+  }
 
   // Tie Go Profile directly to existing mobile-nav/sidebar navigation logic
-  btnGoProfile.addEventListener('click', () => {
-    profileDropdownMenu.classList.remove('show');
-    // Simulate click on the actual profile tab if nav profile tab exists
-    const navProfile = document.getElementById('nav-profile');
-    const mnavProfile = document.getElementById('mnav-profile');
-    if (navProfile) navProfile.click();
-    else if (mnavProfile) mnavProfile.click();
-  });
+  if (btnGoProfile) {
+    btnGoProfile.addEventListener('click', () => {
+      if (profileDropdownMenu) profileDropdownMenu.classList.remove('show');
+      // Simulate click on the actual profile tab if nav profile tab exists
+      const navProfile = document.getElementById('nav-profile');
+      const mnavProfile = document.getElementById('mnav-profile');
+      if (navProfile) navProfile.click();
+      else if (mnavProfile) mnavProfile.click();
+    });
+  }
 
 
   // Re-use Global ShowToast function if exists, else define minimal one here

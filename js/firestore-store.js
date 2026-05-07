@@ -107,9 +107,7 @@ const FirestoreStore = (function () {
         console.log('Animals Updated:', STATE.animals.length);
         
         // Trigger seeding if zero animals (only if not loading anymore)
-        if (STATE.animals.length === 0 && !STATE.isLoading) {
-          if (window.SeedDataModule) window.SeedDataModule.seed(uid);
-        }
+        // (Seed module removed)
         
         STATE.isLoading = false;
         recalculateKPIs();
