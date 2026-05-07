@@ -6,13 +6,13 @@
 
 // 1. Firebase Configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyAiJVcnM9rTFzFRnhZk9Txb7k-gotnBCAg",
-  authDomain: "et-201.firebaseapp.com",
-  projectId: "et-201",
-  storageBucket: "et-201.firebasestorage.app",
-  messagingSenderId: "936111262185",
-  appId: "1:936111262185:web:44eb32fcc0ce086aba2378",
-  measurementId: "G-NBT02CPT26"
+  apiKey: "AIzaSyASdnlePbXPc4qKNCGqNecOvhpFunMhcTk",
+  authDomain: "kisan-track.firebaseapp.com",
+  projectId: "kisan-track",
+  storageBucket: "kisan-track.firebasestorage.app",
+  messagingSenderId: "239457493981",
+  appId: "1:239457493981:web:3746aa1e43b1d76cbc0c34",
+  measurementId: "G-7VPHV9GSTX"
 };
 
 // Initialize Firebase
