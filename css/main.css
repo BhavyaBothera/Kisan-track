@@ -5,7 +5,7 @@
  * ============================================================
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 /* ── Obsidian Design Tokens ───────────────────────────────── */
 :root {
@@ -118,24 +118,79 @@ ul, ol { list-style: none; }
 
 /* ── Page Header ─────────────────────────────────────────── */
 .page-header {
-  margin-bottom: 28px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--border);
+  margin-bottom: 32px;
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
 .page-header h1 {
   font-family: var(--font-heading);
-  font-size: 1.75rem;
-  font-weight: 700;
+  font-size: 2.2rem;
+  font-weight: 800;
   color: var(--text-primary);
-  line-height: 1.2;
+  line-height: 1.1;
+  letter-spacing: -1.5px;
 }
 
-.page-header .subtitle {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  margin-top: 4px;
+/* ── Bio-Score Hub ────────────────────────────────────────── */
+.bio-score-hub {
+  background: radial-gradient(circle at center, rgba(124, 181, 24, 0.08), transparent 70%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 40px;
+  margin-bottom: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  position: relative;
+  overflow: hidden;
 }
+
+.bio-score-hub::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-green), transparent);
+  animation: scanning 4s linear infinite;
+}
+
+@keyframes scanning {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.bio-gauge-wrap {
+  position: relative;
+  width: 180px; height: 180px;
+  flex-shrink: 0;
+}
+
+.bio-gauge-svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+.bio-gauge-bg { fill: none; stroke: rgba(255,255,255,0.03); stroke-width: 8; }
+.bio-gauge-fill {
+  fill: none; stroke: var(--accent-green); stroke-width: 8;
+  stroke-linecap: round; transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 0 8px var(--accent-green));
+}
+
+.bio-gauge-content {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.bio-value { font-size: 3.5rem; font-weight: 900; line-height: 1; letter-spacing: -2px; }
+.bio-label { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; }
+
+.bio-info { flex: 1; padding-left: 50px; }
+.bio-status-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 12px; }
+.bio-status-desc { font-size: 0.95rem; color: var(--text-muted); line-height: 1.6; max-width: 500px; }
+
+.hub-stats { display: flex; gap: 30px; margin-top: 24px; }
+.hub-stat-item { display: flex; flex-direction: column; }
+.h-stat-val { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); }
+.h-stat-lab { font-size: 0.65rem; font-weight: 600; color: var(--text-dim); text-transform: uppercase; }
 
 /* ── Section Title ───────────────────────────────────────── */
 .section-title {

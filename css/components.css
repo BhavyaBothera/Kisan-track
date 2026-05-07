@@ -110,7 +110,7 @@
 }
 
 .animal-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-5px);
   box-shadow: 0 8px 24px rgba(0,0,0,0.35);
   border-color: var(--border-hover);
 }
@@ -2221,3 +2221,13 @@
   }
 }
 
+
+/* -- Live Pulse Heartbeat --------------------------------- */
+.live-pulse { flex: 1; padding: 0 15px; opacity: 0.8; }
+.pulse-svg { width: 100%; height: 18px; }
+.pulse-path { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 100; stroke-dashoffset: 100; animation: pulse-line 2s linear infinite; }
+.pulse-healthy { stroke: var(--accent-green); filter: drop-shadow(0 0 3px var(--accent-green)); }
+.pulse-warning { stroke: var(--accent-amber); filter: drop-shadow(0 0 3px var(--accent-amber)); }
+.pulse-critical { stroke: var(--accent-red); filter: drop-shadow(0 0 3px var(--accent-red)); }
+@keyframes pulse-line { 0% { stroke-dashoffset: 100; } 50% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -100; } }
+.kpi-sparkline canvas { width: 100% !important; height: 100% !important; filter: drop-shadow(0 0 4px rgba(255,255,255,0.1)); }

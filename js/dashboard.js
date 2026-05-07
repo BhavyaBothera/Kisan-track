@@ -8,9 +8,75 @@
 const DashboardModule = (function () {
   'use strict';
 
-  // --- State Reference ---
+  // --- Internal State ---
+  let _sparklines = {};
+
   function getState() {
     return window.FirestoreStore ? window.FirestoreStore.getState() : null;
+  }
+
+  // ── Bio-Score Calculation ─────────────────────────────────
+  function updateBioScoreHub() {
+    const state = getState();
+    if (!state || state.isLoading || state.animals.length === 0) return;
+
+    const total = state.animals.length;
+    const healthy = state.animals.filter(a => a.status === 'Healthy').length;
+    const warning = state.animals.filter(a => a.status === 'Warning').length;
+    const critical = state.animals.filter(a => a.status === 'Critical').length;
+
+    // Calculation: Healthy=100, Warning=60, Critical=20
+    const score = Math.round(((healthy * 100) + (warning * 60) + (critical * 20)) / total);
+    
+    // Update Gauge
+    const fill = document.getElementById('bio-score-fill');
+    const valEl = document.getElementById('bio-score-val');
+    if (fill && valEl) {
+      const circumference = 2 * Math.PI * 45;
+      const offset = circumference * (1 - score / 100);
+      fill.style.strokeDashoffset = offset;
+      
+      // Animate number
+      animateValue(valEl, parseInt(valEl.textContent) || 0, score, 1000);
+    }
+
+    // Update Text
+    const statusText = document.getElementById('bio-status-text');
+    const statusDesc = document.getElementById('bio-status-desc');
+    if (statusText && statusDesc) {
+      if (score > 85) {
+        statusText.textContent = 'Operational Excellence';
+        statusText.style.color = 'var(--accent-green)';
+        statusDesc.textContent = 'Herd vitals are within optimal range. Environmental stressors are minimal.';
+      } else if (score > 60) {
+        statusText.textContent = 'Active Monitoring Required';
+        statusText.style.color = 'var(--accent-amber)';
+        statusDesc.textContent = 'Minor deviations detected in sub-group vitals. Check individual alerts.';
+      } else {
+        statusText.textContent = 'Critical Intervention Protocol';
+        statusText.style.color = 'var(--accent-red)';
+        statusDesc.textContent = 'Multiple critical alerts active. Emergency veterinary protocols recommended.';
+      }
+    }
+
+    // Update Telemetry
+    const totalEl = document.getElementById('hub-total-animals');
+    const sensorEl = document.getElementById('hub-active-sensors');
+    const pingEl = document.getElementById('hub-last-ping');
+    if (totalEl) totalEl.textContent = total;
+    if (sensorEl) sensorEl.textContent = Math.round(total * 0.94); // Mock active ratio
+    if (pingEl) pingEl.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      obj.innerHTML = Math.floor(progress * (end - start) + start).toString().padStart(2, '0');
+      if (progress < 1) window.requestAnimationFrame(step);
+    };
+    window.requestAnimationFrame(step);
   }
 
   // ── Helpers ───────────────────────────────────────────────
@@ -42,15 +108,54 @@ const DashboardModule = (function () {
       { icon: 'fa-solid fa-circle-exclamation', colorClass: 'red', number: kpis.criticalCases, labelEn: 'Critical Cases', labelHi: 'गंभीर मामले', extraClass: 'red', cardExtraClass: 'critical-card' }
     ];
 
-    grid.innerHTML = config.map(k => `
-      <div class="kpi-card ${k.extraClass || ''} ${k.cardExtraClass || ''}">
-        <div class="kpi-icon ${k.colorClass}"><i class="${k.icon}"></i></div>
-        <div class="kpi-body">
-          <div class="kpi-number">${k.number}</div>
-          <div class="bilingual"><span class="en">${k.labelEn}</span><span class="hi">${k.labelHi}</span></div>
+    grid.innerHTML = config.map((k, idx) => `
+      <div class="kpi-card ${k.extraClass || ''} ${k.cardExtraClass || ''}" style="display:flex; flex-direction:column; align-items:stretch; gap:12px;">
+        <div style="display:flex; align-items:center; gap:18px;">
+          <div class="kpi-icon ${k.colorClass}"><i class="${k.icon}"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-number">${k.number}</div>
+            <div class="bilingual"><span class="en">${k.labelEn}</span><span class="hi">${k.labelHi}</span></div>
+          </div>
+        </div>
+        <div class="kpi-sparkline" style="height:40px; margin-top:8px;">
+          <canvas id="kpi-sparkline-${idx}"></canvas>
         </div>
       </div>
     `).join('');
+
+    renderSparklines(config);
+  }
+
+  function renderSparklines(config) {
+    config.forEach((k, idx) => {
+      const ctx = document.getElementById(`kpi-sparkline-${idx}`);
+      if (!ctx) return;
+
+      if (_sparklines[idx]) _sparklines[idx].destroy();
+
+      // Mock trend data
+      const data = Array(12).fill(0).map(() => Math.round(Math.random() * 100));
+
+      _sparklines[idx] = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: Array(12).fill(''),
+          datasets: [{
+            data: data,
+            borderColor: getComputedStyle(document.documentElement).getPropertyValue(`--accent-${k.colorClass === 'blue' ? 'blue' : (k.colorClass === 'green' ? 'green' : (k.colorClass === 'amber' ? 'amber' : 'red'))}`).trim(),
+            borderWidth: 2,
+            pointRadius: 0,
+            tension: 0.4,
+            fill: false
+          }]
+        },
+        options: {
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { enabled: false } },
+          scales: { x: { display: false }, y: { display: false } }
+        }
+      });
+    });
   }
 
   // ── Herd Grid ─────────────────────────────────────────────
@@ -97,6 +202,11 @@ const DashboardModule = (function () {
         <div class="animal-card status-${sc.toLowerCase()}" data-id="${animal.id}" role="button" tabindex="0">
           <div class="animal-card-header">
             <span class="animal-emoji">${animal.emoji}</span>
+            <div class="live-pulse">
+              <svg viewBox="0 0 50 20" class="pulse-svg">
+                <path d="M0 10 L10 10 L15 2 L20 18 L25 10 L50 10" class="pulse-path pulse-${sc.toLowerCase()}"></path>
+              </svg>
+            </div>
             <span class="badge badge-${sc.toLowerCase()}">${animal.status}</span>
           </div>
           <div class="animal-id">#${animal.animalId}</div>
@@ -112,7 +222,7 @@ const DashboardModule = (function () {
             </span>
           </div>
           <div class="card-footer">
-            <span class="view-details">Click for details <i class="fa-solid fa-chevron-right"></i></span>
+            <span class="view-details">Tactical Overview <i class="fa-solid fa-chevron-right"></i></span>
           </div>
         </div>
       `;
@@ -140,13 +250,18 @@ const DashboardModule = (function () {
     track.innerHTML = activeAlerts.map(a => {
       const animal = state.animals.find(x => x.animalId === a.animalId);
       const emoji = animal ? animal.emoji : '⚠️';
+      const severityGlyph = a.severity === 'Critical' ? '⬢' : '⬡';
+      const severityColor = a.severity === 'Critical' ? 'var(--accent-red)' : 'var(--accent-amber)';
+      
       return `
-        <span class="ticker-item">
-          <span class="tick-severity">${a.severity === 'Critical' ? '🔴' : '🟡'} ${a.severity}</span>
-          <span class="tick-id">${emoji} #${a.animalId}</span> — ${a.parameter}: ${a.reading}
+        <span class="ticker-item" style="display:inline-flex; align-items:center; gap:8px;">
+          <span style="color:${severityColor}; font-size:1.2rem; filter:drop-shadow(0 0 5px ${severityColor})">${severityGlyph}</span>
+          <span class="tick-id" style="font-weight:800; color:var(--text-primary)">${emoji} #${a.animalId}</span>
+          <span style="color:var(--text-muted)">//</span>
+          <span style="color:var(--text-muted)">${a.parameter}: <span style="color:var(--text-primary)">${a.reading}</span></span>
         </span>
       `;
-    }).join(' <span style="color:var(--border);margin:0 8px;">|</span> ');
+    }).join(' <span style="color:var(--border); margin:0 20px; opacity:0.3">/ / /</span> ');
   }
 
   // ── Header Display ────────────────────────────────────────
@@ -163,12 +278,14 @@ const DashboardModule = (function () {
 
   // ── Initialization ────────────────────────────────────────
   function init() {
+    updateBioScoreHub();
     renderKPIs();
     renderHerdGrid();
     renderTicker();
     updateHeader();
 
     document.addEventListener('kisanTrack:stateUpdated', () => {
+      updateBioScoreHub();
       renderKPIs();
       renderHerdGrid();
       renderTicker();

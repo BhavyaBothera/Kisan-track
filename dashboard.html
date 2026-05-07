@@ -153,13 +153,43 @@
          SECTION 1: DASHBOARD HOME
     ───────────────────────────────────────────────── -->
       <section class="tab-section active" id="section-dashboard" aria-label="Dashboard Home">
-
         <div class="page-header">
-          <h1><i class="fa-solid fa-gauge-high" style="color:var(--accent-green);margin-right:10px;"></i>Herd Overview /
-            <span style="color:var(--text-muted);">झुंड की स्थिति</span>
-          </h1>
-          <p class="subtitle">Real-time health monitoring for your entire livestock | आपके सभी पशुओं की स्वास्थ्य
-            निगरानी</p>
+          <h1>Farm Command Center</h1>
+        </div>
+
+        <!-- ── BIO-SCORE HUB ── -->
+        <div class="bio-score-hub" id="bio-score-hub">
+          <div class="bio-gauge-wrap">
+            <svg class="bio-gauge-svg" viewBox="0 0 100 100">
+              <circle class="bio-gauge-bg" cx="50" cy="50" r="45" />
+              <circle class="bio-gauge-fill" id="bio-score-fill" cx="50" cy="50" r="45" 
+                stroke-dasharray="282.7" stroke-dashoffset="282.7" />
+            </svg>
+            <div class="bio-gauge-content">
+              <div class="bio-value" id="bio-score-val">00</div>
+              <div class="bio-label">Bio-Score</div>
+            </div>
+          </div>
+          <div class="bio-info">
+            <h2 class="bio-status-title" id="bio-status-text">System Initializing...</h2>
+            <p class="bio-status-desc" id="bio-status-desc">
+              Analyzing real-time vitals across the herd. Please wait for sensor synchronization.
+            </p>
+            <div class="hub-stats">
+              <div class="hub-stat-item">
+                <span class="h-stat-val" id="hub-total-animals">0</span>
+                <span class="h-stat-lab">Monitored</span>
+              </div>
+              <div class="hub-stat-item">
+                <span class="h-stat-val" id="hub-active-sensors">0</span>
+                <span class="h-stat-lab">Live Sensors</span>
+              </div>
+              <div class="hub-stat-item">
+                <span class="h-stat-val" id="hub-last-ping">--:--</span>
+                <span class="h-stat-lab">Last Data Sync</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- KPI Cards -->
