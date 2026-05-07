@@ -3,433 +3,317 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>KisanTrack | AI-Powered Herd Intelligence</title>
+  <title>KisanTrack | Obsidian AI</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <style>
     /* ─────────────────────────────────────────────────────────────
-       THEME TOKENS
+       OBSIDIAN DESIGN SYSTEM
     ───────────────────────────────────────────────────────────── */
     :root {
-      --bg-dark: #0A0F0D;
-      --bg-darker: #050807;
-      --olive: #4A7C59;
-      --olive-glow: rgba(74, 124, 89, 0.2);
-      --amber: #C8843A;
-      --amber-glow: rgba(200, 132, 58, 0.2);
-      --sage: #8A9E8F;
-      --warm-white: #F0EDE6;
-      --glass: rgba(255, 255, 255, 0.04);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --error: #E05C3A;
-      --success: #52B788;
-      --transition: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+      --bg: #030504;
+      --accent: #7CB518;
+      --accent-glow: rgba(124, 181, 24, 0.15);
+      --amber: #E5A100;
+      --text-main: #FFFFFF;
+      --text-dim: #888888;
+      --glass-bg: rgba(10, 15, 12, 0.4);
+      --glass-border: rgba(255, 255, 255, 0.05);
+      --error: #FF4B2B;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
     body {
-      background-color: var(--bg-dark);
-      color: var(--warm-white);
+      background-color: var(--bg);
+      color: var(--text-main);
       font-family: 'Inter', sans-serif;
       min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       overflow: hidden;
     }
 
     /* ─────────────────────────────────────────────────────────────
-       SPLIT LAYOUT
+       AURORA BACKGROUND (Cursor Follow)
     ───────────────────────────────────────────────────────────── */
-    .auth-container {
-      display: flex;
-      width: 100%;
-      height: 100vh;
-    }
-
-    /* --- Left: Branding --- */
-    .brand-side {
-      width: 60%;
-      background: var(--bg-darker);
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 80px;
-      overflow: hidden;
-    }
-
-    .mesh-bg {
-      position: absolute;
+    .aurora-container {
+      position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: radial-gradient(circle at 20% 30%, #1A2E22 0%, transparent 50%),
-                  radial-gradient(circle at 80% 70%, #2E251A 0%, transparent 50%);
+      z-index: -1;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 50%, #0A150F 0%, #030504 100%);
+    }
+
+    .aurora-glow {
+      position: absolute;
+      width: 800px; height: 800px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      transition: width 1s, height 1s;
       filter: blur(80px);
-      animation: meshDrift 20s infinite alternate ease-in-out;
-      opacity: 0.8;
-      z-index: 1;
     }
 
-    @keyframes meshDrift {
-      from { transform: scale(1) rotate(0deg); }
-      to { transform: scale(1.2) rotate(5deg); }
-    }
-
-    .brand-content {
-      position: relative;
-      z-index: 5;
+    /* ─────────────────────────────────────────────────────────────
+       THE OBSIDIAN MODULE
+    ───────────────────────────────────────────────────────────── */
+    .obsidian-wrapper {
       width: 100%;
-      max-width: 500px;
-      text-align: center;
-    }
-
-    .logo-box {
-      position: absolute;
-      top: -120px;
-      left: 0;
-    }
-    .logo { font-size: 32px; font-weight: 700; letter-spacing: -1px; }
-    .logo span { color: var(--olive); }
-    .tagline { font-size: 14px; color: var(--sage); margin-top: 4px; font-weight: 500; }
-
-    /* Visual Cow SVG */
-    .cow-visual {
-      width: 100%;
-      filter: drop-shadow(0 0 30px var(--olive-glow));
-      animation: float 6s infinite ease-in-out;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-20px); }
-    }
-
-    /* Stat Chips */
-    .stat-chip {
-      position: absolute;
-      background: var(--glass);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--glass-border);
-      padding: 14px 24px;
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-      animation: drift 5s infinite alternate ease-in-out;
-    }
-    .chip-1 { top: 15%; right: 0; animation-delay: 0s; }
-    .chip-2 { bottom: 15%; left: -20px; animation-delay: -2.5s; }
-
-    @keyframes drift {
-      from { transform: translateY(0); }
-      to { transform: translateY(-10px); }
-    }
-
-    /* --- Right: Forms --- */
-    .form-side {
-      width: 40%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 40px;
+      max-width: 440px;
       position: relative;
       z-index: 10;
+      text-align: center;
     }
 
-    .auth-card {
-      width: 100%;
-      max-width: 420px;
-      background: var(--glass);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
+    .obsidian-logo {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -1.5px;
+      margin-bottom: 40px;
+      opacity: 0.9;
+    }
+    .obsidian-logo span { color: var(--accent); }
+
+    .obsidian-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
       border: 1px solid var(--glass-border);
-      border-radius: 28px;
-      padding: 48px;
-      box-shadow: 0 40px 100px rgba(0,0,0,0.5);
-    }
-
-    .auth-header { margin-bottom: 32px; }
-    .auth-header h2 { font-size: 28px; font-weight: 600; margin-bottom: 8px; }
-    .auth-header p { font-size: 14px; color: var(--sage); }
-
-    /* ─────────────────────────────────────────────────────────────
-       COMPONENTS
-    ───────────────────────────────────────────────────────────── */
-    .tab-switcher {
-      display: flex;
+      border-radius: 24px;
+      padding: 50px 40px;
+      box-shadow: 0 50px 100px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,255,255,0.02);
       position: relative;
-      background: rgba(0,0,0,0.2);
-      border-radius: 14px;
-      padding: 4px;
-      margin-bottom: 32px;
     }
-    .tab-item {
+
+    .obsidian-card::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 24px;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent, rgba(124, 181, 24, 0.1));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* Tabs */
+    .obsidian-tabs {
+      display: flex;
+      margin-bottom: 40px;
+      border-bottom: 1px solid var(--glass-border);
+      position: relative;
+    }
+    .obsidian-tab {
       flex: 1;
       padding: 12px;
-      text-align: center;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
-      color: var(--sage);
+      color: var(--text-dim);
       cursor: pointer;
-      z-index: 2;
-      transition: color var(--transition);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      transition: color 0.3s;
     }
-    .tab-item.active { color: white; }
-    .tab-pill {
+    .obsidian-tab.active { color: var(--accent); }
+    
+    .obsidian-pill {
       position: absolute;
-      top: 4px; left: 4px;
-      width: calc(50% - 4px); height: calc(100% - 8px);
-      background: var(--olive);
-      border-radius: 10px;
-      transition: transform var(--transition);
-      z-index: 1;
+      bottom: -1px; left: 0;
+      width: 50%; height: 2px;
+      background: var(--accent);
+      transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+      box-shadow: 0 0 10px var(--accent);
     }
 
-    .form-stack { position: relative; min-height: 340px; }
-    .auth-form {
+    /* Form Layout */
+    .form-stack { position: relative; min-height: 320px; }
+    .obsidian-form {
       position: absolute;
       top: 0; left: 0; width: 100%;
       opacity: 0; pointer-events: none;
-      transform: translateY(10px);
-      transition: all 300ms ease;
+      transform: scale(0.98);
+      transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
     }
-    .auth-form.active { opacity: 1; pointer-events: all; transform: translateY(0); }
+    .obsidian-form.active { opacity: 1; pointer-events: all; transform: scale(1); }
 
     /* Inputs */
-    .field-group { margin-bottom: 24px; position: relative; }
-    .input-wrapper {
-      position: relative;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 14px;
-      padding: 14px 18px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      transition: all 200ms ease;
+    .input-group { margin-bottom: 24px; text-align: left; }
+    .input-label { 
+      font-size: 11px; font-weight: 700; color: var(--text-dim); 
+      text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; display: block;
     }
-    .input-wrapper:focus-within {
-      border-color: var(--olive);
-      box-shadow: 0 0 0 4px rgba(74, 124, 89, 0.1);
+    .obsidian-input-box {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 12px;
+      transition: all 0.3s;
     }
-    .input-wrapper i { color: var(--sage); font-size: 18px; }
+    .obsidian-input-box:focus-within {
+      border-color: var(--accent);
+      background: rgba(0,0,0,0.6);
+      box-shadow: 0 0 20px rgba(124, 181, 24, 0.05);
+    }
+    .obsidian-input-box i { color: var(--text-dim); font-size: 16px; }
+    .obsidian-input {
+      flex: 1; background: none; border: none; color: white; font-family: inherit; font-size: 15px; outline: none;
+    }
+    .obsidian-input::placeholder { color: #333; }
 
-    .input-field {
-      flex: 1;
-      background: none;
-      border: none;
-      color: white;
-      font-family: inherit;
-      font-size: 15px;
-      padding: 8px 0;
-      outline: none;
-    }
-    .input-field::placeholder { color: transparent; }
+    .eye-toggle { background: none; border: none; color: var(--text-dim); cursor: pointer; }
 
-    /* Floating Labels */
-    .floating-label {
-      position: absolute;
-      left: 50px; top: 22px;
-      font-size: 15px;
-      color: var(--sage);
-      pointer-events: none;
-      transition: all 200ms ease;
-    }
-    .input-field:focus + .floating-label,
-    .input-field:not(:placeholder-shown) + .floating-label {
-      top: 6px; font-size: 11px; color: var(--olive); font-weight: 600;
-    }
-    .input-field { padding-top: 14px; }
-
-    .eye-btn {
-      background: none; border: none; color: var(--sage); cursor: pointer; font-size: 16px;
-    }
-
-    /* Strength Bar */
-    .strength-meter { display: flex; gap: 4px; margin-top: -16px; margin-bottom: 24px; }
-    .strength-segment { flex: 1; height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; }
-
-    /* CTAs */
-    .btn-primary {
+    /* Buttons */
+    .btn-obsidian {
       width: 100%;
       padding: 16px;
-      border-radius: 14px;
-      border: none;
-      background: var(--olive);
-      color: white;
-      font-family: inherit; font-weight: 600; font-size: 15px;
+      border-radius: 12px;
+      border: 1px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      font-family: inherit; font-weight: 700; font-size: 14px;
+      text-transform: uppercase; letter-spacing: 2px;
       cursor: pointer;
-      transition: all 200ms ease;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      transition: all 0.3s;
+      margin-top: 10px;
     }
-    .btn-primary:hover {
-      transform: scale(1.02);
-      box-shadow: 0 0 20px var(--amber-glow);
+    .btn-obsidian:hover {
+      background: var(--accent);
+      color: black;
+      box-shadow: 0 0 30px var(--accent-glow);
     }
-
-    .forgot-link {
-      display: block; text-align: right; margin-top: -16px; margin-bottom: 24px;
-      font-size: 13px; color: var(--amber); text-decoration: none;
-    }
-
-    .divider {
-      display: flex; align-items: center; gap: 12px; margin: 32px 0;
-      font-size: 12px; color: var(--sage); text-transform: uppercase; letter-spacing: 1px;
-    }
-    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
 
     .btn-google {
-      width: 100%; padding: 14px; border-radius: 14px;
-      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12);
-      color: white; font-family: inherit; font-weight: 600;
+      width: 100%; padding: 14px; border-radius: 12px;
+      background: transparent; border: 1px solid var(--glass-border);
+      color: var(--text-dim); font-family: inherit; font-size: 13px; font-weight: 600;
       display: flex; align-items: center; justify-content: center; gap: 12px;
-      cursor: pointer; transition: all 200ms ease;
+      margin-top: 24px; cursor: pointer; transition: all 0.3s;
     }
-    .btn-google:hover { background: rgba(255,255,255,0.08); transform: translateY(-1px); }
+    .btn-google:hover { border-color: white; color: white; }
 
-    .error-box { color: var(--error); font-size: 13px; text-align: center; margin-top: 12px; min-height: 18px; }
-
-    /* Responsive */
-    @media (max-width: 1024px) {
-      .brand-side { width: 50%; padding: 40px; }
-      .form-side { width: 50%; }
+    .forgot-link {
+      display: block; text-align: center; margin-top: 20px;
+      font-size: 12px; color: var(--text-dim); text-decoration: none; transition: color 0.3s;
     }
-    @media (max-width: 768px) {
-      .brand-side { display: none; }
-      .form-side { width: 100%; background: radial-gradient(circle at top right, #1A2E22, var(--bg-dark)); }
-      .auth-card { padding: 32px 24px; }
+    .forgot-link:hover { color: var(--amber); }
+
+    .error-log { color: var(--error); font-size: 12px; margin-top: 12px; min-height: 16px; font-weight: 600; }
+
+    /* Toast */
+    .toast {
+      position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-100px);
+      background: var(--accent); color: black; padding: 12px 30px; border-radius: 50px;
+      font-weight: 700; font-size: 14px; z-index: 1000; transition: all 0.4s;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* Mobile */
+    @media (max-width: 480px) {
+      .obsidian-card { padding: 40px 24px; border-radius: 0; border: none; background: transparent; box-shadow: none; }
+      .obsidian-logo { margin-bottom: 20px; }
+      body { background: var(--bg); align-items: flex-start; padding-top: 60px; }
     }
   </style>
 </head>
 <body>
 
-  <div class="auth-container">
-    
-    <!-- LEFT -->
-    <div class="brand-side">
-      <div class="mesh-bg"></div>
-      
-      <div class="logo-box">
-        <div class="logo">Kisan<span>Track</span></div>
-        <div class="tagline">AI-Powered Herd Intelligence</div>
-      </div>
-
-      <div class="brand-content">
-        <!-- Cow SVG -->
-        <svg class="cow-visual" viewBox="0 0 500 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M120 200 C120 120, 380 120, 380 200 L380 300 C380 320, 360 340, 340 340 L160 340 C140 340, 120 320, 120 300 Z" stroke="#4A7C59" stroke-width="2.5" />
-          <path d="M150 150 L200 150 L220 180 L300 180" stroke="#C8843A" stroke-width="2" stroke-dasharray="4 4" />
-          <path d="M350 250 L300 250 L280 220 L200 220" stroke="#4A7C59" stroke-width="2" />
-          <circle cx="150" cy="150" r="5" fill="#C8843A" />
-          <circle cx="300" cy="180" r="5" fill="#4A7C59" />
-          <circle cx="350" cy="250" r="5" fill="#C8843A" />
-        </svg>
-
-        <div class="stat-chip chip-1">🐄 12,400+ Cattle Monitored</div>
-        <div class="stat-chip chip-2">📊 98.2% Accuracy</div>
-      </div>
-    </div>
-
-    <!-- RIGHT -->
-    <div class="form-side">
-      <div class="auth-card">
-        <div class="auth-header">
-          <h2 id="title-text">Welcome Back</h2>
-          <p id="sub-text">Monitor your herd with AI precision</p>
-        </div>
-
-        <div class="tab-switcher">
-          <div class="tab-item active" id="tab-login">Login</div>
-          <div class="tab-item" id="tab-signup">Sign Up</div>
-          <div class="tab-pill" id="tab-pill"></div>
-        </div>
-
-        <div class="form-stack">
-          <!-- LOGIN -->
-          <form id="login-form" class="auth-form active">
-            <div class="field-group">
-              <div class="input-wrapper">
-                <i class="fa-solid fa-envelope"></i>
-                <input type="email" id="login-email" class="input-field" placeholder=" " required />
-                <label class="floating-label">Email Address</label>
-              </div>
-            </div>
-            <div class="field-group">
-              <div class="input-wrapper">
-                <i class="fa-solid fa-lock"></i>
-                <input type="password" id="login-password" class="input-field" placeholder=" " required />
-                <label class="floating-label">Password</label>
-                <button type="button" class="eye-btn" id="login-eye"><i class="fa-solid fa-eye"></i></button>
-              </div>
-            </div>
-            <a href="#" class="forgot-link" id="btn-forgot-password">Forgot Password?</a>
-            <button type="submit" class="btn-primary" id="btn-login-submit">Login</button>
-            <div class="divider"><span>or</span></div>
-            <button type="button" class="btn-google" id="btn-google-login">
-              <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="18" alt="G">
-              Continue with Google
-            </button>
-            <div class="error-box" id="login-error"></div>
-          </form>
-
-          <!-- SIGNUP -->
-          <form id="signup-form" class="auth-form">
-            <div class="field-group">
-              <div class="input-wrapper">
-                <i class="fa-solid fa-user"></i>
-                <input type="text" id="signup-name" class="input-field" placeholder=" " required />
-                <label class="floating-label">Full Name</label>
-              </div>
-            </div>
-            <div class="field-group">
-              <div class="input-wrapper">
-                <i class="fa-solid fa-tractor"></i>
-                <input type="text" id="signup-farm" class="input-field" placeholder=" " required />
-                <label class="floating-label">Farm Name</label>
-              </div>
-            </div>
-            <div class="field-group">
-              <div class="input-wrapper">
-                <i class="fa-solid fa-envelope"></i>
-                <input type="email" id="signup-email" class="input-field" placeholder=" " required />
-                <label class="floating-label">Email Address</label>
-              </div>
-            </div>
-            <div class="field-group">
-              <div class="input-wrapper">
-                <i class="fa-solid fa-lock"></i>
-                <input type="password" id="signup-password" class="input-field" placeholder=" " required />
-                <label class="floating-label">Password</label>
-                <button type="button" class="eye-btn" id="signup-eye"><i class="fa-solid fa-eye"></i></button>
-              </div>
-            </div>
-            <div class="strength-meter" id="strength-meter">
-              <div class="strength-segment"></div><div class="strength-segment"></div>
-              <div class="strength-segment"></div><div class="strength-segment"></div>
-            </div>
-            <div class="field-group">
-              <div class="input-wrapper">
-                <i class="fa-solid fa-shield-check"></i>
-                <input type="password" id="signup-confirm" class="input-field" placeholder=" " required />
-                <label class="floating-label">Confirm Password</label>
-              </div>
-            </div>
-            <button type="submit" class="btn-primary" id="btn-signup-submit">Create Account</button>
-            <div class="error-box" id="signup-error"></div>
-          </form>
-        </div>
-      </div>
-    </div>
+  <div class="aurora-container">
+    <div class="aurora-glow" id="aurora"></div>
   </div>
 
-  <div class="toast" id="app-toast"></div>
+  <div class="obsidian-wrapper">
+    <div class="obsidian-logo">KISAN<span>TRACK</span></div>
 
+    <div class="obsidian-card">
+      <div class="obsidian-tabs">
+        <div class="obsidian-tab active" id="tab-login">Login</div>
+        <div class="obsidian-tab" id="tab-signup">Register</div>
+        <div class="obsidian-pill" id="auth-tab-slider"></div>
+      </div>
+
+      <div class="form-stack">
+        <!-- LOGIN -->
+        <form id="login-form" class="obsidian-form active">
+          <div class="input-group">
+            <span class="input-label">Identity</span>
+            <div class="obsidian-input-box">
+              <i class="fa-solid fa-envelope"></i>
+              <input type="email" id="login-email" class="obsidian-input" placeholder="Email Address" required />
+            </div>
+          </div>
+          <div class="input-group">
+            <span class="input-label">Security</span>
+            <div class="obsidian-input-box">
+              <i class="fa-solid fa-lock"></i>
+              <input type="password" id="login-password" class="obsidian-input" placeholder="Password" required />
+              <button type="button" class="eye-toggle" id="login-eye"><i class="fa-solid fa-eye"></i></button>
+            </div>
+          </div>
+          <div class="error-log" id="login-error"></div>
+          <button type="submit" class="btn-obsidian" id="btn-login-submit">Authenticate</button>
+          <a href="#" class="forgot-link" id="btn-forgot-password">Recovery key needed?</a>
+        </form>
+
+        <!-- SIGNUP -->
+        <form id="signup-form" class="obsidian-form">
+          <div class="input-group">
+            <span class="input-label">Full Name</span>
+            <div class="obsidian-input-box">
+              <i class="fa-solid fa-user"></i>
+              <input type="text" id="signup-name" class="obsidian-input" placeholder="Your Name" required />
+            </div>
+          </div>
+          <div class="input-group">
+            <span class="input-label">Farm Identity</span>
+            <div class="obsidian-input-box">
+              <i class="fa-solid fa-tractor"></i>
+              <input type="text" id="signup-farm" class="obsidian-input" placeholder="Farm Name" required />
+            </div>
+          </div>
+          <div class="input-group">
+            <span class="input-label">Email</span>
+            <div class="obsidian-input-box">
+              <i class="fa-solid fa-envelope"></i>
+              <input type="email" id="signup-email" class="obsidian-input" placeholder="Email" required />
+            </div>
+          </div>
+          <div class="input-group">
+            <span class="input-label">Password</span>
+            <div class="obsidian-input-box">
+              <i class="fa-solid fa-lock"></i>
+              <input type="password" id="signup-password" class="obsidian-input" placeholder="Create Password" required />
+              <button type="button" class="eye-toggle" id="signup-eye"><i class="fa-solid fa-eye"></i></button>
+            </div>
+          </div>
+          <div class="error-log" id="signup-error"></div>
+          <button type="submit" class="btn-obsidian" id="btn-signup-submit">Initialize Profile</button>
+        </form>
+      </div>
+
+      <button type="button" class="btn-google" id="btn-google-login">
+        <i class="fa-brands fa-google"></i> Continue with Google Cloud
+      </button>
+    </div>
+
+    <a href="index.html" class="forgot-link" style="margin-top: 40px; opacity: 0.5;">
+      <i class="fa-solid fa-arrow-left"></i> Terminal Entry
+    </a>
+  </div>
+
+  <div class="toast" id="app-toast">Authenticated Successfully</div>
+
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -438,43 +322,40 @@
   <script src="js/auth.js"></script>
 
   <script>
-    // Tab Sync
-    const tLogin = document.getElementById('tab-login');
-    const tSignup = document.getElementById('tab-signup');
-    const tPill = document.getElementById('tab-pill');
-    const fLogin = document.getElementById('login-form');
-    const fSignup = document.getElementById('signup-form');
-    const title = document.getElementById('title-text');
-
-    function syncTab(t) {
-      if(t === 'login') {
-        tLogin.classList.add('active'); tSignup.classList.remove('active');
-        tPill.style.transform = 'translateX(0)';
-        fLogin.classList.add('active'); fSignup.classList.remove('active');
-        title.textContent = 'Welcome Back';
-      } else {
-        tSignup.classList.add('active'); tLogin.classList.remove('active');
-        tPill.style.transform = 'translateX(100%)';
-        fSignup.classList.add('active'); fLogin.classList.remove('active');
-        title.textContent = 'Join KisanTrack';
-      }
-    }
-    tLogin.addEventListener('click', () => syncTab('login'));
-    tSignup.addEventListener('click', () => syncTab('signup'));
-
-    // Strength Meter
-    document.getElementById('signup-password').addEventListener('input', (e) => {
-      const v = e.target.value;
-      let s = 0;
-      if(v.length > 6) s++; if(/[A-Z]/.test(v)) s++; if(/[0-9]/.test(v)) s++; if(/[^A-Za-z0-9]/.test(v)) s++;
-      document.querySelectorAll('.strength-segment').forEach((seg, i) => {
-        seg.style.background = i < s ? (s < 2 ? '#E05C3A' : s < 3 ? '#C8843A' : '#52B788') : 'rgba(255,255,255,0.1)';
-      });
+    // AURORA MOUSE FOLLOW
+    const aurora = document.getElementById('aurora');
+    document.addEventListener('mousemove', (e) => {
+      const x = e.clientX;
+      const y = e.clientY;
+      aurora.style.left = x + 'px';
+      aurora.style.top = y + 'px';
     });
 
-    // Handle initial tab from URL
-    const p = new URLSearchParams(window.location.search);
-    if(p.get('tab') === 'signup') syncTab('signup');
+    // SYNC TABS (Compatible with auth.js IDs)
+    const tLogin = document.getElementById('tab-login');
+    const tSignup = document.getElementById('tab-signup');
+    const tSlider = document.getElementById('auth-tab-slider');
+    const fLogin = document.getElementById('login-form');
+    const fSignup = document.getElementById('signup-form');
+
+    function switchTab(t) {
+      if(t === 'login') {
+        tLogin.classList.add('active'); tSignup.classList.remove('active');
+        tSlider.style.transform = 'translateX(0)';
+        fLogin.classList.add('active'); fSignup.classList.remove('active');
+      } else {
+        tSignup.classList.add('active'); tLogin.classList.remove('active');
+        tSlider.style.transform = 'translateX(100%)';
+        fSignup.classList.add('active'); fLogin.classList.remove('active');
+      }
+    }
+
+    tLogin.addEventListener('click', () => switchTab('login'));
+    tSignup.addEventListener('click', () => switchTab('signup'));
+
+    // URL Tab Handler
+    const params = new URLSearchParams(window.location.search);
+    if(params.get('tab') === 'signup') switchTab('signup');
   </script>
 </body>
 </html>
