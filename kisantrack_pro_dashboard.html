@@ -1,0 +1,1994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>KisanTrack Pro | Smart Livestock Dashboard</title>
+
+  <!-- Google Fonts: Poppins (Headings) & Noto Sans (Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       DESIGN SYSTEM: HARVEST EARTH
+    ═══════════════════════════════════════════════════════ */
+    :root {
+      --bg-midnight: #1A1A0F;    /* Deep Midnight Soil */
+      --bg-earth:    #2C2C1A;    /* Dark Earth Card */
+      --bg-deep:     #0D0D08;    /* Pure Dark */
+      
+      --accent-green: #7CB518;   /* Fresh Grass */
+      --accent-amber: #E5A100;   /* Golden Wheat */
+      --accent-red:   #C0392B;   /* Alert Red */
+      
+      --text-cream:   #F0EAD6;   /* Warm Parchment */
+      --text-muted:   #A89F8C;   /* Dry Grass */
+      
+      --border-soil:  #3D3D28;   /* Soil Divider */
+      
+      --glow-healthy: rgba(124, 181, 24, 0.15);
+      --glow-alert:   rgba(229, 161, 0, 0.2);
+      
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      
+      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --sidebar-width: 280px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-midnight);
+      color: var(--text-cream);
+      font-family: 'Noto Sans', sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    h1, h2, h3, h4, .poppins {
+      font-family: 'Poppins', sans-serif;
+    }
+
+    button { cursor: pointer; border: none; outline: none; background: none; font-family: inherit; }
+
+    /* ═══════════════════════════════════════════════════════
+       SIDEBAR & NAVIGATION
+    ═══════════════════════════════════════════════════════ */
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--bg-deep);
+      border-right: 1px solid var(--border-soil);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      display: flex;
+      flex-direction: column;
+      z-index: 1000;
+      transition: var(--transition);
+    }
+
+    .sidebar-header {
+      padding: 30px 20px;
+      border-bottom: 1px solid var(--border-soil);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--accent-green);
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 20px 0;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 16px 25px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      transition: var(--transition);
+      border-left: 4px solid transparent;
+      font-size: 15px;
+    }
+
+    .nav-link i { font-size: 18px; width: 24px; text-align: center; }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--text-cream);
+      background: rgba(124, 181, 24, 0.05);
+    }
+
+    .nav-link.active {
+      border-left-color: var(--accent-green);
+      color: var(--accent-green);
+    }
+
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid var(--border-soil);
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--accent-green);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--accent-green);
+      animation: pulse-green 2s infinite;
+    }
+
+    @keyframes pulse-green {
+      0% { box-shadow: 0 0 0 0 rgba(124, 181, 24, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(124, 181, 24, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(124, 181, 24, 0); }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       MAIN CONTENT
+    ═══════════════════════════════════════════════════════ */
+    .main-wrapper {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .top-bar {
+      height: 70px;
+      background: var(--bg-deep);
+      border-bottom: 1px solid var(--border-soil);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 30px;
+      position: sticky;
+      top: 0;
+      z-index: 900;
+    }
+
+    .content-area {
+      padding: 30px;
+      flex: 1;
+    }
+
+    .section {
+      display: none;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .section.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       DASHBOARD HOME
+    ═══════════════════════════════════════════════════════ */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .kpi-card {
+      background: var(--bg-earth);
+      border: 1px solid var(--border-soil);
+      border-radius: var(--radius-md);
+      padding: 25px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      transition: var(--transition);
+    }
+
+    .kpi-card:hover { transform: scale(1.03); border-color: var(--accent-green); }
+
+    .kpi-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .kpi-data .val {
+      font-size: 32px;
+      font-weight: 800;
+      display: block;
+      line-height: 1.2;
+    }
+
+    .kpi-data .lab {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .kpi-data .hi {
+      display: block;
+      font-size: 11px;
+      opacity: 0.7;
+    }
+
+    /* Severity Colors */
+    .kpi-healthy { color: var(--accent-green); box-shadow: 0 0 15px var(--glow-healthy); }
+    .kpi-warning { color: var(--accent-amber); box-shadow: 0 0 15px var(--glow-alert); }
+    .kpi-critical { 
+      color: var(--accent-red); 
+      border: 2px solid var(--accent-red) !important;
+      animation: pulse-red-border 2s infinite; 
+    }
+
+    @keyframes pulse-red-border {
+      0% { box-shadow: 0 0 0 0 rgba(192, 60, 43, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(192, 60, 43, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(192, 60, 43, 0); }
+    }
+
+    /* Animal Grid */
+    .herd-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .animal-card {
+      background: var(--bg-earth);
+      border: 1px solid var(--border-soil);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .animal-card:hover { 
+      transform: translateY(-5px); 
+      box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+      border-color: var(--accent-green);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+
+    .emoji-tag {
+      font-size: 28px;
+    }
+
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge-healthy { background: rgba(124, 181, 24, 0.1); color: var(--accent-green); }
+    .badge-warning { background: rgba(229, 161, 0, 0.1); color: var(--accent-amber); }
+    .badge-critical { background: rgba(192, 60, 43, 0.1); color: var(--accent-red); }
+
+    .animal-info h3 { font-size: 20px; margin-bottom: 5px; }
+    .animal-info p { font-size: 14px; color: var(--text-muted); margin-bottom: 15px; }
+
+    .vitals-mini {
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-soil);
+      padding-top: 15px;
+    }
+
+    .v-item { text-align: center; }
+    .v-item .v-val { display: block; font-weight: 700; font-size: 15px; }
+    .v-item .v-lab { font-size: 10px; color: var(--text-muted); text-transform: uppercase; }
+
+    /* Ticker */
+    .alert-ticker-container {
+      margin-top: 40px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border-soil);
+      border-radius: 50px;
+      height: 50px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+
+    .ticker-label {
+      background: var(--accent-amber);
+      color: var(--bg-midnight);
+      height: 100%;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      font-weight: 800;
+      font-size: 14px;
+      z-index: 2;
+    }
+
+    .ticker-content {
+      white-space: nowrap;
+      padding-left: 100%;
+      display: inline-block;
+      animation: ticker 25s linear infinite;
+    }
+
+    .ticker-content:hover { animation-play-state: paused; }
+
+    @keyframes ticker {
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-100%, 0, 0); }
+    }
+
+    .ticker-item {
+      display: inline-block;
+      padding: 0 30px;
+      color: var(--text-cream);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       VITALS MONITOR
+    ═══════════════════════════════════════════════════════ */
+    .vitals-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .custom-select {
+      background: var(--bg-earth);
+      border: 2px solid var(--border-soil);
+      color: var(--text-cream);
+      padding: 12px 20px;
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 600;
+      min-width: 250px;
+    }
+
+    .gauge-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .gauge-card {
+      background: var(--bg-earth);
+      border: 1px solid var(--border-soil);
+      border-radius: var(--radius-md);
+      padding: 30px;
+      text-align: center;
+    }
+
+    .circular-gauge {
+      width: 150px;
+      height: 150px;
+      margin: 0 auto 20px;
+      position: relative;
+    }
+
+    .gauge-svg { transform: rotate(-90deg); }
+    .gauge-circle-bg { fill: none; stroke: var(--border-soil); stroke-width: 8; }
+    .gauge-circle-val { 
+      fill: none; 
+      stroke: var(--accent-green); 
+      stroke-width: 8; 
+      stroke-linecap: round;
+      stroke-dasharray: 283;
+      stroke-dashoffset: 70;
+      transition: stroke-dashoffset 1s ease;
+    }
+
+    .gauge-center-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .gauge-center-text .val { font-size: 28px; font-weight: 800; display: block; }
+    .gauge-center-text .unit { font-size: 12px; color: var(--text-muted); }
+
+    .ai-card {
+      background: rgba(124, 181, 24, 0.03);
+      border: 1px dashed var(--accent-green);
+      border-radius: var(--radius-md);
+      padding: 30px;
+      margin-top: 30px;
+    }
+
+    .ai-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      color: var(--accent-green);
+      margin-bottom: 15px;
+    }
+
+    .ai-summary {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .confidence-bar-wrap {
+      background: var(--bg-deep);
+      height: 8px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .confidence-fill {
+      height: 100%;
+      background: var(--accent-green);
+      transition: width 1s ease;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       UPLOAD LOG
+    ═══════════════════════════════════════════════════════ */
+    .upload-box {
+      border: 2px dashed var(--border-soil);
+      border-radius: var(--radius-lg);
+      padding: 60px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.02);
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .upload-box:hover { border-color: var(--accent-green); background: rgba(124, 181, 24, 0.03); }
+
+    .upload-icon { font-size: 48px; color: var(--text-muted); margin-bottom: 20px; }
+
+    .progress-container {
+      margin-top: 30px;
+      display: none;
+    }
+
+    .progress-bar {
+      height: 12px;
+      background: var(--bg-deep);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent-green);
+      width: 0%;
+      transition: width 0.2s;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       MODALS
+    ═══════════════════════════════════════════════════════ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(5px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: var(--bg-midnight);
+      border: 1px solid var(--border-soil);
+      width: 100%;
+      max-width: 800px;
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      position: relative;
+      animation: modalSlideUp 0.3s ease-out;
+    }
+
+    @keyframes modalSlideUp {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 24px;
+      color: var(--text-muted);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       MOBILE NAVIGATION
+    ═══════════════════════════════════════════════════════ */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: var(--bg-deep);
+      border-top: 1px solid var(--border-soil);
+      height: 70px;
+      z-index: 1000;
+      justify-content: space-around;
+      align-items: center;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .m-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    .m-nav-item i { font-size: 20px; }
+    .m-nav-item span { font-size: 10px; font-weight: 700; text-transform: uppercase; }
+    .m-nav-item.active { color: var(--accent-green); }
+
+    /* ═══════════════════════════════════════════════════════
+       RESPONSIVE DESIGN
+    ═══════════════════════════════════════════════════════ */
+    @media (max-width: 992px) {
+      .sidebar { transform: translateX(-100%); }
+      .main-wrapper { margin-left: 0; }
+      .mobile-nav { display: flex; }
+      .content-area { padding-bottom: 100px; }
+    }
+
+    @media (max-width: 600px) {
+      .top-bar { padding: 0 20px; }
+      .kpi-row { grid-template-columns: repeat(2, 1fr); }
+      .kpi-card { padding: 15px; flex-direction: column; text-align: center; }
+      .kpi-icon { width: 45px; height: 45px; font-size: 18px; }
+      .kpi-data .val { font-size: 24px; }
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 12px 24px;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-primary { background: var(--accent-green); color: var(--bg-midnight); }
+    .btn-primary:hover { filter: brightness(1.1); transform: translateY(-2px); }
+
+    .btn-outline { border: 1px solid var(--border-soil); color: var(--text-cream); }
+    .btn-outline:hover { background: rgba(255,255,255,0.05); }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: var(--accent-green);
+      color: var(--bg-midnight);
+      padding: 15px 30px;
+      border-radius: 50px;
+      font-weight: 800;
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* Form Styles */
+    .form-group { margin-bottom: 15px; }
+    .form-label { display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+    .form-input {
+      width: 100%;
+      background: var(--bg-deep);
+      border: 1px solid var(--border-soil);
+      border-radius: var(--radius-sm);
+      padding: 12px 15px;
+      color: var(--text-cream);
+      font-family: inherit;
+      font-size: 15px;
+    }
+    .form-input:focus { border-color: var(--accent-green); outline: none; }
+    .form-input.error { border-color: var(--accent-red) !important; background: rgba(192, 57, 43, 0.05); }
+
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 600px) { .modal-grid { grid-template-columns: 1fr; } }
+
+    /* Profile Specific */
+    .profile-field-row {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .p-val {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--text-cream);
+    }
+    .p-val input {
+      margin-top: 5px;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar (Desktop Only) -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand">
+        <i class="fa-solid fa-cow"></i>
+        <span>🌾 KisanTrack</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-link active" data-tab="dashboard">
+        <i class="fa-solid fa-layer-group"></i>
+        <div>Dashboard / डैशबोर्ड</div>
+      </a>
+      <a href="#" class="nav-link" data-tab="profiles">
+        <i class="fa-solid fa-cow"></i>
+        <div>Herd Profiles / पशु प्रोफाइल</div>
+      </a>
+      <a href="#" class="nav-link" data-tab="vitals">
+        <i class="fa-solid fa-heart-pulse"></i>
+        <div>Live Monitor / लाइव मॉनिटर</div>
+      </a>
+      <a href="#" class="nav-link" data-tab="alerts">
+        <i class="fa-solid fa-bell"></i>
+        <div>Alert Feed / अलर्ट फीड</div>
+      </a>
+      <a href="#" class="nav-link" data-tab="reports">
+        <i class="fa-solid fa-chart-line"></i>
+        <div>History / इतिहास</div>
+      </a>
+      <a href="#" class="nav-link" data-tab="upload">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        <div>Upload Logs / लॉग अपलोड</div>
+      </a>
+      <a href="#" class="nav-link" data-tab="camera">
+        <i class="fa-solid fa-camera"></i>
+        <div>Camera / कैमरा</div>
+      </a>
+      <a href="#" class="nav-link" data-tab="profile">
+        <i class="fa-solid fa-user-circle"></i>
+        <div>Profile / प्रोफ़ाइल</div>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="status-indicator">
+        <div class="pulse-dot"></div>
+        <span>System Online / ऑनलाइन</span>
+      </div>
+      <div style="font-size: 10px; color: #555; margin-top: 8px;">Last sync: Just now</div>
+    </div>
+  </aside>
+
+  <!-- Mobile Bottom Nav -->
+  <nav class="mobile-nav">
+    <a href="#" class="m-nav-item active" data-tab="dashboard">
+      <i class="fa-solid fa-house"></i>
+      <span>Home</span>
+    </a>
+    <a href="#" class="m-nav-item" data-tab="profiles">
+      <i class="fa-solid fa-cow"></i>
+      <span>Herd</span>
+    </a>
+    <a href="#" class="m-nav-item" data-tab="vitals">
+      <i class="fa-solid fa-heart-pulse"></i>
+      <span>Live</span>
+    </a>
+    <a href="#" class="m-nav-item" data-tab="alerts">
+      <i class="fa-solid fa-bell"></i>
+      <span>Alerts</span>
+    </a>
+    <a href="#" class="m-nav-item" data-tab="upload">
+      <i class="fa-solid fa-plus-circle"></i>
+      <span>Add</span>
+    </a>
+    <a href="#" class="m-nav-item" data-tab="camera">
+      <i class="fa-solid fa-camera"></i>
+      <span>Camera</span>
+    </a>
+    <a href="#" class="m-nav-item" data-tab="profile">
+      <i class="fa-solid fa-user"></i>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+  <!-- Main Content Wrapper -->
+  <div class="main-wrapper">
+    <header class="top-bar">
+      <div class="poppins" style="font-size: 18px; font-weight: 700;">
+        KisanTrack Command Center
+      </div>
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <span class="poppins" style="font-weight: 600; font-size: 14px;">Farmer ID: 4802</span>
+        <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--accent-green); color: var(--bg-midnight); display: flex; align-items: center; justify-content: center; font-weight: 800;">B</div>
+      </div>
+    </header>
+
+    <div class="content-area">
+
+      <!-- 1. DASHBOARD HOME -->
+      <div id="dashboard" class="section active">
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <div class="kpi-icon"><i class="fa-solid fa-list-check"></i></div>
+            <div class="kpi-data">
+              <span class="val">12</span>
+              <span class="lab">Monitored / कुल पशु</span>
+            </div>
+          </div>
+          <div class="kpi-card kpi-healthy">
+            <div class="kpi-icon"><i class="fa-solid fa-check-double"></i></div>
+            <div class="kpi-data">
+              <span class="val">9</span>
+              <span class="lab">Healthy / स्वस्थ</span>
+            </div>
+          </div>
+          <div class="kpi-card kpi-warning">
+            <div class="kpi-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="kpi-data">
+              <span class="val">2</span>
+              <span class="lab">Warnings / चेतावनी</span>
+            </div>
+          </div>
+          <div class="kpi-card kpi-critical">
+            <div class="kpi-icon"><i class="fa-solid fa-shield-virus"></i></div>
+            <div class="kpi-data">
+              <span class="val">1</span>
+              <span class="lab">Critical / गंभीर</span>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="poppins" style="margin-bottom: 20px;">Herd Health Overview / झुंड स्वास्थ्य</h2>
+        <div class="herd-grid" id="dashboard-herd-grid">
+          <!-- Populated by JS -->
+        </div>
+
+        <div class="alert-ticker-container">
+          <div class="ticker-label">LATEST / नवीनतम</div>
+          <div class="ticker-content" id="ticker-track">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. ANIMAL PROFILES -->
+      <div id="profiles" class="section">
+        <div class="vitals-header">
+          <div class="welcome-text">
+            <h2 class="poppins">Animal Registry / पशु पंजी</h2>
+            <p style="color: var(--text-muted); font-size: 14px;">Manage your livestock records</p>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <button class="btn btn-primary" onclick="openAddAnimalModal()">
+              <i class="fa-solid fa-plus"></i> Add Animal / पशु जोड़ें
+            </button>
+          </div>
+        </div>
+        
+        <div class="dashboard-card" style="padding: 20px; margin-bottom: 30px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+          <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted);"></i>
+          <input type="text" class="custom-select" placeholder="Search by ID or breed..." style="background: var(--bg-deep); flex: 1; min-width: 200px;">
+          <div style="display: flex; gap: 5px;">
+            <button class="btn btn-outline active" style="padding: 8px 15px; font-size: 13px;">All</button>
+            <button class="btn btn-outline" style="padding: 8px 15px; font-size: 13px;">Cows</button>
+            <button class="btn btn-outline" style="padding: 8px 15px; font-size: 13px;">Buffaloes</button>
+            <button class="btn btn-outline" style="padding: 8px 15px; font-size: 13px;">Goats</button>
+          </div>
+        </div>
+
+        <div class="herd-grid" id="full-herd-grid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- 3. LIVE MONITOR -->
+      <div id="vitals" class="section">
+        <div class="vitals-header">
+          <h2 class="poppins">Live Vitals / लाइव विटल्स</h2>
+          <select id="vitals-animal-select" class="custom-select">
+            <!-- Populated by JS -->
+          </select>
+        </div>
+
+        <div class="gauge-row">
+          <div class="gauge-card">
+            <h3 class="poppins" style="margin-bottom: 20px;">Temperature / तापमान</h3>
+            <div class="circular-gauge">
+              <svg class="gauge-svg" width="150" height="150">
+                <circle class="gauge-circle-bg" cx="75" cy="75" r="45"></circle>
+                <circle class="gauge-circle-val" id="gauge-temp" cx="75" cy="75" r="45"></circle>
+              </svg>
+              <div class="gauge-center-text">
+                <span class="val" id="txt-temp">38.5</span>
+                <span class="unit">°C</span>
+              </div>
+            </div>
+            <div id="status-temp" class="status-badge badge-healthy">NORMAL</div>
+          </div>
+
+          <div class="gauge-card">
+            <h3 class="poppins" style="margin-bottom: 20px;">Heart Rate / हृदय गति</h3>
+            <div class="circular-gauge">
+              <svg class="gauge-svg" width="150" height="150">
+                <circle class="gauge-circle-bg" cx="75" cy="75" r="45"></circle>
+                <circle class="gauge-circle-val" id="gauge-hr" cx="75" cy="75" r="45"></circle>
+              </svg>
+              <div class="gauge-center-text">
+                <span class="val" id="txt-hr">72</span>
+                <span class="unit">BPM</span>
+              </div>
+            </div>
+            <div id="status-hr" class="status-badge badge-healthy">NORMAL</div>
+          </div>
+
+          <div class="gauge-card">
+            <h3 class="poppins" style="margin-bottom: 20px;">Activity / गतिविधि</h3>
+            <div class="circular-gauge">
+              <svg class="gauge-svg" width="150" height="150">
+                <circle class="gauge-circle-bg" cx="75" cy="75" r="45"></circle>
+                <circle class="gauge-circle-val" id="gauge-act" cx="75" cy="75" r="45"></circle>
+              </svg>
+              <div class="gauge-center-text">
+                <span class="val" id="txt-act">Norm</span>
+              </div>
+            </div>
+            <div id="status-act" class="status-badge badge-healthy">NORMAL</div>
+          </div>
+        </div>
+
+        <div class="dashboard-card" style="padding: 30px; margin-bottom: 30px;">
+          <h3 class="poppins" style="margin-bottom: 20px;">Real-Time Trend / वास्तविक रुझान</h3>
+          <div style="height: 300px;">
+            <canvas id="liveTrendChart"></canvas>
+          </div>
+        </div>
+
+        <div class="ai-card">
+          <div class="ai-title"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Health Assessment / एआई स्वास्थ्य मूल्यांकन</div>
+          <p class="ai-summary" id="ai-health-text">Select an animal to generate a real-time health intelligence report based on current vitals and historical trends.</p>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 13px; font-weight: 700;">Detection Confidence / आत्मविश्वास</div>
+            <div style="font-size: 13px; font-weight: 700; color: var(--accent-green);" id="ai-conf-val">94.2%</div>
+          </div>
+          <div class="confidence-bar-wrap" style="margin-top: 10px;">
+            <div class="confidence-fill" id="ai-conf-bar" style="width: 94.2%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. CAMERA MONITOR -->
+      <div id="camera" class="section">
+        <!-- Settings Bar -->
+        <div class="dashboard-card" style="padding: 15px 25px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+          <div style="display: flex; gap: 20px; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="form-label" style="margin-bottom: 0;">Camera / कैमरा</span>
+              <button class="status-badge badge-healthy" id="cam-power-toggle">ON</button>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="form-label" style="margin-bottom: 0;">Interval (s)</span>
+              <input type="number" class="form-input" value="120" style="width: 80px; padding: 5px 10px;" id="cam-interval">
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 15px;">
+            <span class="form-label" style="margin-bottom: 0;">Location / स्थान</span>
+            <input type="text" class="form-input" value="Main Barn" style="width: 150px; padding: 5px 10px;" id="cam-loc-label">
+          </div>
+        </div>
+
+        <div class="modal-grid" style="grid-template-columns: 2fr 1fr;">
+          <!-- Left: Feed -->
+          <div style="display: flex; flex-direction: column; gap: 25px;">
+            <div class="dashboard-card" style="padding: 20px; background: #0D0D08; border-color: var(--accent-green);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 class="poppins"><i class="fa-solid fa-tower-broadcast"></i> ESP32-CAM Live Feed</h3>
+                <div class="status-indicator">
+                  <div class="pulse-dot" style="background: var(--accent-red); box-shadow: 0 0 10px var(--accent-red);"></div>
+                  <span style="color: var(--accent-red); font-weight: 800; letter-spacing: 1px;">LIVE</span>
+                </div>
+              </div>
+              
+              <div style="width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; position: relative;" id="cam-feed-container">
+                <canvas id="cam-canvas" style="width: 100%; height: 100%; object-fit: cover;"></canvas>
+                <div id="cam-flash" style="position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; transition: opacity 0.2s;"></div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                <div style="display: flex; gap: 30px;">
+                  <div>
+                    <span class="form-label">Last Capture / पिछला</span>
+                    <div id="last-cap-time" style="font-weight: 700;">Just now</div>
+                  </div>
+                  <div>
+                    <span class="form-label">Next Capture / अगला</span>
+                    <div id="next-cap-timer" style="font-weight: 800; color: var(--accent-amber); font-family: monospace; font-size: 18px;">120s</div>
+                  </div>
+                </div>
+                <button class="btn btn-primary" onclick="triggerManualCapture()"><i class="fa-solid fa-camera"></i> Capture Now / कैप्चर करें</button>
+              </div>
+            </div>
+
+            <!-- OpenCV Panel -->
+            <div class="dashboard-card" style="padding: 25px;">
+              <h3 class="poppins" style="margin-bottom: 20px;"><i class="fa-solid fa-microchip"></i> Detection Results / पहचान परिणाम</h3>
+              <div class="modal-grid" style="grid-template-columns: repeat(4, 1fr); gap: 15px;">
+                <div style="background: var(--bg-deep); padding: 15px; border-radius: 12px; text-align: center;">
+                  <span class="val" id="det-total" style="font-size: 24px; font-weight: 800; display: block;">0</span>
+                  <small class="form-label">Total / कुल</small>
+                </div>
+                <div style="background: var(--bg-deep); padding: 15px; border-radius: 12px; text-align: center;">
+                  <span class="val" id="det-healthy" style="font-size: 24px; font-weight: 800; color: var(--accent-green); display: block;">0</span>
+                  <small class="form-label">Healthy</small>
+                </div>
+                <div style="background: var(--bg-deep); padding: 15px; border-radius: 12px; text-align: center;">
+                  <span class="val" id="det-flagged" style="font-size: 24px; font-weight: 800; color: var(--accent-red); display: block;">0</span>
+                  <small class="form-label">Flagged</small>
+                </div>
+                <div style="background: var(--bg-deep); padding: 15px; border-radius: 12px; text-align: center;">
+                  <span class="val" id="det-conf" style="font-size: 24px; font-weight: 800; color: var(--accent-blue); display: block;">0%</span>
+                  <small class="form-label">Confidence</small>
+                </div>
+              </div>
+              <p style="margin-top: 15px; font-size: 11px; color: var(--text-dim); text-align: center;">Powered by OpenCV + Gemini Vision / जेमिनी विज़न द्वारा संचालित</p>
+            </div>
+          </div>
+
+          <!-- Right: Gemini AI -->
+          <div style="display: flex; flex-direction: column; gap: 25px;">
+            <div class="dashboard-card" style="padding: 25px; border-left: 4px solid var(--accent-blue);">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                <i class="fa-solid fa-brain" style="color: var(--accent-blue); font-size: 24px;"></i>
+                <h3 class="poppins">Gemini Vision / विश्लेषण</h3>
+              </div>
+
+              <!-- API Key Section -->
+              <div id="gemini-key-section" style="margin-bottom: 25px;">
+                <div id="key-input-area">
+                  <span class="form-label">Gemini API Key</span>
+                  <div style="display: flex; gap: 8px;">
+                    <input type="password" class="form-input" id="gemini-api-key" placeholder="Enter key...">
+                    <button class="btn btn-primary" onclick="saveGeminiKey()" style="padding: 10px;"><i class="fa-solid fa-save"></i></button>
+                  </div>
+                  <p style="font-size: 10px; color: var(--text-dim); margin-top: 5px;">Required for AI visual health assessment.</p>
+                </div>
+                <div id="key-connected-area" style="display: none; color: var(--accent-green); font-weight: 700; font-size: 13px;">
+                  <i class="fa-solid fa-circle-check"></i> Gemini Connected / कनेक्टेड
+                  <button class="btn-text" onclick="clearGeminiKey()" style="font-size: 10px; margin-left: 10px;">Change</button>
+                </div>
+              </div>
+
+              <!-- AI Results -->
+              <div id="ai-vision-results" style="opacity: 0.5; pointer-events: none;">
+                <div style="margin-bottom: 20px;">
+                  <span class="form-label">Herd Visual Score / स्कोर</span>
+                  <div style="display: flex; align-items: center; gap: 15px;">
+                    <div class="confidence-bar-wrap" style="flex: 1;">
+                      <div id="visual-score-bar" class="confidence-fill" style="width: 0%;"></div>
+                    </div>
+                    <span id="visual-score-text" style="font-weight: 800; font-size: 18px;">-/10</span>
+                  </div>
+                </div>
+
+                <div id="species-chips" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;">
+                  <!-- Chips go here -->
+                </div>
+
+                <div id="flagged-animal-alert" style="display: none; background: rgba(192, 57, 43, 0.1); border: 1px solid var(--accent-red); padding: 15px; border-radius: 12px; margin-bottom: 20px;">
+                  <div style="color: var(--accent-red); font-weight: 800; font-size: 13px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Health Concern Detected
+                  </div>
+                  <p id="flagged-text" style="font-size: 12px; margin-top: 5px;">Abnormal posture detected in Cow #1.</p>
+                </div>
+
+                <div class="dashboard-card" style="padding: 15px; background: rgba(255,255,255,0.02); font-size: 13px; line-height: 1.5;" id="ai-vision-summary">
+                  Waiting for next capture analysis...
+                </div>
+              </div>
+            </div>
+
+            <!-- Capture History -->
+            <div class="dashboard-card" style="padding: 25px;">
+              <h3 class="poppins" style="margin-bottom: 20px; font-size: 16px;">History / पिछला कैप्चर</h3>
+              <div id="capture-history-strip" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <!-- Thumbnails go here -->
+              </div>
+              <button class="btn btn-outline" style="width: 100%; margin-top: 20px; font-size: 12px;">View All History</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. ALERTS FEED -->
+      <div id="alerts" class="section">
+        <div class="vitals-header">
+          <h2 class="poppins">Live Alert Stream / लाइव अलर्ट</h2>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-outline">All</button>
+            <button class="btn btn-primary" style="background: var(--accent-red); color: white;">Critical</button>
+            <button class="btn btn-outline">Resolved</button>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 15px;" id="full-alerts-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- 5. REPORTS -->
+      <div id="reports" class="section">
+        <div class="vitals-header">
+          <h2 class="poppins">Historical Analytics / विश्लेषण</h2>
+          <button class="btn btn-primary" onclick="exportCSV()"><i class="fa-solid fa-download"></i> Export CSV</button>
+        </div>
+        
+        <div class="kpi-row" style="grid-template-columns: 1fr 1fr;">
+          <div class="dashboard-card" style="padding: 25px;">
+            <h3 class="poppins" style="margin-bottom: 15px;">Incidents by Day</h3>
+            <div style="height: 250px;"><canvas id="reportBarChart"></canvas></div>
+          </div>
+          <div class="dashboard-card" style="padding: 25px;">
+            <h3 class="poppins" style="margin-bottom: 15px;">Avg Temperature Trend</h3>
+            <div style="height: 250px;"><canvas id="reportLineChart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="dashboard-card" style="padding: 30px;">
+          <h3 class="poppins">Detailed Log Table / विस्तृत लॉग तालिका</h3>
+          <div class="table-wrap">
+            <table id="logs-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Animal ID</th>
+                  <th>Parameter</th>
+                  <th>Reading</th>
+                  <th>Severity</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="logs-tbody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. UPLOAD -->
+      <div id="upload" class="section">
+        <h2 class="poppins" style="margin-bottom: 30px;">Sync Offline Logs / लॉग अपलोड करें</h2>
+        ...
+      </div>
+
+      <!-- 7. PROFILE -->
+      <div id="profile" class="section">
+        <div class="dashboard-card" style="padding: 40px; text-align: center; margin-bottom: 30px; position: relative;">
+          <div style="width: 120px; height: 120px; border-radius: 50%; background: var(--bg-midnight); border: 4px solid var(--accent-green); display: flex; align-items: center; justify-content: center; font-size: 48px; font-weight: 800; color: var(--accent-green); margin: 0 auto 20px;" id="prof-initials">
+            RK
+          </div>
+          <h2 class="poppins" id="prof-display-name">Rajesh Kumar</h2>
+          <p id="prof-display-farm" style="color: var(--text-muted); margin-bottom: 10px;">Green Valley Farm</p>
+          <span class="status-badge badge-healthy"><i class="fa-solid fa-circle-check"></i> Active Farmer / सक्रिय किसान</span>
+          
+          <div style="margin-top: 25px;">
+            <button class="btn btn-outline" id="btn-edit-profile" onclick="toggleProfileEdit()">
+              <i class="fa-solid fa-pen-to-square"></i> Edit Profile / संपादित करें
+            </button>
+            <div id="edit-actions" style="display: none; justify-content: center; gap: 15px;">
+              <button class="btn btn-outline" onclick="toggleProfileEdit(false)">Cancel</button>
+              <button class="btn btn-primary" onclick="saveProfile()">Save Changes / सहेजें</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-grid" id="profile-info-grid">
+          <!-- Card 1: Personal -->
+          <div class="dashboard-card" style="padding: 25px;">
+            <h3 class="poppins" style="margin-bottom: 20px; font-size: 18px; border-bottom: 1px solid var(--border-soil); padding-bottom: 10px;">
+              <i class="fa-solid fa-id-card" style="color: var(--accent-green);"></i> Personal Info / व्यक्तिगत
+            </h3>
+            <div class="profile-field-row">
+              <span class="form-label">Full Name / पूरा नाम</span>
+              <div class="p-val" data-field="name">Rajesh Kumar</div>
+            </div>
+            <div class="profile-field-row" style="margin-top: 15px;">
+              <span class="form-label">Age / आयु</span>
+              <div class="p-val" data-field="age">42</div>
+            </div>
+            <div class="profile-field-row" style="margin-top: 15px;">
+              <span class="form-label">Phone / फ़ोन</span>
+              <div class="p-val" data-field="phone">+91 98765 43210</div>
+            </div>
+            <div class="profile-field-row" style="margin-top: 15px;">
+              <span class="form-label">Village / गाँव</span>
+              <div class="p-val" data-field="village">Deshnoke</div>
+            </div>
+            <div class="profile-field-row" style="margin-top: 15px;">
+              <span class="form-label">District / जिला</span>
+              <div class="p-val" data-field="district">Bikaner</div>
+            </div>
+            <div class="profile-field-row" style="margin-top: 15px;">
+              <span class="form-label">State / राज्य</span>
+              <div class="p-val" data-field="state">Rajasthan</div>
+            </div>
+          </div>
+
+          <!-- Card 2: Farm -->
+          <div class="dashboard-card" style="padding: 25px;">
+            <h3 class="poppins" style="margin-bottom: 20px; font-size: 18px; border-bottom: 1px solid var(--border-soil); padding-bottom: 10px;">
+              <i class="fa-solid fa-wheat-awn" style="color: var(--accent-amber);"></i> Farm Details / खेत
+            </h3>
+            <div class="profile-field-row">
+              <span class="form-label">Farm Name / खेत का नाम</span>
+              <div class="p-val" data-field="farmName">Green Valley Farm</div>
+            </div>
+            <div class="profile-field-row" style="margin-top: 15px;">
+              <span class="form-label">Farm Size / आकार (Acres)</span>
+              <div class="p-val" data-field="farmSize">12.5</div>
+            </div>
+            <div class="profile-field-row" style="margin-top: 15px;">
+              <span class="form-label">Years of Farming / अनुभव</span>
+              <div class="p-val" data-field="exp">15</div>
+            </div>
+            <div class="profile-field-row" style="margin-top: 15px;">
+              <span class="form-label">Primary Animal / मुख्य पशु</span>
+              <div class="p-val" data-field="primaryType">Cow / Buffalo</div>
+            </div>
+            <div class="profile-field-row" style="margin-top: 15px;">
+              <span class="form-label">Sensor System ID / आईडी</span>
+              <div class="p-val" data-field="sensorId">KT-SYS-4802</div>
+            </div>
+          </div>
+
+          <!-- Card 3: Account -->
+          <div class="dashboard-card" style="grid-column: 1 / -1; padding: 25px;">
+            <h3 class="poppins" style="margin-bottom: 20px; font-size: 18px; border-bottom: 1px solid var(--border-soil); padding-bottom: 10px;">
+              <i class="fa-solid fa-user-shield" style="color: var(--accent-blue);"></i> Account Info / खाता
+            </h3>
+            <div class="modal-grid" style="gap: 40px;">
+              <div>
+                <span class="form-label">Farmer ID</span>
+                <div style="font-weight: 800; font-size: 18px; color: var(--accent-green);">#KT-4802</div>
+              </div>
+              <div>
+                <span class="form-label">Registration Date</span>
+                <div style="font-weight: 600;">January 12, 2026</div>
+              </div>
+              <div>
+                <span class="form-label">Last Login</span>
+                <div style="font-weight: 600;">Today, 01:05 AM</div>
+              </div>
+              <div>
+                <span class="form-label">System Version</span>
+                <div style="font-weight: 600;">v2.4.0 (Pro)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats Chips -->
+        <div style="display: flex; gap: 15px; margin-top: 30px; flex-wrap: wrap;">
+          <div class="status-badge" style="background: var(--bg-earth); padding: 12px 25px; font-size: 14px; border: 1px solid var(--border-soil);">
+            🐄 12 Animals Registered
+          </div>
+          <div class="status-badge" style="background: var(--bg-earth); padding: 12px 25px; font-size: 14px; border: 1px solid var(--border-soil);">
+            ⚠️ 2 Active Alerts
+          </div>
+          <div class="status-badge" style="background: var(--bg-earth); padding: 12px 25px; font-size: 14px; border: 1px solid var(--border-soil);">
+            ✓ 94% System Uptime
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-content">
+      <button class="close-modal" id="close-modal"><i class="fa-solid fa-xmark"></i></button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">
+    <i class="fa-solid fa-circle-check"></i>
+    <span id="toast-text">Success Message</span>
+  </div>
+
+  <script>
+    /* ═══════════════════════════════════════════════════════
+       APPLICATION DATA & STATE
+    ═══════════════════════════════════════════════════════ */
+    const APP_DATA = {
+      animals: [
+        { id: 'A01', species: 'Cow', emoji: '🐄', breed: 'Holstein', age: 4, weight: 450, status: 'Healthy', vitals: { temp: 38.6, hr: 68, activity: 'Normal' } },
+        { id: 'A02', species: 'Cow', emoji: '🐄', breed: 'Holstein', age: 3, weight: 420, status: 'Warning', vitals: { temp: 39.8, hr: 74, activity: 'Normal' } },
+        { id: 'A03', species: 'Cow', emoji: '🐄', breed: 'Gir', age: 5, weight: 480, status: 'Healthy', vitals: { temp: 38.4, hr: 66, activity: 'Normal' } },
+        { id: 'B01', species: 'Buffalo', emoji: '🐃', breed: 'Murrah', age: 6, weight: 650, status: 'Healthy', vitals: { temp: 38.2, hr: 62, activity: 'Normal' } },
+        { id: 'B02', species: 'Buffalo', emoji: '🐃', breed: 'Surti', age: 4, weight: 580, status: 'Critical', vitals: { temp: 37.8, hr: 84, activity: 'Low' } },
+        { id: 'G01', species: 'Goat', emoji: '🐐', breed: 'Beetal', age: 2, weight: 45, status: 'Healthy', vitals: { temp: 39.1, hr: 78, activity: 'Normal' } },
+        { id: 'G02', species: 'Goat', emoji: '🐐', breed: 'Sirohi', age: 3, weight: 52, status: 'Healthy', vitals: { temp: 39.0, hr: 76, activity: 'Normal' } },
+        { id: 'G03', species: 'Goat', emoji: '🐐', breed: 'Beetal', age: 1, weight: 32, status: 'Warning', vitals: { temp: 40.2, hr: 82, activity: 'High' } },
+        { id: 'A04', species: 'Cow', emoji: '🐄', breed: 'Sahiwal', age: 4, weight: 440, status: 'Healthy', vitals: { temp: 38.5, hr: 68, activity: 'Normal' } },
+        { id: 'A05', species: 'Cow', emoji: '🐄', breed: 'Sahiwal', age: 5, weight: 460, status: 'Healthy', vitals: { temp: 38.6, hr: 67, activity: 'Normal' } },
+        { id: 'B03', species: 'Buffalo', emoji: '🐃', breed: 'Murrah', age: 3, weight: 600, status: 'Healthy', vitals: { temp: 38.3, hr: 63, activity: 'Normal' } },
+        { id: 'G04', species: 'Goat', emoji: '🐐', breed: 'Sirohi', age: 2, weight: 48, status: 'Healthy', vitals: { temp: 39.2, hr: 77, activity: 'Normal' } }
+      ],
+      alerts: [
+        { id: 101, animalId: 'B02', species: 'Buffalo', type: 'Critical', param: 'Heart Rate', value: '84 bpm', time: '10:32 AM', conf: 96.4, resolved: false },
+        { id: 102, animalId: 'A02', species: 'Cow', type: 'Warning', param: 'Temperature', value: '39.8°C', time: '09:15 AM', conf: 92.1, resolved: false },
+        { id: 103, animalId: 'G03', species: 'Goat', type: 'Warning', param: 'Activity', value: 'Abnormally High', time: '08:45 AM', conf: 89.5, resolved: true },
+        { id: 104, animalId: 'B02', species: 'Buffalo', type: 'Critical', param: 'Activity', value: 'Low', time: 'Yesterday', conf: 98.2, resolved: false },
+        { id: 105, animalId: 'A01', species: 'Cow', type: 'Info', param: 'Checkup', value: 'Routine Complete', time: 'Yesterday', conf: 100, resolved: true }
+      ],
+      logs: [
+        { date: '2026-05-08', id: 'B02', param: 'Heart Rate', val: '84 bpm', sev: 'Critical', status: 'Pending' },
+        { date: '2026-05-08', id: 'A02', param: 'Temp', val: '39.8°C', sev: 'Warning', status: 'Pending' },
+        { date: '2026-05-07', id: 'G03', param: 'Activity', val: 'High', sev: 'Warning', status: 'Resolved' },
+        { date: '2026-05-07', id: 'B01', param: 'Temp', val: '38.2°C', sev: 'Healthy', status: 'Ok' }
+      ]
+    };
+
+    let selectedAnimalId = 'A01';
+    let liveChart = null;
+
+    /* ═══════════════════════════════════════════════════════
+       INITIALIZATION & TAB SYSTEM
+    ═══════════════════════════════════════════════════════ */
+    document.addEventListener('DOMContentLoaded', () => {
+      initTabs();
+      renderDashboardGrid();
+      renderHerdRegistry();
+      renderAlertFeed();
+      initVitalsMonitor();
+      initReports();
+      setupUpload();
+      startSimulation();
+      initCameraSystem();
+    });
+
+    function initTabs() {
+      const navLinks = document.querySelectorAll('.nav-link, .m-nav-item');
+      navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const tabId = link.getAttribute('data-tab');
+          
+          // Update UI
+          document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+          document.getElementById(tabId).classList.add('active');
+          
+          document.querySelectorAll('.nav-link, .m-nav-item').forEach(l => l.classList.remove('active'));
+          document.querySelectorAll(`[data-tab="${tabId}"]`).forEach(l => l.classList.add('active'));
+
+          if (tabId === 'vitals') setTimeout(initLiveChart, 100);
+        });
+      });
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       RENDER FUNCTIONS
+    ═══════════════════════════════════════════════════════ */
+    function renderDashboardGrid() {
+      const grid = document.getElementById('dashboard-herd-grid');
+      const ticker = document.getElementById('ticker-track');
+      
+      grid.innerHTML = APP_DATA.animals.map(a => `
+        <div class="animal-card" onclick="openAnimalDetail('${a.id}')">
+          <div class="card-top">
+            <span class="emoji-tag">${a.emoji}</span>
+            <span class="status-badge badge-${a.status.toLowerCase()}">${a.status}</span>
+          </div>
+          <div class="animal-info">
+            <h3>#${a.id} - ${a.breed}</h3>
+            <p>${a.species} · ${a.age} yrs · ${a.weight}kg</p>
+          </div>
+          <div class="vitals-mini">
+            <div class="v-item"><span class="v-val">${a.vitals.temp}°</span><span class="v-lab">Temp</span></div>
+            <div class="v-item"><span class="v-val">${a.vitals.hr}</span><span class="v-lab">HR</span></div>
+            <div class="v-item"><span class="v-val">${a.vitals.activity[0]}</span><span class="v-lab">Act</span></div>
+          </div>
+        </div>
+      `).join('');
+
+      ticker.innerHTML = APP_DATA.alerts.filter(al => !al.resolved).map(al => `
+        <span class="ticker-item">⚠️ ${al.species} #${al.animalId} — ${al.param} ${al.value} — ${al.time}</span>
+      `).join('');
+    }
+
+    function renderHerdRegistry() {
+      const grid = document.getElementById('full-herd-grid');
+      grid.innerHTML = APP_DATA.animals.map(a => `
+        <div class="animal-card">
+          <div class="card-top">
+            <span class="emoji-tag">${a.emoji}</span>
+            <span class="status-badge badge-${a.status.toLowerCase()}">${a.status}</span>
+          </div>
+          <div class="animal-info">
+            <h3>${a.breed} #${a.id}</h3>
+            <p>${a.age} years old · Tag: KT-${a.id}88</p>
+            <p style="color: var(--text-muted); font-size: 13px;">Historical Status: Steady</p>
+          </div>
+          <button class="btn btn-outline" style="width: 100%;" onclick="openAnimalDetail('${a.id}')">View Details</button>
+        </div>
+      `).join('');
+    }
+
+    function renderAlertFeed() {
+      const feed = document.getElementById('full-alerts-list');
+      feed.innerHTML = APP_DATA.alerts.map(al => `
+        <div class="dashboard-card" style="padding: 20px; display: flex; align-items: center; justify-content: space-between; opacity: ${al.resolved ? 0.6 : 1}">
+          <div style="display: flex; gap: 20px; align-items: center;">
+            <div style="font-size: 24px;">${al.species === 'Cow' ? '🐄' : (al.species === 'Buffalo' ? '🐃' : '🐐')}</div>
+            <div>
+              <div style="font-weight: 800; font-size: 16px;">#${al.animalId} - ${al.param} Alert</div>
+              <div style="font-size: 13px; color: var(--text-muted);">${al.value} · ${al.time} · Confidence: ${al.conf}%</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <span class="status-badge badge-${al.type.toLowerCase()}">${al.type}</span>
+            ${al.resolved ? '<i class="fa-solid fa-circle-check" style="color: var(--accent-green); font-size: 20px;"></i>' : 
+              '<button class="btn btn-outline" style="padding: 8px 15px; font-size: 12px;" onclick="resolveAlert('+al.id+')">Resolve</button>'}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       VITALS MONITOR LOGIC
+    ═══════════════════════════════════════════════════════ */
+    function initVitalsMonitor() {
+      const select = document.getElementById('vitals-animal-select');
+      select.innerHTML = APP_DATA.animals.map(a => `<option value="${a.id}">${a.species} #${a.id} (${a.breed})</option>`).join('');
+      
+      select.addEventListener('change', (e) => {
+        selectedAnimalId = e.target.value;
+        updateGauges();
+        updateAISummary();
+        if (liveChart) {
+          liveChart.data.datasets.forEach(d => d.data = Array(20).fill(0).map(() => 38 + Math.random()));
+          liveChart.update();
+        }
+      });
+    }
+
+    function updateGauges() {
+      const animal = APP_DATA.animals.find(a => a.id === selectedAnimalId);
+      if (!animal) return;
+
+      // Temp Gauge
+      const tempPct = ((animal.vitals.temp - 35) / 10) * 100;
+      document.getElementById('gauge-temp').style.strokeDashoffset = 283 - (tempPct / 100) * 283;
+      document.getElementById('txt-temp').textContent = animal.vitals.temp;
+      
+      const tStat = document.getElementById('status-temp');
+      if (animal.vitals.temp > 39.5) { tStat.textContent = "HIGH"; tStat.className = "status-badge badge-critical"; }
+      else { tStat.textContent = "NORMAL"; tStat.className = "status-badge badge-healthy"; }
+
+      // HR Gauge
+      const hrPct = ((animal.vitals.hr - 40) / 80) * 100;
+      document.getElementById('gauge-hr').style.strokeDashoffset = 283 - (hrPct / 100) * 283;
+      document.getElementById('txt-hr').textContent = animal.vitals.hr;
+
+      // Act Gauge
+      document.getElementById('txt-act').textContent = animal.vitals.activity;
+    }
+
+    function initLiveChart() {
+      const ctx = document.getElementById('liveTrendChart').getContext('2d');
+      if (liveChart) liveChart.destroy();
+
+      liveChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: Array(20).fill(''),
+          datasets: [
+            { label: 'Temp', borderColor: '#7CB518', data: Array(20).fill(38.5), tension: 0.4, borderWeight: 3, pointRadius: 0 },
+            { label: 'HR', borderColor: '#E5A100', data: Array(20).fill(70), tension: 0.4, borderWeight: 3, pointRadius: 0 },
+            { label: 'Act', borderColor: '#3B82F6', data: Array(20).fill(10), tension: 0.4, borderWeight: 3, pointRadius: 0 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { display: false },
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#A89F8C' } }
+          }
+        }
+      });
+    }
+
+    function updateAISummary() {
+      const animal = APP_DATA.animals.find(a => a.id === selectedAnimalId);
+      const aiText = document.getElementById('ai-health-text');
+      const aiConf = document.getElementById('ai-conf-val');
+      const aiBar = document.getElementById('ai-conf-bar');
+
+      if (animal.status === 'Healthy') {
+        aiText.textContent = `${animal.species} #${animal.id} is in optimal condition. Vital parameters are stable within the expected seasonal range. No action required.`;
+        aiConf.textContent = "98.1%";
+        aiBar.style.width = "98.1%";
+      } else if (animal.status === 'Warning') {
+        aiText.textContent = `${animal.species} #${animal.id} is showing early signs of metabolic stress. Body temperature is slightly elevated at ${animal.vitals.temp}°C. Monitor closely over the next 4 hours.`;
+        aiConf.textContent = "91.4%";
+        aiBar.style.width = "91.4%";
+      } else {
+        aiText.textContent = `URGENT: ${animal.species} #${animal.id} requires immediate clinical inspection. Vitals indicate severe distress (Low Activity + High Heart Rate). Contact livestock medical team immediately.`;
+        aiConf.textContent = "96.8%";
+        aiBar.style.width = "96.8%";
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       SIMULATION ENGINE
+    ═══════════════════════════════════════════════════════ */
+    function startSimulation() {
+      setInterval(() => {
+        APP_DATA.animals.forEach(a => {
+          // Slight random fluctuation
+          a.vitals.temp = parseFloat((a.vitals.temp + (Math.random() * 0.2 - 0.1)).toFixed(1));
+          a.vitals.hr = Math.floor(a.vitals.hr + (Math.random() * 2 - 1));
+        });
+        
+        if (document.getElementById('vitals').classList.contains('active')) {
+          updateGauges();
+          if (liveChart) {
+            const animal = APP_DATA.animals.find(a => a.id === selectedAnimalId);
+            liveChart.data.datasets[0].data.shift();
+            liveChart.data.datasets[0].data.push(animal.vitals.temp);
+            liveChart.data.datasets[1].data.shift();
+            liveChart.data.datasets[1].data.push(animal.vitals.hr / 2); // scaled for view
+            liveChart.update('none');
+          }
+        }
+      }, 3000);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       MODALS & INTERACTIONS
+    ═══════════════════════════════════════════════════════ */
+    function openAnimalDetail(id) {
+      const animal = APP_DATA.animals.find(a => a.id === id);
+      const modal = document.getElementById('modal-overlay');
+      const body = document.getElementById('modal-body');
+      
+      body.innerHTML = `
+        <div style="display: flex; gap: 30px; margin-bottom: 30px;">
+          <div style="font-size: 80px;">${animal.emoji}</div>
+          <div>
+            <h2 class="poppins">${animal.species} #${animal.id}</h2>
+            <p style="color: var(--accent-green); font-weight: 700;">Status: ${animal.status}</p>
+            <p>${animal.breed} · ${animal.age} Years · ${animal.weight}kg</p>
+          </div>
+        </div>
+        <div style="height: 250px;">
+          <canvas id="historyChart"></canvas>
+        </div>
+        <div style="margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <button class="btn btn-primary" style="width: 100%;"><i class="fa-solid fa-notes-medical"></i> Clinical Records</button>
+          <button class="btn btn-outline" style="width: 100%;"><i class="fa-solid fa-bell"></i> Set Custom Alert</button>
+        </div>
+      `;
+      
+      modal.style.display = 'flex';
+      
+      setTimeout(() => {
+        const ctx = document.getElementById('historyChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{ label: 'Temp', data: [38.2, 38.4, 38.1, 38.6, 39.0, 38.5, 38.4], borderColor: '#7CB518', tension: 0.3 }]
+          },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+      }, 100);
+    }
+
+    document.getElementById('close-modal').onclick = () => document.getElementById('modal-overlay').style.display = 'none';
+    document.getElementById('modal-overlay').onclick = (e) => { if(e.target === document.getElementById('modal-overlay')) document.getElementById('modal-overlay').style.display = 'none'; };
+
+    function resolveAlert(id) {
+      const alert = APP_DATA.alerts.find(al => al.id === id);
+      if (alert) alert.resolved = true;
+      renderAlertFeed();
+      renderDashboardGrid();
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       REPORTS & EXPORT
+    ═══════════════════════════════════════════════════════ */
+    function initReports() {
+      const ctxBar = document.getElementById('reportBarChart').getContext('2d');
+      new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+          labels: ['May 02', 'May 03', 'May 04', 'May 05', 'May 06', 'May 07', 'May 08'],
+          datasets: [
+            { label: 'Critical', data: [1, 0, 2, 1, 0, 1, 1], backgroundColor: '#C0392B' },
+            { label: 'Warning', data: [2, 3, 1, 4, 2, 3, 2], backgroundColor: '#E5A100' }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
+      });
+
+      const ctxLine = document.getElementById('reportLineChart').getContext('2d');
+      new Chart(ctxLine, {
+        type: 'line',
+        data: {
+          labels: ['May 02', 'May 03', 'May 04', 'May 05', 'May 06', 'May 07', 'May 08'],
+          datasets: [{ label: 'Avg Temp', data: [38.4, 38.5, 38.4, 38.6, 38.8, 38.7, 38.6], borderColor: '#7CB518', fill: false }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+
+      const tbody = document.getElementById('logs-tbody');
+      tbody.innerHTML = APP_DATA.logs.map(l => `
+        <tr>
+          <td>${l.date}</td>
+          <td>${l.id}</td>
+          <td>${l.param}</td>
+          <td>${l.val}</td>
+          <td><span class="status-badge badge-${l.sev.toLowerCase()}">${l.sev}</span></td>
+          <td>${l.status}</td>
+        </tr>
+      `).join('');
+    }
+
+    function exportCSV() {
+      let csv = "Date,Animal ID,Parameter,Reading,Severity,Status\n";
+      APP_DATA.logs.forEach(l => {
+        csv += `${l.date},${l.id},${l.param},${l.val},${l.sev},${l.status}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.setAttribute('hidden', '');
+      a.setAttribute('href', url);
+      a.setAttribute('download', 'kisantrack_health_report.csv');
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       CAMERA & VISION AI SYSTEM
+    ═══════════════════════════════════════════════════════ */
+    let camCountdown = 120;
+    let camTimer = null;
+    let lastCaptureImg = 'https://images.unsplash.com/photo-1546445317-29f4545e9d53?auto=format&fit=crop&w=800&q=80';
+    let historyCaptures = [];
+
+    function initCameraSystem() {
+      checkGeminiKey();
+      startCamTimer();
+      renderCaptureHistory();
+      drawCamFeed();
+    }
+
+    function startCamTimer() {
+      if (camTimer) clearInterval(camTimer);
+      camTimer = setInterval(() => {
+        camCountdown--;
+        document.getElementById('next-cap-timer').textContent = camCountdown + 's';
+        if (camCountdown <= 0) {
+          triggerManualCapture();
+        }
+      }, 1000);
+    }
+
+    async function triggerManualCapture() {
+      camCountdown = 120;
+      
+      // Flash Effect
+      const flash = document.getElementById('cam-flash');
+      flash.style.opacity = '1';
+      setTimeout(() => flash.style.opacity = '0', 200);
+
+      // Simulate New Capture (Randomize from a small set or just use placeholder)
+      lastCaptureImg = 'https://images.unsplash.com/photo-1546445317-29f4545e9d53?auto=format&fit=crop&w=800&q=' + (80 + Math.random());
+      
+      document.getElementById('last-cap-time').textContent = 'Just now';
+      
+      drawCamFeed();
+      performVisionAnalysis();
+      
+      // Add to history
+      historyCaptures.unshift({ img: lastCaptureImg, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), score: 8 });
+      if (historyCaptures.length > 8) historyCaptures.pop();
+      renderCaptureHistory();
+    }
+
+    function drawCamFeed() {
+      const canvas = document.getElementById('cam-canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      img.crossOrigin = "Anonymous";
+      img.src = lastCaptureImg;
+      
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        
+        // Mock OpenCV Detection Boxes
+        drawBox(ctx, 100, 150, 200, 250, "Cow #1", "#7CB518");
+        drawBox(ctx, 400, 200, 220, 230, "Cow #2", "#7CB518");
+        drawBox(ctx, 50, 350, 180, 200, "Buffalo #1", "#C0392B"); // Red for flagged
+        
+        // Update Stats
+        document.getElementById('det-total').textContent = "3";
+        document.getElementById('det-healthy').textContent = "2";
+        document.getElementById('det-flagged').textContent = "1";
+        document.getElementById('det-conf').textContent = "94%";
+      };
+    }
+
+    function drawBox(ctx, x, y, w, h, label, color) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 6;
+      ctx.strokeRect(x, y, w, h);
+      
+      ctx.fillStyle = color;
+      ctx.font = "bold 24px Poppins";
+      ctx.fillText(label, x, y - 10);
+      
+      ctx.fillStyle = 'rgba(' + (color === '#C0392B' ? '192, 57, 43' : '124, 181, 24') + ', 0.1)';
+      ctx.fillRect(x, y, w, h);
+    }
+
+    async function performVisionAnalysis() {
+      const apiKey = localStorage.getItem('gemini_api_key');
+      if (!apiKey) return;
+
+      const resultsArea = document.getElementById('ai-vision-results');
+      const summaryArea = document.getElementById('ai-vision-summary');
+      
+      resultsArea.style.opacity = '0.5';
+      summaryArea.textContent = "AI Analysis in progress... (Simulated)";
+
+      // Mock Gemini Response for demonstration
+      setTimeout(() => {
+        resultsArea.style.opacity = '1';
+        summaryArea.innerHTML = `<strong>Vision Summary:</strong> The camera has detected 3 animals in the main barn. Cow #1 and #2 appear healthy with normal resting postures. <strong>Warning:</strong> Buffalo #1 is showing signs of lethargy and an abnormal neck position. Recommend manual inspection.`;
+        
+        document.getElementById('visual-score-text').textContent = "7/10";
+        document.getElementById('visual-score-bar').style.width = "70%";
+        document.getElementById('visual-score-bar').style.background = "var(--accent-amber)";
+        
+        document.getElementById('species-chips').innerHTML = `
+          <span class="status-badge" style="background: rgba(255,255,255,0.05); color: var(--text-cream);">2 Cows</span>
+          <span class="status-badge" style="background: rgba(255,255,255,0.05); color: var(--text-cream);">1 Buffalo</span>
+        `;
+        
+        document.getElementById('flagged-animal-alert').style.display = 'block';
+        document.getElementById('flagged-text').textContent = "Buffalo #1 flagged for lethargy / असामान्य मुद्रा";
+        
+        // Add System Alert
+        const newAlert = { id: Date.now(), animalId: 'Unknown', species: 'Buffalo', type: 'Warning', param: 'Visual Health', value: 'Lethargy Detected', time: 'Just now', conf: 92, resolved: false };
+        APP_DATA.alerts.unshift(newAlert);
+        renderAlertFeed();
+        renderDashboardGrid();
+        showToast("⚠ Camera detected a health concern / कैमरे ने समस्या पकड़ी");
+      }, 2000);
+    }
+
+    function renderCaptureHistory() {
+      const strip = document.getElementById('capture-history-strip');
+      strip.innerHTML = historyCaptures.map(cap => `
+        <div class="dashboard-card" style="padding: 5px; cursor: pointer;" onclick="loadFromHistory('${cap.img}')">
+          <img src="${cap.img}" style="width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 8px;">
+          <div style="display: flex; justify-content: space-between; font-size: 10px; margin-top: 5px; padding: 0 5px;">
+            <span>${cap.time}</span>
+            <span style="color: var(--accent-green); font-weight: 700;">${cap.score}/10</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function loadFromHistory(img) {
+      lastCaptureImg = img;
+      drawCamFeed();
+      performVisionAnalysis();
+    }
+
+    /* API Key Management */
+    function saveGeminiKey() {
+      const key = document.getElementById('gemini-api-key').value;
+      if (!key) return;
+      localStorage.setItem('gemini_api_key', key);
+      checkGeminiKey();
+      showToast("✓ API Key Saved / कुंजी सहेजी गई");
+    }
+
+    function checkGeminiKey() {
+      const key = localStorage.getItem('gemini_api_key');
+      if (key) {
+        document.getElementById('key-input-area').style.display = 'none';
+        document.getElementById('key-connected-area').style.display = 'block';
+        document.getElementById('ai-vision-results').style.opacity = '1';
+        document.getElementById('ai-vision-results').style.pointerEvents = 'all';
+      }
+    }
+
+    function clearGeminiKey() {
+      localStorage.removeItem('gemini_api_key');
+      document.getElementById('key-input-area').style.display = 'block';
+      document.getElementById('key-connected-area').style.display = 'none';
+      document.getElementById('ai-vision-results').style.opacity = '0.5';
+      document.getElementById('ai-vision-results').style.pointerEvents = 'none';
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       ADD ANIMAL LOGIC
+    ═══════════════════════════════════════════════════════ */
+    function openAddAnimalModal() {
+      const modal = document.getElementById('modal-overlay');
+      const body = document.getElementById('modal-body');
+      
+      body.innerHTML = `
+        <h2 class="poppins" style="margin-bottom: 25px; color: var(--accent-green);">
+          <i class="fa-solid fa-plus-circle"></i> Add New Animal / पशु जोड़ें
+        </h2>
+        <form id="add-animal-form">
+          <div class="modal-grid">
+            <div class="form-group">
+              <label class="form-label">Animal ID / पशु आईडी</label>
+              <input type="text" class="form-input" id="new-id" placeholder="e.g. Cow #A04" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Species / प्रजाति</label>
+              <select class="form-input" id="new-species" required>
+                <option value="Cow">Cow / गाय</option>
+                <option value="Buffalo">Buffalo / भैंस</option>
+                <option value="Goat">Goat / बकरी</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Breed / नस्ल</label>
+              <input type="text" class="form-input" id="new-breed" placeholder="e.g. Gir / Holstein" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Age / उम्र (Years)</label>
+              <input type="number" class="form-input" id="new-age" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Weight / वजन (kg)</label>
+              <input type="number" class="form-input" id="new-weight" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Sensor Tag ID / टैग आईडी</label>
+              <input type="text" class="form-input" id="new-tag" placeholder="KT-XXXXX" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Initial Health Status / स्वास्थ्य स्थिति</label>
+            <select class="form-input" id="new-status" required>
+              <option value="Healthy">Healthy / स्वस्थ</option>
+              <option value="Warning">Warning / चेतावनी</option>
+              <option value="Critical">Critical / गंभीर</option>
+            </select>
+          </div>
+          <div style="margin-top: 30px; display: flex; gap: 15px;">
+            <button type="button" class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('modal-overlay').style.display='none'">Cancel</button>
+            <button type="submit" class="btn btn-primary" style="flex: 2;">Add to Herd / झुंड में जोड़ें</button>
+          </div>
+        </form>
+      `;
+      
+      modal.style.display = 'flex';
+
+      document.getElementById('add-animal-form').onsubmit = (e) => {
+        e.preventDefault();
+        submitAddAnimal();
+      };
+    }
+
+    function submitAddAnimal() {
+      const fields = ['new-id', 'new-species', 'new-breed', 'new-age', 'new-weight', 'new-tag', 'new-status'];
+      let isValid = true;
+      const data = {};
+
+      fields.forEach(f => {
+        const el = document.getElementById(f);
+        if (!el.value) {
+          el.classList.add('error');
+          isValid = false;
+        } else {
+          el.classList.remove('error');
+          data[f.replace('new-', '')] = el.value;
+        }
+      });
+
+      if (!isValid) return;
+
+      const emojiMap = { 'Cow': '🐄', 'Buffalo': '🐃', 'Goat': '🐐' };
+      
+      const newAnimal = {
+        id: data.id,
+        species: data.species,
+        emoji: emojiMap[data.species],
+        breed: data.breed,
+        age: parseInt(data.age),
+        weight: parseInt(data.weight),
+        status: data.status,
+        vitals: {
+          temp: data.status === 'Healthy' ? 38.5 : (data.status === 'Warning' ? 39.8 : 40.5),
+          hr: data.status === 'Healthy' ? 68 : (data.status === 'Warning' ? 76 : 84),
+          activity: data.status === 'Healthy' ? 'Normal' : (data.status === 'Warning' ? 'High' : 'Low')
+        }
+      };
+
+      // Add to data
+      APP_DATA.animals.unshift(newAnimal);
+
+      // Update UI
+      renderDashboardGrid();
+      renderHerdRegistry();
+      initVitalsMonitor(); // Updates dropdown
+      updateKPICounts();
+      
+      // Close Modal
+      document.getElementById('modal-overlay').style.display = 'none';
+      
+      // Show Success
+      showToast("✓ Animal Added Successfully / पशु सफलतापूर्वक जोड़ा गया");
+    }
+
+    function updateKPICounts() {
+      const total = APP_DATA.animals.length;
+      const healthy = APP_DATA.animals.filter(a => a.status === 'Healthy').length;
+      const warning = APP_DATA.animals.filter(a => a.status === 'Warning').length;
+      const critical = APP_DATA.animals.filter(a => a.status === 'Critical').length;
+
+      document.querySelector('.kpi-card:nth-child(1) .val').textContent = total;
+      document.querySelector('.kpi-card:nth-child(2) .val').textContent = healthy;
+      document.querySelector('.kpi-card:nth-child(3) .val').textContent = warning;
+      document.querySelector('.kpi-card:nth-child(4) .val').textContent = critical;
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-text').textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+    /* ═══════════════════════════════════════════════════════
+       PROFILE MANAGEMENT
+    ═══════════════════════════════════════════════════════ */
+    let isEditing = false;
+    const profileData = {
+      name: "Rajesh Kumar",
+      age: "42",
+      phone: "+91 98765 43210",
+      village: "Deshnoke",
+      district: "Bikaner",
+      state: "Rajasthan",
+      farmName: "Green Valley Farm",
+      farmSize: "12.5",
+      exp: "15",
+      primaryType: "Cow / Buffalo",
+      sensorId: "KT-SYS-4802"
+    };
+
+    function toggleProfileEdit(editing = true) {
+      isEditing = editing;
+      const displayFields = document.querySelectorAll('.p-val');
+      const editBtn = document.getElementById('btn-edit-profile');
+      const editActions = document.getElementById('edit-actions');
+
+      if (isEditing) {
+        editBtn.style.display = 'none';
+        editActions.style.display = 'flex';
+        
+        displayFields.forEach(div => {
+          const field = div.getAttribute('data-field');
+          const currentVal = div.textContent;
+          div.innerHTML = `<input type="text" class="form-input" value="${currentVal}" id="edit-${field}">`;
+        });
+      } else {
+        editBtn.style.display = 'inline-flex';
+        editActions.style.display = 'none';
+        
+        displayFields.forEach(div => {
+          const field = div.getAttribute('data-field');
+          div.textContent = profileData[field];
+        });
+      }
+    }
+
+    function saveProfile() {
+      const displayFields = document.querySelectorAll('.p-val');
+      
+      displayFields.forEach(div => {
+        const field = div.getAttribute('data-field');
+        const input = document.getElementById(`edit-${field}`);
+        if (input) profileData[field] = input.value;
+      });
+
+      // Update Global Displays
+      document.getElementById('prof-display-name').textContent = profileData.name;
+      document.getElementById('prof-display-farm').textContent = profileData.farmName;
+      document.getElementById('sidebar-farmer-name').textContent = profileData.name.split(' ')[0];
+      document.getElementById('sidebar-farm-name').textContent = profileData.farmName;
+      
+      // Update Initials
+      const names = profileData.name.split(' ');
+      const initials = names.length > 1 ? names[0][0] + names[1][0] : names[0][0];
+      document.getElementById('prof-initials').textContent = initials.toUpperCase();
+      document.getElementById('sidebar-avatar').textContent = initials.toUpperCase()[0];
+
+      toggleProfileEdit(false);
+      showToast("✓ Profile Updated / प्रोफ़ाइल अपडेट हो गई");
+    }
+  </script>
+</body>
+</html>
