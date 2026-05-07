@@ -9,25 +9,27 @@
 
 /* ── Obsidian Design Tokens ───────────────────────────────── */
 :root {
-  --bg-primary:    #030504; 
-  --bg-card:       rgba(10, 15, 12, 0.6); 
-  --bg-card-hover: rgba(20, 25, 22, 0.8);
-  --bg-input:      rgba(0, 0, 0, 0.4);
-  --bg-sidebar:    #050806; 
+  --bg-primary:       #1A1A0F;
+  --bg-card:          #2C2C1A;
+  --bg-deep:          #0D0D08;
+  --bg-sidebar:       #0D0D08; 
+  --bg-input:         #1A1A0F; 
 
-  --accent-green:  #7CB518; 
-  --accent-amber:  #C8843A; 
-  --accent-red:    #E05C3A; 
-  --accent-blue:   #2196F3; 
+  --accent-green:     #7CB518; 
+  --accent-amber:     #E5A100; 
+  --accent-red:       #C0392B; 
+  --accent-blue:      #2980B9; 
 
-  --text-primary:  #FFFFFF; 
-  --text-muted:    #888888;
-  --text-dim:      #555555;
+  --text-primary:     #F0EAD6; 
+  --text-muted:       #A89F8C;
+  --text-dim:         #706860;
 
-  --border:        rgba(255, 255, 255, 0.05);
-  --border-hover:  rgba(255, 255, 255, 0.1);
+  --border:           #3D3D28;
+  --border-hover:     rgba(124, 181, 24, 0.3);
 
-  --accent-glow:   rgba(124, 181, 24, 0.15);
+  --glow-green:       rgba(124, 181, 24, 0.15);
+  --glow-amber:       rgba(229, 161, 0, 0.15);
+  --glow-red:         rgba(192, 57, 43, 0.2);
 
   /* Sidebar */
   --sidebar-width:         260px;

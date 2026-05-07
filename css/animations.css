@@ -141,13 +141,47 @@
   animation: cam-flash 0.4s ease-out forwards;
 }
 
-/* ── Analysis Spinner ────────────────────────────────────── */
-.analysis-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(124, 181, 24, 0.2);
-  border-top-color: var(--accent-green);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin: 0 auto 12px;
+/* ── AI Typing Dots ──────────────────────────────────────── */
+.typing-dots {
+  display: flex;
+  gap: 4px;
 }
+
+.typing-dots span {
+  width: 6px;
+  height: 6px;
+  background: var(--accent-green);
+  border-radius: 50%;
+  display: inline-block;
+  animation: typing-bounce 1s infinite ease-in-out;
+}
+
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing-bounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.6; }
+  40% { transform: scale(1.2); opacity: 1; }
+}
+
+/* ── Alert Ticker Marquee ────────────────────────────────── */
+@keyframes ticker {
+  0%   { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+/* ── Staggered Entrance ───────────────────────────────────── */
+@keyframes cardEntrance {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.staggered-item {
+  animation: cardEntrance 0.5s ease forwards;
+  opacity: 0;
+}
+
+.staggered-item:nth-child(1) { animation-delay: 0.1s; }
+.staggered-item:nth-child(2) { animation-delay: 0.2s; }
+.staggered-item:nth-child(3) { animation-delay: 0.3s; }
+.staggered-item:nth-child(4) { animation-delay: 0.4s; }
