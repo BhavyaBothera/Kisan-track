@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Sensor Log Upload — KisanTrack</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- App Stylesheets -->
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/sidebar.css" />
+  <link rel="stylesheet" href="css/components.css" />
+</head>
+
+<body>
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main Navigation">
+    <div class="sidebar-brand">
+      <div class="brand-icon">🌾</div>
+      <div class="brand-text">
+        <span class="brand-name">KisanTrack</span>
+        <span class="brand-sub">Animal Health Monitor</span>
+      </div>
+    </div>
+    <div class="sidebar-status">
+      <div class="status-dot" id="status-dot"></div>
+      <span class="status-text">System Online / ऑनलाइन</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Main Menu / मुख्य मेन्यू</div>
+      <a href="dashboard.html" class="nav-link" id="nav-dashboard">
+        <i class="fa-solid fa-gauge-high"></i>
+        <span class="nav-text">Dashboard<span class="nav-hi">डैशबोर्ड</span></span>
+      </a>
+      <a href="herd.html" class="nav-link" id="nav-animals">
+        <i class="fa-solid fa-paw"></i>
+        <span class="nav-text">Herd & Vitals<span class="nav-hi">झुंड और जीवन संकेत</span></span>
+      </a>
+      <a href="alerts.html" class="nav-link" id="nav-alerts">
+        <i class="fa-solid fa-bell"></i>
+        <span class="nav-text">Alerts & Reports<span class="nav-hi">अलर्ट और रिपोर्ट</span></span>
+      </a>
+      <a href="camera.html" class="nav-link" id="nav-camera">
+        <i class="fa-solid fa-camera"></i>
+        <span class="nav-text">AI Camera<span class="nav-hi">आई कैमरा</span></span>
+      </a>
+      <a href="uploads.html" class="nav-link active" id="nav-upload">
+        <i class="fa-solid fa-upload"></i>
+        <span class="nav-text">Sensor Upload<span class="nav-hi">सेंसर अपलोड</span></span>
+      </a>
+      <div class="nav-label" style="margin-top:8px;">Account / खाता</div>
+      <a href="profile.html" class="nav-link" id="nav-profile">
+        <i class="fa-solid fa-circle-user"></i>
+        <span class="nav-text">Farmer Profile<span class="nav-hi">किसान प्रोफ़ाइल</span></span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="last-sync"><i class="fa-solid fa-rotate"></i> Last sync: <strong id="last-sync-time">Just now</strong></div>
+      <div class="farm-info"><i class="fa-solid fa-location-dot"></i> <span id="farm-location">Anandpur, Gujarat</span></div>
+    </div>
+  </aside>
+
+  <button class="hamburger" id="hamburger"><i class="fa-solid fa-bars"></i></button>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <main class="main-content">
+    <div class="content-area">
+      <section class="tab-section active" id="section-upload" aria-label="Upload Sensor Log">
+        <div class="page-header">
+          <h1><i class="fa-solid fa-upload" style="color:var(--accent-green);margin-right:10px;"></i>Upload Sensor Log / <span style="color:var(--text-muted);">सेंसर डेटा अपलोड</span></h1>
+          <p class="subtitle">Upload CSV or JSON sensor logs for analysis | विश्लेषण के लिए CSV या JSON फ़ाइल अपलोड करें</p>
+        </div>
+
+        <div class="upload-container">
+          <div class="dropzone" id="dropzone" role="button" tabindex="0">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <h3>Drop your file here / फ़ाइल यहाँ छोड़ें</h3>
+            <p>or click "Browse Files" to select</p>
+            <div class="formats">
+              <span class="format-tag">CSV</span>
+              <span class="format-tag">JSON</span>
+              <span class="format-tag">Max 50MB</span>
+            </div>
+          </div>
+
+          <div class="upload-actions">
+            <input type="file" id="file-input" accept=".csv,.json" style="display:none;" />
+            <button class="btn btn-secondary" id="browse-btn" style="margin-top:14px;">
+              <i class="fa-solid fa-folder-open"></i> Browse Files / फ़ाइल चुनें
+            </button>
+          </div>
+
+          <div class="file-preview" id="file-preview">
+            <div class="file-icon"><i class="fa-solid fa-file-csv"></i></div>
+            <div class="file-info">
+              <div class="file-name" id="file-name-display">filename.csv</div>
+              <div class="file-size" id="file-size-display">0 KB</div>
+            </div>
+            <button class="btn btn-primary btn-sm" id="process-btn">
+              <i class="fa-solid fa-microchip"></i> Process File
+            </button>
+          </div>
+
+          <div class="upload-progress" id="upload-progress">
+            <div class="progress-label">
+              <span id="progress-label-text">Analyzing data...</span>
+              <span id="progress-pct">0%</span>
+            </div>
+            <div class="progress-bar-outer"><div class="progress-bar-inner" id="progress-bar-fill"></div></div>
+          </div>
+
+          <div class="upload-result" id="upload-result">
+            <div class="result-header"><i class="fa-solid fa-circle-check"></i> Analysis Complete</div>
+            <div class="result-stats">
+              <div class="result-stat"><div class="result-stat-num" id="res-parsed">0</div><div class="result-stat-label">Records</div></div>
+              <div class="result-stat"><div class="result-stat-num" id="res-anomalies" style="color:var(--accent-amber)">0</div><div class="result-stat-label">Anomalies</div></div>
+              <div class="result-stat"><div class="result-stat-num" id="res-animals" style="color:var(--accent-red)">0</div><div class="result-stat-label">Animals</div></div>
+            </div>
+            <div class="table-scroll">
+              <table class="data-table">
+                <thead><tr><th>Animal ID</th><th>Parameter</th><th>Reading</th><th>Severity</th></tr></thead>
+                <tbody id="anomaly-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- MOBILE NAV -->
+  <nav class="mobile-nav">
+    <div class="mobile-nav-inner">
+      <div class="mobile-nav-item" data-tab="dashboard"><i class="fa-solid fa-gauge-high"></i><span>Home</span></div>
+      <div class="mobile-nav-item" data-tab="animals"><i class="fa-solid fa-paw"></i><span>Herd</span></div>
+      <div class="mobile-nav-item" data-tab="alerts"><i class="fa-solid fa-bell"></i><span>Alerts</span></div>
+      <div class="mobile-nav-item" data-tab="camera"><i class="fa-solid fa-camera"></i><span>Camera</span></div>
+      <div class="mobile-nav-item active" data-tab="upload"><i class="fa-solid fa-upload"></i><span>Upload</span></div>
+      <div class="mobile-nav-item" data-tab="profile"><i class="fa-solid fa-circle-user"></i><span>Profile</span></div>
+    </div>
+  </nav>
+
+  <div class="toast" id="app-toast"><i class="fa-solid fa-circle-check toast-icon"></i><span class="toast-msg" id="toast-msg"></span></div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/firebase-init.js"></script>
+  <script src="js/firestore-store.js"></script>
+  <script src="js/upload.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

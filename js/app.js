@@ -20,7 +20,8 @@
     'vitals': 'herd.html#section-vitals',
     'alerts': 'alerts.html',
     'reports': 'alerts.html#section-reports',
-    'camera': 'profile.html#section-camera',
+    'camera': 'camera.html',
+    'upload': 'uploads.html',
     'profile': 'profile.html'
   };
 

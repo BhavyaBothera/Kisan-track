@@ -66,6 +66,16 @@
         <span id="alert-badge"
           style="background:var(--accent-red);color:#fff;font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:100px;margin-left:auto;display:none;">0</span>
       </a>
+      
+      <a href="camera.html" class="nav-link" id="nav-camera">
+        <i class="fa-solid fa-camera"></i>
+        <span class="nav-text">AI Camera<span class="nav-hi">आई कैमरा</span></span>
+      </a>
+      
+      <a href="uploads.html" class="nav-link" id="nav-upload">
+        <i class="fa-solid fa-upload"></i>
+        <span class="nav-text">Sensor Upload<span class="nav-hi">सेंसर अपलोड</span></span>
+      </a>
 
       <div class="nav-label" style="margin-top:8px;">Account / खाता</div>
 
@@ -102,109 +112,6 @@
   <main class="main-content" id="main-content">
     <div class="content-area">
 
-
-
-      <!-- ─────────────────────────────────────────────────
-         SECTION 6: UPLOAD SENSOR LOG
-    ───────────────────────────────────────────────── -->
-      <section class="tab-section" id="section-upload" aria-label="Upload Sensor Log">
-
-        <div class="page-header">
-          <h1><i class="fa-solid fa-upload" style="color:var(--accent-green);margin-right:10px;"></i>Upload Sensor Log /
-            <span style="color:var(--text-muted);">सेंसर डेटा अपलोड</span>
-          </h1>
-          <p class="subtitle">Upload CSV or JSON sensor logs for analysis | विश्लेषण के लिए CSV या JSON फ़ाइल अपलोड करें
-          </p>
-        </div>
-
-        <div class="upload-container">
-
-          <!-- Drop Zone -->
-          <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Drop file here or click to browse">
-            <i class="fa-solid fa-cloud-arrow-up"></i>
-            <h3>Drop your file here / फ़ाइल यहाँ छोड़ें</h3>
-            <p>or click "Browse Files" to select</p>
-            <div class="formats">
-              <span class="format-tag">CSV</span>
-              <span class="format-tag">JSON</span>
-              <span class="format-tag">Max 50MB</span>
-            </div>
-          </div>
-
-          <!-- Browse Button -->
-          <div class="upload-actions">
-            <input type="file" id="file-input" accept=".csv,.json" style="display:none;" aria-label="Select file" />
-            <button class="btn btn-secondary" id="browse-btn" style="margin-top:14px;">
-              <i class="fa-solid fa-folder-open"></i> Browse Files / फ़ाइल चुनें
-            </button>
-          </div>
-
-          <!-- File Preview -->
-          <div class="file-preview" id="file-preview">
-            <div class="file-icon"><i class="fa-solid fa-file-csv"></i></div>
-            <div class="file-info">
-              <div class="file-name" id="file-name-display">filename.csv</div>
-              <div class="file-size" id="file-size-display">0 KB</div>
-            </div>
-            <button class="btn btn-primary btn-sm" id="process-btn">
-              <i class="fa-solid fa-microchip"></i> Process File
-            </button>
-          </div>
-
-          <!-- Progress Bar -->
-          <div class="upload-progress" id="upload-progress">
-            <div class="progress-label">
-              <span id="progress-label-text">Analyzing data... / डेटा विश्लेषण हो रहा है...</span>
-              <span id="progress-pct">0%</span>
-            </div>
-            <div class="progress-bar-outer">
-              <div class="progress-bar-inner" id="progress-bar-fill"></div>
-            </div>
-          </div>
-
-          <!-- Result Card -->
-          <div class="upload-result" id="upload-result">
-            <div class="result-header">
-              <i class="fa-solid fa-circle-check"></i> Analysis Complete / विश्लेषण पूर्ण
-            </div>
-            <div class="result-stats">
-              <div class="result-stat">
-                <div class="result-stat-num" id="res-parsed">142</div>
-                <div class="result-stat-label">Records Parsed / रिकॉर्ड पढ़े</div>
-              </div>
-              <div class="result-stat">
-                <div class="result-stat-num" id="res-anomalies" style="color:var(--accent-amber)">3</div>
-                <div class="result-stat-label">Anomalies Found / असामान्यताएं</div>
-              </div>
-              <div class="result-stat">
-                <div class="result-stat-num" id="res-animals" style="color:var(--accent-red)">2</div>
-                <div class="result-stat-label">Animals Affected / प्रभावित पशु</div>
-              </div>
-            </div>
-            <h4 style="font-family:var(--font-heading);font-size:0.88rem;color:var(--text-muted);margin-bottom:10px;">
-              <i class="fa-solid fa-triangle-exclamation" style="color:var(--accent-amber);margin-right:6px;"></i>
-              Detected Anomalies / पाई गई असामान्यताएं
-            </h4>
-            <div class="table-scroll">
-              <table class="data-table" id="anomaly-table">
-                <thead>
-                  <tr>
-                    <th>Animal ID</th>
-                    <th>Parameter</th>
-                    <th>Reading</th>
-                    <th>Severity</th>
-                  </tr>
-                </thead>
-                <tbody id="anomaly-table-body">
-                  <!-- Populated by upload.js -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
       <!-- ─────────────────────────────────────────────────
          SECTION 7: FARMER PROFILE
     ───────────────────────────────────────────────── -->
@@ -221,124 +128,6 @@
 
       </section>
 
-      <!-- ─────────────────────────────────────────────────
-         SECTION 8: CAMERA MONITOR
-    ───────────────────────────────────────────────── -->
-      <section class="tab-section" id="section-camera" aria-label="Camera Monitor">
-
-        <div class="page-header">
-          <h1><i class="fa-solid fa-camera" style="color:var(--accent-green);margin-right:10px;"></i>Camera Monitor /
-            <span style="color:var(--text-muted);">कैमरा मॉनिटर</span>
-          </h1>
-          <p class="subtitle">ESP32-CAM visual health detection with Gemini AI | आई से पशु स्वास्थ्य बिश्लेषण</p>
-        </div>
-
-        <!-- Settings Bar -->
-        <div class="cam-settings-bar">
-          <div class="cam-setting-group">
-            <label class="cam-setting-label">Camera / कैमरा</label>
-            <label class="toggle-switch" aria-label="Camera on/off">
-              <input type="checkbox" id="cam-toggle" checked />
-              <span class="toggle-track"><span class="toggle-thumb"></span></span>
-            </label>
-            <span class="cam-setting-val" id="cam-status-label">ON</span>
-          </div>
-          <div class="cam-setting-group">
-            <label class="cam-setting-label" for="capture-interval-input">Interval / अंतराल</label>
-            <input type="number" id="capture-interval-input" class="cam-num-input" value="120" min="10" max="3600"
-              aria-label="Capture interval in seconds" />
-            <span class="cam-setting-val">s</span>
-          </div>
-          <div class="cam-setting-group">
-            <label class="cam-setting-label">Auto-AI / ऑटो AI</label>
-            <label class="toggle-switch" aria-label="Auto analysis on/off">
-              <input type="checkbox" id="auto-analysis-toggle" checked />
-              <span class="toggle-track"><span class="toggle-thumb"></span></span>
-            </label>
-          </div>
-          <div class="cam-setting-group">
-            <label class="cam-setting-label" for="cam-location-input">Location / स्थान</label>
-            <input type="text" id="cam-location-input" class="cam-text-input" value="Main Barn"
-              aria-label="Camera location" />
-          </div>
-        </div>
-
-        <!-- Main Grid: Feed + Analysis -->
-        <div class="camera-main-grid">
-
-          <!-- LEFT: Live Feed -->
-          <div class="camera-feed-card">
-            <div class="cam-feed-header">
-              <h3 class="section-title" style="margin:0;"><i class="fa-solid fa-video"></i> ESP32-CAM Live Feed / लाइव
-                कैमरा फ़ीड</h3>
-              <div class="cam-live-badge" id="camera-live-badge">
-                <span class="cam-live-dot"></span> LIVE
-              </div>
-            </div>
-            <div class="cam-feed-box">
-              <canvas id="camera-feed-canvas" width="640" height="360" aria-label="Live camera feed"></canvas>
-              <div class="cam-flash" id="cam-flash"></div>
-            </div>
-            <div class="cam-feed-meta">
-              <span><i class="fa-solid fa-microchip" style="color:var(--accent-green)"></i> CAM-01</span>
-              <span><i class="fa-solid fa-location-dot" style="color:var(--text-dim)"></i> <span
-                  id="cam-location-display">Main Barn</span></span>
-              <span><i class="fa-regular fa-clock" style="color:var(--text-dim)"></i> <span
-                  id="last-capture-time">—</span></span>
-              <span class="cam-countdown-wrap"><i class="fa-solid fa-rotate" style="color:var(--accent-amber)"></i>
-                Next: <span id="cam-countdown" class="cam-countdown">120s</span></span>
-            </div>
-            <button class="btn btn-primary" id="capture-now-btn" style="margin-top:14px;width:100%;">
-              <i class="fa-solid fa-camera"></i> Capture Now / अभी कैप्चर करें
-            </button>
-          </div>
-
-          <!-- RIGHT: Gemini AI Analysis -->
-          <div class="camera-analysis-card">
-            <h3 class="section-title" style="margin-bottom:16px;">
-              <i class="fa-solid fa-robot" style="color:var(--accent-green);"></i>
-              Gemini Vision Analysis / जेमिनी विश्लेषण
-            </h3>
-
-            <!-- No-key prompt -->
-            <div id="no-key-prompt" class="no-key-prompt">
-              <i class="fa-solid fa-key"></i>
-              <p>🔑 Connect Gemini API to enable AI analysis<br><span
-                  style="color:var(--text-dim);font-size:0.78rem;">AI विश्लेषण के लिए Gemini API जोड़ें</span></p>
-              <p style="font-size:0.78rem;color:var(--text-dim);margin-top:6px;">Simulated analysis will run until API
-                key is set.</p>
-            </div>
-
-            <!-- Results area -->
-            <div id="analysis-results" class="analysis-results-area"></div>
-          </div>
-
-        </div><!-- /.camera-main-grid -->
-
-        <!-- Detection Overlay Canvas -->
-        <div class="detection-card">
-          <h3 class="section-title"><i class="fa-solid fa-object-group"></i> Detection Results / पहचान परिणाम</h3>
-          <div class="detection-canvas-wrap">
-            <canvas id="detection-canvas" width="640" height="360" aria-label="Animal detection overlay"></canvas>
-          </div>
-          <div class="detection-stats-row" id="detection-stats-row">
-            <!-- Populated by camera.js -->
-          </div>
-          <p class="powered-by-note">
-            <i class="fa-solid fa-microchip"></i>
-            Powered by OpenCV + Gemini Vision / OpenCV + जेमिनी विज़न द्वारा संचालित
-          </p>
-        </div>
-
-        <!-- Capture History Filmstrip -->
-        <div class="filmstrip-card">
-          <div class="filmstrip-header">
-            <h3 class="section-title"><i class="fa-solid fa-film"></i> Capture History / कैप्चर इतिहास</h3>
-            <button class="btn btn-secondary btn-sm" id="view-all-history-btn">
-              <i class="fa-solid fa-clock-rotate-left"></i> View All / पूरा इतिहास
-            </button>
-          </div>
-          <div class="filmstrip" id="filmstrip">
             <div class="filmstrip-empty"><i class="fa-solid fa-camera-slash"></i>
               <p>No captures yet. Camera will auto-capture every 120 seconds. / अभी कोई कैप्चर नहीं।</p>
             </div>

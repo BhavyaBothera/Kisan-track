@@ -9,7 +9,24 @@
 const VitalsModule = (function () {
   'use strict';
 
+  // --- Internal State ---
+  let selectedAnimalId = localStorage.getItem('kt_selected_animal_id') || null;
   let vitalsUnsubscribe = null;
+  let chartTemp = null, chartHR = null, chartActivity = null;
+  
+  const MAX_READINGS = 20;
+  const CIRCUMFERENCE = 2 * Math.PI * 45; // Based on r=45 in gauges
+  
+  let liveReadings = {
+    labels: [],
+    temp: [],
+    hr: [],
+    activity: []
+  };
+
+  function getState() {
+    return window.FirestoreStore ? window.FirestoreStore.getState() : null;
+  }
 
   // ── Populate selector ─────────────────────────────────────
   function populateSelector() {
@@ -17,16 +34,19 @@ const VitalsModule = (function () {
     const select = document.getElementById('vitals-animal-select');
     if (!select || !state) return;
 
-    const currentSelection = select.value;
+    const savedId = localStorage.getItem('kt_selected_animal_id');
+    
     select.innerHTML = state.animals.map(a => `
       <option value="${a.id}">${a.emoji} ${a.species} #${a.animalId} (${a.breed}) — ${a.status}</option>
     `).join('');
 
-    if (currentSelection && state.animals.some(a => a.id === currentSelection)) {
-      select.value = currentSelection;
+    if (savedId && state.animals.some(a => a.id === savedId)) {
+      selectedAnimalId = savedId;
+      select.value = savedId;
     } else if (state.animals.length > 0) {
       selectedAnimalId = state.animals[0].id;
       select.value = selectedAnimalId;
+      localStorage.setItem('kt_selected_animal_id', selectedAnimalId);
     }
   }
 
@@ -91,10 +111,10 @@ const VitalsModule = (function () {
 
   // ── Chart factory ─────────────────────────────────────────
   function makeChart(canvasId, label, data, color, unit, minY, maxY, safeMin, safeMax) {
-    const ctx = document.getElementById(canvasId);
-    if (!ctx) return null;
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return null;
 
-    return new Chart(ctx.getContext('2d'), {
+    return new Chart(canvas.getContext('2d'), {
       type: 'line',
       data: {
         labels: liveReadings.labels,
@@ -174,6 +194,7 @@ const VitalsModule = (function () {
     if (select) {
       select.addEventListener('change', () => {
         selectedAnimalId = select.value;
+        localStorage.setItem('kt_selected_animal_id', selectedAnimalId);
         setupVitalsListener();
         updateAISummary();
       });
@@ -195,10 +216,14 @@ const VitalsModule = (function () {
     
     document.addEventListener('kisanTrack:stateUpdated', () => {
       populateSelector();
-      // If we don't have a listener yet and now we have a selected ID, start it
       if (!vitalsUnsubscribe && selectedAnimalId) {
         setupVitalsListener();
       }
+    });
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      if (vitalsUnsubscribe) vitalsUnsubscribe();
     });
   }
 

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>AI Camera Monitor — KisanTrack</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- App Stylesheets -->
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/sidebar.css" />
+  <link rel="stylesheet" href="css/components.css" />
+</head>
+
+<body>
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main Navigation">
+    <div class="sidebar-brand">
+      <div class="brand-icon">🌾</div>
+      <div class="brand-text">
+        <span class="brand-name">KisanTrack</span>
+        <span class="brand-sub">Animal Health Monitor</span>
+      </div>
+    </div>
+    <div class="sidebar-status">
+      <div class="status-dot" id="status-dot"></div>
+      <span class="status-text">System Online / ऑनलाइन</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Main Menu / मुख्य मेन्यू</div>
+      <a href="dashboard.html" class="nav-link" id="nav-dashboard">
+        <i class="fa-solid fa-gauge-high"></i>
+        <span class="nav-text">Dashboard<span class="nav-hi">डैशबोर्ड</span></span>
+      </a>
+      <a href="herd.html" class="nav-link" id="nav-animals">
+        <i class="fa-solid fa-paw"></i>
+        <span class="nav-text">Herd & Vitals<span class="nav-hi">झुंड और जीवन संकेत</span></span>
+      </a>
+      <a href="alerts.html" class="nav-link" id="nav-alerts">
+        <i class="fa-solid fa-bell"></i>
+        <span class="nav-text">Alerts & Reports<span class="nav-hi">अलर्ट और रिपोर्ट</span></span>
+      </a>
+      <a href="camera.html" class="nav-link active" id="nav-camera">
+        <i class="fa-solid fa-camera"></i>
+        <span class="nav-text">AI Camera<span class="nav-hi">आई कैमरा</span></span>
+      </a>
+      <a href="uploads.html" class="nav-link" id="nav-upload">
+        <i class="fa-solid fa-upload"></i>
+        <span class="nav-text">Sensor Upload<span class="nav-hi">सेंसर अपलोड</span></span>
+      </a>
+      <div class="nav-label" style="margin-top:8px;">Account / खाता</div>
+      <a href="profile.html" class="nav-link" id="nav-profile">
+        <i class="fa-solid fa-circle-user"></i>
+        <span class="nav-text">Farmer Profile<span class="nav-hi">किसान प्रोफ़ाइल</span></span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="last-sync"><i class="fa-solid fa-rotate"></i> Last sync: <strong id="last-sync-time">Just now</strong></div>
+      <div class="farm-info"><i class="fa-solid fa-location-dot"></i> <span id="farm-location">Anandpur, Gujarat</span></div>
+    </div>
+  </aside>
+
+  <button class="hamburger" id="hamburger"><i class="fa-solid fa-bars"></i></button>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <main class="main-content">
+    <div class="content-area">
+      <section class="tab-section active" id="section-camera" aria-label="Camera Monitor">
+        <div class="page-header">
+          <h1><i class="fa-solid fa-camera" style="color:var(--accent-green);margin-right:10px;"></i>Camera Monitor / <span style="color:var(--text-muted);">कैमरा मॉनिटर</span></h1>
+          <p class="subtitle">ESP32-CAM visual health detection with Gemini AI | आई से पशु स्वास्थ्य बिश्लेषण</p>
+        </div>
+
+        <div class="cam-settings-bar">
+          <div class="cam-setting-group">
+            <label class="cam-setting-label">Camera / कैमरा</label>
+            <label class="toggle-switch"><input type="checkbox" id="cam-toggle" checked /><span class="toggle-track"><span class="toggle-thumb"></span></span></label>
+            <span class="cam-setting-val" id="cam-status-label">ON</span>
+          </div>
+          <div class="cam-setting-group">
+            <label class="cam-setting-label" for="capture-interval-input">Interval / अंतराल</label>
+            <input type="number" id="capture-interval-input" class="cam-num-input" value="120" min="10" max="3600" />
+            <span class="cam-setting-val">s</span>
+          </div>
+          <div class="cam-setting-group">
+            <label class="cam-setting-label">Auto-AI / ऑटो AI</label>
+            <label class="toggle-switch"><input type="checkbox" id="auto-analysis-toggle" checked /><span class="toggle-track"><span class="toggle-thumb"></span></span></label>
+          </div>
+          <div class="cam-setting-group">
+            <label class="cam-setting-label" for="cam-location-input">Location / स्थान</label>
+            <input type="text" id="cam-location-input" class="cam-text-input" value="Main Barn" />
+          </div>
+        </div>
+
+        <div class="camera-main-grid">
+          <div class="camera-feed-card">
+            <div class="cam-feed-header">
+              <h3 class="section-title" style="margin:0;"><i class="fa-solid fa-video"></i> ESP32-CAM Live Feed / लाइव कैमरा फ़ीड</h3>
+              <div class="cam-live-badge"><span class="cam-live-dot"></span> LIVE</div>
+            </div>
+            <div class="cam-feed-box">
+              <canvas id="camera-feed-canvas" width="640" height="360"></canvas>
+              <div class="cam-flash" id="cam-flash"></div>
+            </div>
+            <div class="cam-feed-meta">
+              <span><i class="fa-solid fa-microchip" style="color:var(--accent-green)"></i> CAM-01</span>
+              <span><i class="fa-solid fa-location-dot"></i> <span id="cam-location-display">Main Barn</span></span>
+              <span><i class="fa-regular fa-clock"></i> <span id="last-capture-time">—</span></span>
+              <span class="cam-countdown-wrap"><i class="fa-solid fa-rotate" style="color:var(--accent-amber)"></i> Next: <span id="cam-countdown" class="cam-countdown">120s</span></span>
+            </div>
+            <button class="btn btn-primary" id="capture-now-btn" style="margin-top:14px;width:100%;">
+              <i class="fa-solid fa-camera"></i> Capture Now / अभी कैप्चर करें
+            </button>
+          </div>
+
+          <div class="camera-analysis-card">
+            <h3 class="section-title" style="margin-bottom:16px;"><i class="fa-solid fa-robot" style="color:var(--accent-green);"></i> Gemini Vision Analysis / जेमिनी विश्लेषण</h3>
+            <div id="no-key-prompt" class="no-key-prompt">
+              <i class="fa-solid fa-key"></i>
+              <p>🔑 Connect Gemini API to enable AI analysis<br><span style="color:var(--text-dim);font-size:0.78rem;">AI विश्लेषण के लिए Gemini API जोड़ें</span></p>
+            </div>
+            <div id="analysis-results" class="analysis-results-area"></div>
+          </div>
+        </div>
+
+        <div class="detection-card">
+          <h3 class="section-title"><i class="fa-solid fa-object-group"></i> Detection Results / पहचान परिणाम</h3>
+          <div class="detection-canvas-wrap"><canvas id="detection-canvas" width="640" height="360"></canvas></div>
+          <div class="detection-stats-row" id="detection-stats-row"></div>
+        </div>
+
+        <div class="filmstrip-card">
+          <div class="filmstrip-header">
+            <h3 class="section-title"><i class="fa-solid fa-film"></i> Capture History / कैप्चर इतिहास</h3>
+          </div>
+          <div class="filmstrip" id="filmstrip"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- MOBILE NAV -->
+  <nav class="mobile-nav">
+    <div class="mobile-nav-inner">
+      <div class="mobile-nav-item" data-tab="dashboard"><i class="fa-solid fa-gauge-high"></i><span>Home</span></div>
+      <div class="mobile-nav-item" data-tab="animals"><i class="fa-solid fa-paw"></i><span>Herd</span></div>
+      <div class="mobile-nav-item" data-tab="alerts"><i class="fa-solid fa-bell"></i><span>Alerts</span></div>
+      <div class="mobile-nav-item active" data-tab="camera"><i class="fa-solid fa-camera"></i><span>Camera</span></div>
+      <div class="mobile-nav-item" data-tab="upload"><i class="fa-solid fa-upload"></i><span>Upload</span></div>
+      <div class="mobile-nav-item" data-tab="profile"><i class="fa-solid fa-circle-user"></i><span>Profile</span></div>
+    </div>
+  </nav>
+
+  <div class="toast" id="app-toast"><i class="fa-solid fa-circle-check toast-icon"></i><span class="toast-msg" id="toast-msg"></span></div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/firebase-init.js"></script>
+  <script src="js/firestore-store.js"></script>
+  <script src="js/camera.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

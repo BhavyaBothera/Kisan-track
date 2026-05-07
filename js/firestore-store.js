@@ -208,3 +208,8 @@ const FirestoreStore = (function () {
   };
 
 })();
+
+// Ensure cleanup on page transition in Multi-Page Architecture
+window.addEventListener('beforeunload', () => {
+  if (window.FirestoreStore) window.FirestoreStore.unsubscribeAll();
+});
