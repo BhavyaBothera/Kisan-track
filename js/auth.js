@@ -64,39 +64,38 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 
-  // --- 3. UI Tab Switching Logic ---
-  if (tabLogin) tabLogin.addEventListener('click', () => switchTab('login'));
-  if (tabSignup) tabSignup.addEventListener('click', () => switchTab('signup'));
+  // --- 3. Dual-Shift UI Logic ---
+  const container = document.getElementById('auth-container');
+  const toSignup = document.getElementById('shifter-to-signup');
+  const toLogin = document.getElementById('shifter-to-login');
 
-  function switchTab(tab) {
-    if (tab === 'login') {
-      tabLogin.classList.add('active');
-      tabSignup.classList.remove('active');
-      authTabSlider.style.transform = 'translateX(0)';
-
-      loginForm.classList.add('active');
-      signupForm.classList.remove('active');
+  window.toggleShift = (state) => {
+    if(state === 'signup') {
+      container.classList.add('signup-active');
+      container.classList.remove('login-active');
+      if (toSignup) toSignup.style.display = 'none';
+      if (toLogin) toLogin.style.display = 'block';
     } else {
-      tabSignup.classList.add('active');
-      tabLogin.classList.remove('active');
-      authTabSlider.style.transform = 'translateX(100%)';
-
-      signupForm.classList.add('active');
-      loginForm.classList.remove('active');
+      container.classList.add('login-active');
+      container.classList.remove('signup-active');
+      if (toSignup) toSignup.style.display = 'block';
+      if (toLogin) toLogin.style.display = 'none';
     }
     clearErrors();
-  }
+  };
 
   // Handle URL parameters on load
   const urlParams = new URLSearchParams(window.location.search);
   const initialTab = urlParams.get('tab');
   if (initialTab === 'signup') {
-    switchTab('signup');
+    window.toggleShift('signup');
   } else {
-    switchTab('login');
+    window.toggleShift('login');
   }
 
+
   // --- 4. Password Toggle logic ---
+  // (Unchanged)
   const toggleVisibility = (inputId, iconId) => {
     const input = document.getElementById(inputId);
     const iconBtn = document.getElementById(iconId);
@@ -144,34 +143,32 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function clearErrors() {
-    loginError.textContent = '';
-    signupError.textContent = '';
-    const inputs = document.querySelectorAll('.auth-field input');
-    inputs.forEach(input => input.classList.remove('error-border'));
+    if (loginError) loginError.textContent = '';
+    if (signupError) signupError.textContent = '';
   }
 
-  function showError(formType, message, inputsToHighlight = []) {
+  function showError(formType, message) {
     if (formType === 'login') {
-      loginError.textContent = message;
+      if (loginError) loginError.textContent = message;
     } else {
-      signupError.textContent = message;
+      if (signupError) signupError.textContent = message;
     }
-    inputsToHighlight.forEach(input => input.classList.add('error-border'));
   }
 
   function validateEmail(email) {
-    return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 
-  function setLoadingState(btnId, isLoading, originalText = '') {
+  function setLoadingState(btnId, isLoading) {
     const btn = document.getElementById(btnId);
+    if (!btn) return;
     if (isLoading) {
       btn.dataset.originalText = btn.innerHTML;
       btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Please wait...';
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
     } else {
       btn.disabled = false;
-      btn.innerHTML = btn.dataset.originalText || originalText;
+      btn.innerHTML = btn.dataset.originalText || (btnId === 'btn-login-submit' ? 'Authenticate' : 'Initialize');
     }
   }
 
@@ -183,24 +180,19 @@ document.addEventListener('DOMContentLoaded', () => {
     clearErrors();
 
     const name = signupName.value.trim();
-    const farm = signupFarm.value.trim();
     const email = signupEmail.value.trim();
     const pass = signupPass.value;
-    const confirm = signupConfirm.value;
 
     let hasError = false;
 
-    if (!name || !farm || !email || !pass || !confirm) {
-      showError('signup', 'All fields are required.', []);
+    if (!name || !email || !pass) {
+      showError('signup', 'All fields are required.');
       hasError = true;
     } else if (!validateEmail(email)) {
-      showError('signup', 'Please enter a valid email.', [signupEmail]);
+      showError('signup', 'Please enter a valid email.');
       hasError = true;
     } else if (pass.length < 6) {
-      showError('signup', 'Password must be at least 6 characters.', [signupPass]);
-      hasError = true;
-    } else if (pass !== confirm) {
-      showError('signup', 'Passwords do not match.', [signupPass, signupConfirm]);
+      showError('signup', 'Password must be at least 6 characters.');
       hasError = true;
     }
 
@@ -210,18 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
-      const user = userCredential.user;
-
-      // Update Firebase Profile
-      await user.updateProfile({
-        displayName: name
-      });
-
-      // Save farm name
-      localStorage.setItem('kisanTrack_farmName', farm);
-
-      // (onAuthStateChanged handles the routing from here)
-
+      await userCredential.user.updateProfile({ displayName: name });
     } catch (error) {
       showError('signup', getFriendlyErrorMessage(error));
     } finally {
@@ -240,23 +221,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const email = loginEmail.value.trim();
     const pass = loginPass.value;
 
-    let hasError = false;
-    
     if (!email || !pass) {
-      showError('login', 'Please fill in both email and password.');
-      hasError = true;
-    } else if (!validateEmail(email)) {
-      showError('login', 'Please enter a valid email.', [loginEmail]);
-      hasError = true;
+      showError('login', 'Please fill in both fields.');
+      return;
     }
     
-    if (hasError) return;
-
     setLoadingState('btn-login-submit', true);
 
     try {
       await auth.signInWithEmailAndPassword(email, pass);
-      // (onAuthStateChanged handles the routing)
     } catch (error) {
       showError('login', getFriendlyErrorMessage(error));
     } finally {
@@ -271,10 +244,10 @@ document.addEventListener('DOMContentLoaded', () => {
     btnGoogle.addEventListener('click', async () => {
     try {
       await auth.signInWithPopup(googleProvider);
-      // Success handled by state listener
     } catch (error) {
       if (error.code !== 'auth/popup-closed-by-user') {
-        showError(loginForm.classList.contains('active') ? 'login' : 'signup', getFriendlyErrorMessage(error));
+        const activeForm = container.classList.contains('signup-active') ? 'signup' : 'login';
+        showError(activeForm, getFriendlyErrorMessage(error));
       }
     }
     });
