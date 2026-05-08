@@ -678,25 +678,31 @@
             </div>
 
             <div class="cam-feed-area" id="cam-feed-area">
-              <!-- States: Active, Flash, No Image, Offline -->
               <div id="feed-container" class="feed-container">
                 <img id="live-image" src="" alt="Camera Feed" style="display:none;" />
                 <canvas id="detection-canvas-overlay"></canvas>
                 <div class="cam-flash" id="cam-flash"></div>
                 
                 <div id="feed-placeholder" class="feed-placeholder">
-                  <i class="fa-solid fa-camera"></i>
-                  <p>Waiting for capture...<br>पहली तस्वीर का इंतज़ार है...</p>
+                  <i class="fa-solid fa-satellite-dish"></i>
+                  <p>Awaiting Uplink...<br>अपलिंक की प्रतीक्षा है...</p>
                   <div class="pulsing-dots"><span></span><span></span><span></span></div>
                 </div>
 
                 <div class="feed-overlay-top">
-                  <span class="overlay-pill">CAM-01</span>
-                  <span class="overlay-pill" id="overlay-location">Main Barn</span>
+                  <div class="overlay-pill">
+                    <i class="fa-solid fa-tower-broadcast"></i> <span id="overlay-signal">UPLINK: 92%</span>
+                  </div>
+                  <div class="overlay-pill rec-pill">
+                    <i class="fa-solid fa-circle" style="color:var(--accent-red); animation: pulse-red 1s infinite;"></i> LIVE REC
+                  </div>
                 </div>
 
                 <div class="feed-overlay-bottom">
-                  <div class="overlay-animal" id="overlay-animal-id">🐄 Select an Animal</div>
+                  <div class="overlay-pill overlay-animal" id="overlay-animal-id">🐄 Surveillance Mode</div>
+                  <div class="overlay-pill">
+                    <i class="fa-solid fa-battery-three-quarters"></i> 72%
+                  </div>
                   <div class="overlay-time" id="overlay-timestamp">Captured: --</div>
                 </div>
               </div>
