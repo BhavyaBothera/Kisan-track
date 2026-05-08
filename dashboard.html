@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KisanTrack | Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Dashboard — KisanTrack | पशु स्वास्थ्य निगरानी</title>
 
-  <!-- Google Fonts: Poppins & Noto Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Noto+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet" />
 
-  <!-- Font Awesome -->
+  <!-- Font Awesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <!-- App Stylesheets -->
@@ -19,238 +22,991 @@
   <link rel="stylesheet" href="css/sidebar.css" />
   <link rel="stylesheet" href="css/components.css" />
 
-  <style>
-    /* Unique Dashboard Overrides to match Landing Page */
-    body {
-      background: var(--bg-primary);
-      background-image: radial-gradient(circle at 20% 20%, rgba(124, 181, 24, 0.05) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 80%, rgba(229, 161, 0, 0.02) 0%, transparent 50%);
-    }
-
-    .dashboard-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      transition: all 0.3s ease;
-    }
-
-    .dashboard-card:hover {
-      border-color: var(--accent-green);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    }
-
-    .stat-value {
-      font-family: 'Poppins', sans-serif;
-      font-weight: 800;
-      color: var(--accent-green);
-    }
-  </style>
 </head>
+
 <body>
 
   <!-- ═══════════════════════════════════════════════════════
      SIDEBAR
-  ═══════════════════════════════════════════════════════ -->
-  <aside class="sidebar" id="sidebar">
+═══════════════════════════════════════════════════════ -->
+  <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main Navigation">
+
+    <!-- Brand -->
     <div class="sidebar-brand">
-      <div class="brand-emoji" style="font-size: 28px;">🐄</div>
-      <div class="brand-info">
+      <div class="brand-icon">🌾</div>
+      <div class="brand-text">
         <span class="brand-name">KisanTrack</span>
-        <span class="brand-sub">Smart Monitoring</span>
+        <span class="brand-sub">Animal Health Monitor</span>
       </div>
     </div>
 
+    <!-- System Status -->
+    <div class="sidebar-status">
+      <div class="status-dot" id="status-dot"></div>
+      <span class="status-text" id="status-text">System Online / ऑनलाइन</span>
+    </div>
+
+    <!-- Navigation -->
     <nav class="sidebar-nav">
-      <div class="nav-label">MAIN MENU / मुख्य मेनू</div>
-      <a href="dashboard.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Dashboard</span></a>
-      <a href="herd.html" class="nav-item"><i class="fa-solid fa-cow"></i><span>My Herd</span></a>
-      <a href="alerts.html" class="nav-item"><i class="fa-solid fa-bell"></i><span>Alerts</span></a>
-      
-      <div class="nav-label">TOOLS / उपकरण</div>
-      <a href="camera.html" class="nav-item"><i class="fa-solid fa-camera"></i><span>Camera AI</span></a>
-      <a href="uploads.html" class="nav-item"><i class="fa-solid fa-cloud-arrow-up"></i><span>Log Uploads</span></a>
-      <a href="profile.html" class="nav-item"><i class="fa-solid fa-user"></i><span>My Profile</span></a>
+      <div class="nav-label">Main Menu / मुख्य मेन्यू</div>
+
+      <div class="nav-link active" data-tab="dashboard" role="button" tabindex="0" id="nav-dashboard">
+        <i class="fa-solid fa-gauge-high"></i>
+        <span class="nav-text">Dashboard<span class="nav-hi">डैशबोर्ड</span></span>
+      </div>
+
+      <div class="nav-link" data-tab="animals" role="button" tabindex="0" id="nav-animals">
+        <i class="fa-solid fa-paw"></i>
+        <span class="nav-text">Animal Profiles<span class="nav-hi">पशु प्रोफ़ाइल</span></span>
+      </div>
+
+      <div class="nav-link" data-tab="vitals" role="button" tabindex="0" id="nav-vitals">
+        <i class="fa-solid fa-heartbeat"></i>
+        <span class="nav-text">Live Vitals<span class="nav-hi">लाइव जीवन संकेत</span></span>
+      </div>
+
+      <div class="nav-link" data-tab="camera" role="button" tabindex="0" id="nav-camera">
+        <i class="fa-solid fa-camera"></i>
+        <span class="nav-text">Camera Monitor<span class="nav-hi">कैमरा मॉनिटर</span></span>
+      </div>
+
+      <div class="nav-link" data-tab="alerts" role="button" tabindex="0" id="nav-alerts">
+        <i class="fa-solid fa-bell"></i>
+        <span class="nav-text">Alerts<span class="nav-hi">अलर्ट</span></span>
+        <span id="alert-badge"
+          style="background:var(--accent-red);color:#fff;font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:100px;margin-left:auto;">2</span>
+      </div>
+
+      <div class="nav-link" data-tab="reports" role="button" tabindex="0" id="nav-reports">
+        <i class="fa-solid fa-chart-column"></i>
+        <span class="nav-text">Reports<span class="nav-hi">रिपोर्ट</span></span>
+      </div>
+
+      <div class="nav-link" data-tab="upload" role="button" tabindex="0" id="nav-upload">
+        <i class="fa-solid fa-upload"></i>
+        <span class="nav-text">Upload Sensor Log<span class="nav-hi">सेंसर डेटा अपलोड</span></span>
+      </div>
+
+      <div class="nav-label" style="margin-top:8px;">Account / खाता</div>
+
+      <div class="nav-link" data-tab="profile" role="button" tabindex="0" id="nav-profile">
+        <i class="fa-solid fa-circle-user"></i>
+        <span class="nav-text">Farmer Profile<span class="nav-hi">किसान प्रोफ़ाइल</span></span>
+      </div>
     </nav>
 
+    <!-- Footer -->
     <div class="sidebar-footer">
-      <div class="user-info-pill">
-        <div class="avatar" id="sidebar-avatar">F</div>
-        <div class="meta">
-          <div class="name" id="sidebar-farmer-name">Farmer</div>
-          <div class="loc" id="sidebar-farm-name">My Farm</div>
-        </div>
+      <div class="last-sync">
+        <i class="fa-solid fa-rotate"></i>
+        Last sync: <strong id="last-sync-time">2 min ago</strong>
       </div>
-      <button class="btn-signout" id="btn-sidebar-signout"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+      <div class="farm-info">
+        <i class="fa-solid fa-location-dot" style="color:var(--text-dim)"></i>
+        <span id="farm-location">Anandpur, Gujarat</span>
+      </div>
     </div>
   </aside>
 
+  <!-- Hamburger (mobile) -->
+  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+    <i class="fa-solid fa-bars"></i>
+  </button>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
   <!-- ═══════════════════════════════════════════════════════
      MAIN CONTENT
-  ═══════════════════════════════════════════════════════ -->
-  <main class="main-content">
-    
-    <!-- Top Header -->
-    <header class="dashboard-header">
-      <div class="header-left">
-        <button class="hamburger" id="hamburger"><i class="fa-solid fa-bars"></i></button>
-        <div class="welcome-text">
-          <h2 id="banner-greeting">Good Morning, Farmer ☀️</h2>
-          <p id="banner-farm-info">Bikaner Sector 4 · Rajasthan</p>
-        </div>
-      </div>
-      <div class="header-right">
-        <div class="header-clock" id="header-datetime">Friday, May 8 · 01:05 AM</div>
-        <button class="btn-icon" id="btn-header-signout"><i class="fa-solid fa-power-off"></i></button>
-      </div>
-    </header>
+═══════════════════════════════════════════════════════ -->
+  <main class="main-content" id="main-content">
+    <div class="content-area">
 
-    <div class="dashboard-grid">
-      
-      <!-- KPI CARDS -->
-      <section class="kpi-row">
-        <div class="dashboard-card kpi-card">
-          <div class="kpi-icon" style="background: rgba(124, 181, 24, 0.1); color: var(--accent-green);">
-            <i class="fa-solid fa-cow"></i>
-          </div>
-          <div class="kpi-data">
-            <span class="label">Total Herd / कुल पशु</span>
-            <span class="stat-value" id="kpi-total-animals">0</span>
-          </div>
+      <!-- ─────────────────────────────────────────────────
+         SECTION 1: DASHBOARD HOME
+    ───────────────────────────────────────────────── -->
+      <section class="tab-section active" id="section-dashboard" aria-label="Dashboard Home">
+
+        <div class="page-header">
+          <h1><i class="fa-solid fa-gauge-high" style="color:var(--accent-green);margin-right:10px;"></i>Herd Overview /
+            <span style="color:var(--text-muted);">झुंड की स्थिति</span>
+          </h1>
+          <p class="subtitle">Real-time health monitoring for your entire livestock | आपके सभी पशुओं की स्वास्थ्य
+            निगरानी</p>
         </div>
 
-        <div class="dashboard-card kpi-card">
-          <div class="kpi-icon" style="background: rgba(59, 130, 246, 0.1); color: var(--accent-blue);">
-            <i class="fa-solid fa-heart-pulse"></i>
-          </div>
-          <div class="kpi-data">
-            <span class="label">Healthy / स्वस्थ</span>
-            <span class="stat-value" id="kpi-healthy-animals">0</span>
-          </div>
+        <!-- KPI Cards -->
+        <div class="kpi-grid" id="kpi-grid">
+          <!-- Populated by dashboard.js -->
         </div>
 
-        <div class="dashboard-card kpi-card">
-          <div class="kpi-icon" style="background: rgba(229, 161, 0, 0.1); color: var(--accent-amber);">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-          </div>
-          <div class="kpi-data">
-            <span class="label">Active Alerts / अलर्ट</span>
-            <span class="stat-value" id="kpi-active-alerts">0</span>
-          </div>
+        <!-- Herd Status Grid -->
+        <p class="section-title">
+          <i class="fa-solid fa-grip"></i> Herd Status / झुंड की स्थिति
+        </p>
+        <div class="herd-grid" id="herd-grid">
+          <!-- Populated by dashboard.js -->
         </div>
 
-        <div class="dashboard-card kpi-card">
-          <div class="kpi-icon" style="background: rgba(192, 57, 43, 0.1); color: var(--accent-red);">
-            <i class="fa-solid fa-shield-virus"></i>
-          </div>
-          <div class="kpi-data">
-            <span class="label">Critical / गंभीर</span>
-            <span class="stat-value" id="kpi-critical-cases">0</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- ANALYTICS ROW -->
-      <section class="analytics-row">
-        <div class="dashboard-card chart-main">
-          <div class="card-header">
-            <h3>Health Index Trends / स्वास्थ्य रुझान</h3>
-          </div>
-          <div class="chart-container">
-            <canvas id="main-telemetry-chart"></canvas>
-          </div>
-        </div>
-
-        <div class="dashboard-card species-dist">
-          <div class="card-header">
-            <h3>Herd Composition / पशु संरचना</h3>
-          </div>
-          <div class="donut-container">
-            <canvas id="herd-donut-chart"></canvas>
-            <div class="donut-center">
-              <span id="donut-total">0</span>
-              <small>Total</small>
+        <!-- Alert Ticker -->
+        <div class="ticker-section" id="alert-ticker">
+          <span class="ticker-label">⚠ LIVE ALERTS</span>
+          <div class="ticker-wrap">
+            <div class="ticker-track" id="ticker-track">
+              <!-- Populated by dashboard.js -->
             </div>
           </div>
-          <div class="donut-legend" id="donut-legend">
-            <!-- Legend items -->
+        </div>
+
+      </section>
+
+      <!-- ─────────────────────────────────────────────────
+         SECTION 2: ANIMAL PROFILES
+    ───────────────────────────────────────────────── -->
+      <section class="tab-section" id="section-animals" aria-label="Animal Profiles">
+
+        <div class="page-header"
+          style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+          <div>
+            <h1><i class="fa-solid fa-paw" style="color:var(--accent-green);margin-right:10px;"></i>Animal Profiles /
+              <span style="color:var(--text-muted);">पशु प्रोफ़ाइल</span>
+            </h1>
+            <p class="subtitle">Full registry of monitored animals | निगरानी में सभी पशुओं की सूची</p>
           </div>
+          <button class="btn btn-primary" id="open-add-animal-btn" aria-label="Add New Animal">
+            <i class="fa-solid fa-plus"></i>
+            <span>+ Add Animal / + पशु जोड़ें</span>
+          </button>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="filter-bar" id="animal-filter-bar">
+          <button class="filter-btn active" data-filter="all" id="filter-all">All / सभी</button>
+          <button class="filter-btn" data-filter="cows" id="filter-cows">🐄 Cows / गाय</button>
+          <button class="filter-btn" data-filter="buffaloes" id="filter-buffaloes">🐃 Buffaloes / भैंस</button>
+          <button class="filter-btn" data-filter="goats" id="filter-goats">🐐 Goats / बकरी</button>
+        </div>
+
+        <!-- Search -->
+        <div class="search-wrap">
+          <i class="fa-solid fa-search"></i>
+          <input type="search" class="search-input" id="animal-search"
+            placeholder="Search by ID or name... | ID या नाम से खोजें" aria-label="Search animals" />
+        </div>
+
+        <!-- Profile grid -->
+        <div class="profiles-grid" id="profiles-grid">
+          <!-- Populated by animals.js -->
         </div>
       </section>
 
-      <!-- FEED ROW -->
-      <section class="feed-row">
-        <div class="dashboard-card recent-herd">
-          <div class="card-header">
-            <h3>Live Herd Stream / लाइव झुंड</h3>
-            <button class="btn-text" onclick="window.location.href='herd.html'">View All</button>
-          </div>
-          <div class="herd-list" id="herd-grid">
-            <!-- Animal cards -->
+      <!-- ─────────────────────────────────────────────────
+         SECTION 3: LIVE VITALS MONITOR
+    ───────────────────────────────────────────────── -->
+      <section class="tab-section" id="section-vitals" aria-label="Live Vitals Monitor">
+
+        <div class="page-header">
+          <h1><i class="fa-solid fa-heartbeat" style="color:var(--accent-green);margin-right:10px;"></i>Live Vitals /
+            <span style="color:var(--text-muted);">लाइव जीवन संकेत</span>
+          </h1>
+          <p class="subtitle">Real-time sensor readings with AI health analysis | AI स्वास्थ्य विश्लेषण सहित लाइव रीडिंग
+          </p>
+        </div>
+
+        <!-- Animal Selector -->
+        <div class="vitals-selector-bar">
+          <label for="vitals-animal-select"><i class="fa-solid fa-paw"
+              style="color:var(--accent-green);margin-right:4px;"></i> Select Animal / पशु चुनें:</label>
+          <select class="styled-select" id="vitals-animal-select" style="flex:1;max-width:300px;">
+            <!-- Populated by vitals.js -->
+          </select>
+          <div class="live-badge">
+            <div class="live-dot"></div>
+            LIVE
           </div>
         </div>
 
-        <div class="dashboard-card recent-alerts">
-          <div class="card-header">
-            <h3>Recent Alerts / हालिया अलर्ट</h3>
-            <button class="btn-text" onclick="window.location.href='alerts.html'">History</button>
-          </div>
-          <div class="alerts-feed" id="alerts-feed">
-            <!-- Alert items -->
-          </div>
-        </div>
-      </section>
-
-      <!-- AI ASSISTANCE -->
-      <section class="ai-row">
-        <div class="dashboard-card ai-assistant">
-          <div class="ai-header">
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
-            <h3>Kisan AI — Health Intelligence</h3>
-          </div>
-          <div class="ai-body">
-            <div class="ai-input-group">
-              <p>Select an animal for deep clinical analysis / विश्लेषण के लिए पशु चुनें:</p>
-              <div class="ai-controls">
-                <select id="ai-animal-select">
-                  <option value="">Select Subject...</option>
-                </select>
-                <button class="btn-primary" id="btn-ai-analyse">Run Neural Scan</button>
+        <!-- Gauges -->
+        <div class="gauges-row" id="gauges-row">
+          <!-- Gauge 1: Temperature -->
+          <div class="gauge-card">
+            <div class="gauge-title">
+              <i class="fa-solid fa-thermometer-half" style="color:var(--accent-green);"></i>
+              Body Temperature<span class="hi-label">शरीर का तापमान</span>
+            </div>
+            <div class="gauge-svg-wrap">
+              <svg viewBox="0 0 100 100">
+                <circle class="gauge-bg" cx="50" cy="50" r="40" stroke-dasharray="251.2" />
+                <circle class="gauge-fill green" id="gauge-temp-fill" cx="50" cy="50" r="40" stroke-dasharray="251.2"
+                  stroke-dashoffset="251.2" />
+              </svg>
+              <div class="gauge-label">
+                <div class="gauge-value" id="gauge-temp-val">--</div>
+                <div class="gauge-unit">°C</div>
               </div>
             </div>
-            <div class="ai-result-area" id="ai-result-area" style="display:none;">
-              <div class="ai-loading">
-                <div class="spinner"></div>
-                <span>Analyzing biomarkers...</span>
+            <div class="gauge-range">Safe: 38.0 – 39.5°C</div>
+          </div>
+
+          <!-- Gauge 2: Heart Rate -->
+          <div class="gauge-card">
+            <div class="gauge-title">
+              <i class="fa-solid fa-heart-pulse" style="color:var(--accent-amber);"></i>
+              Heart Rate<span class="hi-label">हृदय गति</span>
+            </div>
+            <div class="gauge-svg-wrap">
+              <svg viewBox="0 0 100 100">
+                <circle class="gauge-bg" cx="50" cy="50" r="40" stroke-dasharray="251.2" />
+                <circle class="gauge-fill amber" id="gauge-hr-fill" cx="50" cy="50" r="40" stroke-dasharray="251.2"
+                  stroke-dashoffset="251.2" />
+              </svg>
+              <div class="gauge-label">
+                <div class="gauge-value" id="gauge-hr-val">--</div>
+                <div class="gauge-unit">bpm</div>
               </div>
-              <div class="ai-content" id="ai-content"></div>
+            </div>
+            <div class="gauge-range">Safe: 60 – 80 bpm</div>
+          </div>
+
+          <!-- Gauge 3: Activity -->
+          <div class="gauge-card">
+            <div class="gauge-title">
+              <i class="fa-solid fa-running" style="color:var(--accent-blue);"></i>
+              Activity Level<span class="hi-label">गतिविधि स्तर</span>
+            </div>
+            <div class="gauge-svg-wrap">
+              <svg viewBox="0 0 100 100">
+                <circle class="gauge-bg" cx="50" cy="50" r="40" stroke-dasharray="251.2" />
+                <circle class="gauge-fill blue" id="gauge-act-fill" cx="50" cy="50" r="40" stroke-dasharray="251.2"
+                  stroke-dashoffset="251.2" />
+              </svg>
+              <div class="gauge-label">
+                <div class="gauge-value" id="gauge-act-val">--</div>
+                <div class="gauge-unit">%</div>
+              </div>
+            </div>
+            <div class="gauge-range">Normal: 40 – 80%</div>
+          </div>
+        </div>
+
+        <!-- Live Charts (3 separate) -->
+        <div class="live-charts-grid">
+
+          <!-- Chart 1: Temperature -->
+          <div class="live-chart-card">
+            <div class="live-chart-header">
+              <h3 class="section-title" style="margin:0;">
+                <i class="fa-solid fa-thermometer-half" style="color:#7CB518;"></i>
+                Body Temperature / शरीर का तापमान
+              </h3>
+              <div class="live-badge">
+                <div class="live-dot"></div>Every 60s
+              </div>
+            </div>
+            <div class="live-chart-range">Safe: 38.0 – 39.5°C &nbsp;·&nbsp; Unit: °C</div>
+            <div class="chart-wrap vitals-chart-wrap">
+              <canvas id="chart-temp"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 2: Heart Rate -->
+          <div class="live-chart-card">
+            <div class="live-chart-header">
+              <h3 class="section-title" style="margin:0;">
+                <i class="fa-solid fa-heart-pulse" style="color:#E5A100;"></i>
+                Heart Rate / हृदय गति
+              </h3>
+              <div class="live-badge">
+                <div class="live-dot"></div>Every 60s
+              </div>
+            </div>
+            <div class="live-chart-range">Safe: 60 – 80 bpm &nbsp;·&nbsp; Unit: bpm</div>
+            <div class="chart-wrap vitals-chart-wrap">
+              <canvas id="chart-hr"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 3: Activity -->
+          <div class="live-chart-card">
+            <div class="live-chart-header">
+              <h3 class="section-title" style="margin:0;">
+                <i class="fa-solid fa-person-running" style="color:#3B82F6;"></i>
+                Activity Level / गतिविधि स्तर
+              </h3>
+              <div class="live-badge">
+                <div class="live-dot"></div>Every 60s
+              </div>
+            </div>
+            <div class="live-chart-range">Normal: 40 – 80% &nbsp;·&nbsp; Unit: %</div>
+            <div class="chart-wrap vitals-chart-wrap">
+              <canvas id="chart-activity"></canvas>
+            </div>
+          </div>
+
+        </div><!-- /.live-charts-grid -->
+
+        <!-- AI Summary -->
+        <div class="ai-summary-card">
+          <div class="ai-summary-header">
+            <i class="fa-solid fa-robot"></i>
+            <h3>AI Health Summary / AI स्वास्थ्य सारांश</h3>
+          </div>
+          <p class="ai-summary-text" id="ai-summary-text">Select an animal to view the AI-generated health summary.</p>
+          <div class="confidence-bar-wrap">
+            <div class="confidence-label">
+              Detection Confidence / पहचान विश्वसनीयता <span id="confidence-pct">—</span>
+            </div>
+            <div class="confidence-bar">
+              <div class="confidence-bar-fill" id="confidence-fill" style="width:0%"></div>
             </div>
           </div>
         </div>
       </section>
 
-    </div>
+      <!-- ─────────────────────────────────────────────────
+         SECTION 4: ALERTS & NOTIFICATIONS
+    ───────────────────────────────────────────────── -->
+      <section class="tab-section" id="section-alerts" aria-label="Alerts and Notifications">
+
+        <div class="page-header">
+          <h1><i class="fa-solid fa-bell" style="color:var(--accent-amber);margin-right:10px;"></i>Alerts / <span
+              style="color:var(--text-muted);">अलर्ट</span></h1>
+          <p class="subtitle">All health alerts and notifications | सभी स्वास्थ्य चेतावनियाँ</p>
+        </div>
+
+        <!-- Summary Stats -->
+        <div class="alert-stats-row" id="alert-stats-row">
+          <!-- Populated by alerts.js -->
+        </div>
+
+        <!-- Filter -->
+        <div class="filter-bar" id="alert-filter-bar">
+          <button class="filter-btn active" data-filter="all" id="af-all">All / सभी</button>
+          <button class="filter-btn" data-filter="Critical" id="af-critical">🔴 Critical</button>
+          <button class="filter-btn" data-filter="Warning" id="af-warning">🟡 Warning</button>
+          <button class="filter-btn" data-filter="resolved" id="af-resolved">✅ Resolved</button>
+        </div>
+
+        <!-- Alert Feed -->
+        <div class="alert-feed" id="alert-feed">
+          <!-- Populated by alerts.js -->
+        </div>
+      </section>
+
+      <!-- ─────────────────────────────────────────────────
+         SECTION 5: HISTORICAL REPORTS
+    ───────────────────────────────────────────────── -->
+      <section class="tab-section" id="section-reports" aria-label="Historical Reports">
+
+        <div class="page-header">
+          <h1><i class="fa-solid fa-chart-column" style="color:var(--accent-green);margin-right:10px;"></i>Historical
+            Reports / <span style="color:var(--text-muted);">ऐतिहासिक रिपोर्ट</span></h1>
+          <p class="subtitle">Herd health trends and historical data | झुंड स्वास्थ्य प्रवृत्ति और पुराने डेटा</p>
+        </div>
+
+        <!-- Date Range -->
+        <div class="report-controls">
+          <label for="date-range"><i class="fa-solid fa-calendar"
+              style="color:var(--accent-green);margin-right:4px;"></i> Date Range / तारीख:</label>
+          <select class="styled-select" id="date-range">
+            <option value="7">Last 7 Days / पिछले 7 दिन</option>
+            <option value="14" selected>Last 14 Days / पिछले 14 दिन</option>
+            <option value="30">Last 30 Days / पिछले 30 दिन</option>
+          </select>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="charts-row">
+          <div class="chart-card">
+            <h3 class="chart-card-title">
+              <i class="fa-solid fa-chart-bar"></i>
+              Daily Alert Count / दैनिक अलर्ट
+            </h3>
+            <div class="chart-wrap">
+              <canvas id="report-alerts-chart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <h3 class="chart-card-title">
+              <i class="fa-solid fa-temperature-half"></i>
+              Average Herd Temperature / औसत तापमान
+            </h3>
+            <div class="chart-wrap">
+              <canvas id="report-temp-chart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="data-table-wrap">
+          <div class="data-table-header">
+            <h3><i class="fa-solid fa-table" style="color:var(--accent-green);margin-right:8px;"></i>Event Log / घटना
+              लॉग</h3>
+            <button class="btn btn-secondary btn-sm" id="export-csv-btn">
+              <i class="fa-solid fa-download"></i> Export CSV
+            </button>
+          </div>
+          <div class="table-scroll">
+            <table class="data-table" id="report-table">
+              <thead>
+                <tr>
+                  <th>Date / तारीख</th>
+                  <th>Animal ID</th>
+                  <th>Parameter / पैरामीटर</th>
+                  <th>Reading / रीडिंग</th>
+                  <th>Severity / स्तर</th>
+                  <th>Confidence / विश्वास</th>
+                  <th>Status / स्थिति</th>
+                </tr>
+              </thead>
+              <tbody id="report-table-body">
+                <!-- Populated by reports.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─────────────────────────────────────────────────
+         SECTION 6: UPLOAD SENSOR LOG
+    ───────────────────────────────────────────────── -->
+      <section class="tab-section" id="section-upload" aria-label="Upload Sensor Log">
+
+        <div class="page-header">
+          <h1><i class="fa-solid fa-upload" style="color:var(--accent-green);margin-right:10px;"></i>Upload Sensor Log /
+            <span style="color:var(--text-muted);">सेंसर डेटा अपलोड</span>
+          </h1>
+          <p class="subtitle">Upload CSV or JSON sensor logs for analysis | विश्लेषण के लिए CSV या JSON फ़ाइल अपलोड करें
+          </p>
+        </div>
+
+        <div class="upload-container">
+
+          <!-- Drop Zone -->
+          <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Drop file here or click to browse">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <h3>Drop your file here / फ़ाइल यहाँ छोड़ें</h3>
+            <p>or click "Browse Files" to select</p>
+            <div class="formats">
+              <span class="format-tag">CSV</span>
+              <span class="format-tag">JSON</span>
+              <span class="format-tag">Max 50MB</span>
+            </div>
+          </div>
+
+          <!-- Browse Button -->
+          <div class="upload-actions">
+            <input type="file" id="file-input" accept=".csv,.json" style="display:none;" aria-label="Select file" />
+            <button class="btn btn-secondary" id="browse-btn" style="margin-top:14px;">
+              <i class="fa-solid fa-folder-open"></i> Browse Files / फ़ाइल चुनें
+            </button>
+          </div>
+
+          <!-- File Preview -->
+          <div class="file-preview" id="file-preview">
+            <div class="file-icon"><i class="fa-solid fa-file-csv"></i></div>
+            <div class="file-info">
+              <div class="file-name" id="file-name-display">filename.csv</div>
+              <div class="file-size" id="file-size-display">0 KB</div>
+            </div>
+            <button class="btn btn-primary btn-sm" id="process-btn">
+              <i class="fa-solid fa-microchip"></i> Process File
+            </button>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="upload-progress" id="upload-progress">
+            <div class="progress-label">
+              <span id="progress-label-text">Analyzing data... / डेटा विश्लेषण हो रहा है...</span>
+              <span id="progress-pct">0%</span>
+            </div>
+            <div class="progress-bar-outer">
+              <div class="progress-bar-inner" id="progress-bar-fill"></div>
+            </div>
+          </div>
+
+          <!-- Result Card -->
+          <div class="upload-result" id="upload-result">
+            <div class="result-header">
+              <i class="fa-solid fa-circle-check"></i> Analysis Complete / विश्लेषण पूर्ण
+            </div>
+            <div class="result-stats">
+              <div class="result-stat">
+                <div class="result-stat-num" id="res-parsed">142</div>
+                <div class="result-stat-label">Records Parsed / रिकॉर्ड पढ़े</div>
+              </div>
+              <div class="result-stat">
+                <div class="result-stat-num" id="res-anomalies" style="color:var(--accent-amber)">3</div>
+                <div class="result-stat-label">Anomalies Found / असामान्यताएं</div>
+              </div>
+              <div class="result-stat">
+                <div class="result-stat-num" id="res-animals" style="color:var(--accent-red)">2</div>
+                <div class="result-stat-label">Animals Affected / प्रभावित पशु</div>
+              </div>
+            </div>
+            <h4 style="font-family:var(--font-heading);font-size:0.88rem;color:var(--text-muted);margin-bottom:10px;">
+              <i class="fa-solid fa-triangle-exclamation" style="color:var(--accent-amber);margin-right:6px;"></i>
+              Detected Anomalies / पाई गई असामान्यताएं
+            </h4>
+            <div class="table-scroll">
+              <table class="data-table" id="anomaly-table">
+                <thead>
+                  <tr>
+                    <th>Animal ID</th>
+                    <th>Parameter</th>
+                    <th>Reading</th>
+                    <th>Severity</th>
+                  </tr>
+                </thead>
+                <tbody id="anomaly-table-body">
+                  <!-- Populated by upload.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ─────────────────────────────────────────────────
+         SECTION 7: FARMER PROFILE
+    ───────────────────────────────────────────────── -->
+      <section class="tab-section" id="section-profile" aria-label="Farmer Profile">
+
+        <div class="page-header">
+          <h1><i class="fa-solid fa-circle-user" style="color:var(--accent-green);margin-right:10px;"></i>Farmer Profile
+            / <span style="color:var(--text-muted);">किसान प्रोफ़ाइल</span></h1>
+          <p class="subtitle">Your personal and farm information | आपकी व्यक्तिगत और खेत की जानकारी</p>
+        </div>
+
+        <!-- Dynamic content rendered by profile.js -->
+        <div id="profile-section-root"></div>
+
+      </section>
+
+      <!-- ─────────────────────────────────────────────────
+         SECTION 8: CAMERA MONITOR
+    ───────────────────────────────────────────────── -->
+      <section class="tab-section" id="section-camera" aria-label="Camera Monitor">
+
+        <div class="page-header">
+          <h1><i class="fa-solid fa-camera" style="color:var(--accent-green);margin-right:10px;"></i>Camera Monitor /
+            <span style="color:var(--text-muted);">कैमरा मॉनिटर</span>
+          </h1>
+          <p class="subtitle">ESP32-CAM visual health detection with Gemini AI | आई से पशु स्वास्थ्य बिश्लेषण</p>
+        </div>
+
+        <!-- Settings Bar -->
+        <div class="cam-settings-bar">
+          <div class="cam-setting-group">
+            <label class="cam-setting-label">Camera / कैमरा</label>
+            <label class="toggle-switch" aria-label="Camera on/off">
+              <input type="checkbox" id="cam-toggle" checked />
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+            <span class="cam-setting-val" id="cam-status-label">ON</span>
+          </div>
+          <div class="cam-setting-group">
+            <label class="cam-setting-label" for="capture-interval-input">Interval / अंतराल</label>
+            <input type="number" id="capture-interval-input" class="cam-num-input" value="120" min="10" max="3600"
+              aria-label="Capture interval in seconds" />
+            <span class="cam-setting-val">s</span>
+          </div>
+          <div class="cam-setting-group">
+            <label class="cam-setting-label">Auto-AI / ऑटो AI</label>
+            <label class="toggle-switch" aria-label="Auto analysis on/off">
+              <input type="checkbox" id="auto-analysis-toggle" checked />
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+          </div>
+          <div class="cam-setting-group">
+            <label class="cam-setting-label" for="cam-location-input">Location / स्थान</label>
+            <input type="text" id="cam-location-input" class="cam-text-input" value="Main Barn"
+              aria-label="Camera location" />
+          </div>
+        </div>
+
+        <!-- Main Grid: Feed + Analysis -->
+        <div class="camera-main-grid">
+
+          <!-- LEFT: Live Feed -->
+          <div class="camera-feed-card">
+            <div class="cam-feed-header">
+              <h3 class="section-title" style="margin:0;"><i class="fa-solid fa-video"></i> ESP32-CAM Live Feed / लाइव
+                कैमरा फ़ीड</h3>
+              <div class="cam-live-badge" id="camera-live-badge">
+                <span class="cam-live-dot"></span> LIVE
+              </div>
+            </div>
+            <div class="cam-feed-box">
+              <canvas id="camera-feed-canvas" width="640" height="360" aria-label="Live camera feed"></canvas>
+              <div class="cam-flash" id="cam-flash"></div>
+            </div>
+            <div class="cam-feed-meta">
+              <span><i class="fa-solid fa-microchip" style="color:var(--accent-green)"></i> CAM-01</span>
+              <span><i class="fa-solid fa-location-dot" style="color:var(--text-dim)"></i> <span
+                  id="cam-location-display">Main Barn</span></span>
+              <span><i class="fa-regular fa-clock" style="color:var(--text-dim)"></i> <span
+                  id="last-capture-time">—</span></span>
+              <span class="cam-countdown-wrap"><i class="fa-solid fa-rotate" style="color:var(--accent-amber)"></i>
+                Next: <span id="cam-countdown" class="cam-countdown">120s</span></span>
+            </div>
+            <button class="btn btn-primary" id="capture-now-btn" style="margin-top:14px;width:100%;">
+              <i class="fa-solid fa-camera"></i> Capture Now / अभी कैप्चर करें
+            </button>
+          </div>
+
+          <!-- RIGHT: Gemini AI Analysis -->
+          <div class="camera-analysis-card">
+            <h3 class="section-title" style="margin-bottom:16px;">
+              <i class="fa-solid fa-robot" style="color:var(--accent-green);"></i>
+              Gemini Vision Analysis / जेमिनी विश्लेषण
+            </h3>
+
+            <!-- No-key prompt -->
+            <div id="no-key-prompt" class="no-key-prompt">
+              <i class="fa-solid fa-key"></i>
+              <p>🔑 Connect Gemini API to enable AI analysis<br><span
+                  style="color:var(--text-dim);font-size:0.78rem;">AI विश्लेषण के लिए Gemini API जोड़ें</span></p>
+              <p style="font-size:0.78rem;color:var(--text-dim);margin-top:6px;">Simulated analysis will run until API
+                key is set.</p>
+            </div>
+
+            <!-- Results area -->
+            <div id="analysis-results" class="analysis-results-area"></div>
+          </div>
+
+        </div><!-- /.camera-main-grid -->
+
+        <!-- Detection Overlay Canvas -->
+        <div class="detection-card">
+          <h3 class="section-title"><i class="fa-solid fa-object-group"></i> Detection Results / पहचान परिणाम</h3>
+          <div class="detection-canvas-wrap">
+            <canvas id="detection-canvas" width="640" height="360" aria-label="Animal detection overlay"></canvas>
+          </div>
+          <div class="detection-stats-row" id="detection-stats-row">
+            <!-- Populated by camera.js -->
+          </div>
+          <p class="powered-by-note">
+            <i class="fa-solid fa-microchip"></i>
+            Powered by OpenCV + Gemini Vision / OpenCV + जेमिनी विज़न द्वारा संचालित
+          </p>
+        </div>
+
+        <!-- Capture History Filmstrip -->
+        <div class="filmstrip-card">
+          <div class="filmstrip-header">
+            <h3 class="section-title"><i class="fa-solid fa-film"></i> Capture History / कैप्चर इतिहास</h3>
+            <button class="btn btn-secondary btn-sm" id="view-all-history-btn">
+              <i class="fa-solid fa-clock-rotate-left"></i> View All / पूरा इतिहास
+            </button>
+          </div>
+          <div class="filmstrip" id="filmstrip">
+            <div class="filmstrip-empty"><i class="fa-solid fa-camera-slash"></i>
+              <p>No captures yet. Camera will auto-capture every 120 seconds. / अभी कोई कैप्चर नहीं।</p>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </div><!-- /.content-area -->
   </main>
 
-  <!-- Alert Ticker -->
-  <div class="alert-ticker" id="ticker">
-    <div class="ticker-label">LIVE STATUS:</div>
-    <div class="ticker-track" id="ticker-track">
-      <span class="ticker-item">✅ All systems normal / सब ठीक है</span>
+  <!-- ═══════════════════════════════════════════════════════
+     MOBILE BOTTOM NAVIGATION
+═══════════════════════════════════════════════════════ -->
+  <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile Navigation">
+    <div class="mobile-nav-inner">
+      <div class="mobile-nav-item active" data-tab="dashboard" id="mnav-dashboard">
+        <i class="fa-solid fa-gauge-high"></i>
+        <span>Home</span>
+      </div>
+      <div class="mobile-nav-item" data-tab="animals" id="mnav-animals">
+        <i class="fa-solid fa-paw"></i>
+        <span>Animals</span>
+      </div>
+      <div class="mobile-nav-item" data-tab="vitals" id="mnav-vitals">
+        <i class="fa-solid fa-heartbeat"></i>
+        <span>Vitals</span>
+      </div>
+      <div class="mobile-nav-item" data-tab="alerts" id="mnav-alerts">
+        <i class="fa-solid fa-bell"></i>
+        <span>Alerts</span>
+      </div>
+      <div class="mobile-nav-item" data-tab="camera" id="mnav-camera">
+        <i class="fa-solid fa-camera"></i>
+        <span>Camera</span>
+      </div>
+      <div class="mobile-nav-item" data-tab="profile" id="mnav-profile">
+        <i class="fa-solid fa-circle-user"></i>
+        <span>Profile</span>
+      </div>
+    </div>
+  </nav>
+
+
+
+  <!-- ═══════════════════════════════════════════════════════
+     ANIMAL DETAIL MODAL (shared between sections)
+═══════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="animal-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <div class="modal-emoji" id="modal-emoji">🐄</div>
+          <div>
+            <h2 class="modal-title" id="modal-title">Animal Detail</h2>
+            <p class="modal-subtitle" id="modal-subtitle">Loading...</p>
+          </div>
+        </div>
+        <button class="modal-close" id="modal-close" aria-label="Close modal">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Vitals -->
+        <div class="modal-vitals-grid">
+          <div class="modal-vital">
+            <div class="modal-vital-value" id="modal-temp">--</div>
+            <div class="modal-vital-label">Temp (°C) / तापमान</div>
+          </div>
+          <div class="modal-vital">
+            <div class="modal-vital-value" id="modal-hr">--</div>
+            <div class="modal-vital-label">Heart Rate / हृदय गति</div>
+          </div>
+          <div class="modal-vital">
+            <div class="modal-vital-value" id="modal-act">--</div>
+            <div class="modal-vital-label">Activity / गतिविधि</div>
+          </div>
+        </div>
+
+        <!-- 7-Day Chart -->
+        <h4 style="font-size:0.85rem;color:var(--text-muted);margin-bottom:10px;">
+          <i class="fa-solid fa-chart-line" style="color:var(--accent-green);margin-right:6px;"></i>
+          7-Day Health History / 7 दिन का इतिहास
+        </h4>
+        <div class="modal-chart-wrap">
+          <canvas id="modal-chart"></canvas>
+        </div>
+
+        <!-- Info grid -->
+        <div class="divider"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+          <div class="modal-vital">
+            <div class="modal-vital-value" id="modal-breed" style="font-size:1rem;">--</div>
+            <div class="modal-vital-label">Breed / नस्ल</div>
+          </div>
+          <div class="modal-vital">
+            <div class="modal-vital-value" id="modal-age" style="font-size:1rem;">--</div>
+            <div class="modal-vital-label">Age / उम्र</div>
+          </div>
+          <div class="modal-vital">
+            <div class="modal-vital-value" id="modal-weight" style="font-size:1rem;">--</div>
+            <div class="modal-vital-label">Weight / वजन</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+  <!-- ═══════════════════════════════════════════════════════
+     ADD ANIMAL MODAL
+═══════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="add-animal-modal" role="dialog" aria-modal="true"
+    aria-labelledby="add-animal-modal-title">
+    <div class="modal-box" style="max-width:560px;">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <div class="modal-emoji">🐄</div>
+          <div>
+            <h2 class="modal-title" id="add-animal-modal-title">Add New Animal / नया पशु जोड़ें</h2>
+            <p class="modal-subtitle">Fill all fields to register a new animal / सभी जानकारी भरें</p>
+          </div>
+        </div>
+        <button class="modal-close" id="add-animal-close" aria-label="Close Add Animal modal">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="add-animal-form" novalidate autocomplete="off">
+
+          <!-- Row 1: ID + Species -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="new-animal-id">
+                Animal ID / पशु ID <span class="form-required">*</span>
+              </label>
+              <input type="text" id="new-animal-id" class="form-input" placeholder="e.g. A06, B04, G05" />
+              <span class="form-error" id="err-animal-id">Please enter a unique Animal ID.</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="new-species">
+                Species / प्रजाति <span class="form-required">*</span>
+              </label>
+              <select id="new-species" class="form-input styled-select">
+                <option value="">Select species...</option>
+                <option value="Cow">🐄 Cow / गाय</option>
+                <option value="Buffalo">🐃 Buffalo / भैंस</option>
+                <option value="Goat">🐐 Goat / बकरी</option>
+              </select>
+              <span class="form-error" id="err-species">Please select a species.</span>
+            </div>
+          </div>
+
+          <!-- Row 2: Breed + Tag ID -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="new-breed">
+                Breed / नस्ल <span class="form-required">*</span>
+              </label>
+              <input type="text" id="new-breed" class="form-input" placeholder="e.g. Holstein, Murrah, Beetal" />
+              <span class="form-error" id="err-breed">Please enter the breed.</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="new-tag-id">
+                Sensor Tag ID / सेंसर टैग <span class="form-required">*</span>
+              </label>
+              <input type="text" id="new-tag-id" class="form-input" placeholder="e.g. TAG-C006" />
+              <span class="form-error" id="err-tag-id">Please enter the sensor tag ID.</span>
+            </div>
+          </div>
+
+          <!-- Row 3: Age + Weight -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="new-age">
+                Age (years) / उम्र (वर्ष) <span class="form-required">*</span>
+              </label>
+              <input type="number" id="new-age" class="form-input" placeholder="e.g. 3" min="0" max="30" />
+              <span class="form-error" id="err-age">Please enter a valid age (0–30).</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="new-weight">
+                Weight (kg) / वजन (किग्रा) <span class="form-required">*</span>
+              </label>
+              <input type="number" id="new-weight" class="form-input" placeholder="e.g. 420" min="1" max="2000" />
+              <span class="form-error" id="err-weight">Please enter a valid weight.</span>
+            </div>
+          </div>
+
+          <!-- Row 4: Status -->
+          <div class="form-row">
+            <div class="form-group" style="flex:1;">
+              <label class="form-label" for="new-status">
+                Initial Health Status / प्रारंभिक स्वास्थ्य स्थिति <span class="form-required">*</span>
+              </label>
+              <select id="new-status" class="form-input styled-select">
+                <option value="">Select status...</option>
+                <option value="Healthy">✅ Healthy / स्वस्थ</option>
+                <option value="Warning">⚠️ Warning / चेतावनी</option>
+                <option value="Critical">🔴 Critical / गंभीर</option>
+              </select>
+              <span class="form-error" id="err-status">Please select a health status.</span>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:22px;">
+            <button type="button" class="btn btn-secondary" id="cancel-add-animal">Cancel / रद्द करें</button>
+            <button type="submit" class="btn btn-primary" id="submit-add-animal">
+              <i class="fa-solid fa-plus-circle"></i> Add Animal / पशु जोड़ें
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+     COMPLETE PROFILE MODAL (Welcome Nudge)
+  ═══════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="complete-profile-modal" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width:500px;">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <div class="modal-emoji">👋</div>
+          <div>
+            <h2 class="modal-title">Welcome to KisanTrack!</h2>
+            <p class="modal-subtitle">Please complete your profile to get started / अपनी प्रोफ़ाइल पूरी करें</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-body">
+        <form id="complete-profile-form" novalidate autocomplete="off">
+          <div class="form-group" style="margin-bottom:16px;">
+            <label class="form-label">Farm Name / खेत का नाम <span class="form-required">*</span></label>
+            <input type="text" id="cp-farm-name" class="form-input" placeholder="e.g. Green Valley Farm" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Village / गाँव <span class="form-required">*</span></label>
+              <input type="text" id="cp-village" class="form-input" placeholder="Enter village" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">District / जिला <span class="form-required">*</span></label>
+              <input type="text" id="cp-district" class="form-input" placeholder="Enter district" required />
+            </div>
+          </div>
+          <div class="form-row" style="margin-top:16px;">
+            <div class="form-group">
+              <label class="form-label">State / राज्य <span class="form-required">*</span></label>
+              <input type="text" id="cp-state" class="form-input" placeholder="Enter state" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Farm Size (Acres) / खेत का आकार <span class="form-required">*</span></label>
+              <input type="number" id="cp-farm-size" class="form-input" placeholder="e.g. 5" step="0.5" required />
+            </div>
+          </div>
+
+          <div style="margin-top:24px;">
+            <button type="submit" class="btn btn-primary" id="btn-complete-profile" style="width:100%;">
+              Complete Profile & Continue / जारी रखें
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+     TOAST NOTIFICATION
+═══════════════════════════════════════════════════════ -->
+  <div class="toast" id="app-toast" role="alert" aria-live="polite">
+    <i class="fa-solid fa-circle-check toast-icon"></i>
+    <span class="toast-msg" id="toast-msg">Action completed successfully.</span>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+     EXTERNAL SCRIPTS
+═══════════════════════════════════════════════════════ -->
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 
   <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/firebase-init.js"></script>
-  <script src="js/auth.js"></script>
   <script src="js/firestore-store.js"></script>
+  <script src="js/seed-data.js"></script>
   <script src="js/dashboard.js"></script>
+  <script src="js/animals.js"></script>
+  <script src="js/vitals.js"></script>
+  <script src="js/alerts.js"></script>
+  <script src="js/reports.js"></script>
+  <script src="js/upload.js"></script>
+  <script src="js/add-animal.js"></script>
+  <script src="js/seed-data.js"></script>
+  <script src="js/profile.js"></script>
+  <script src="js/camera.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+
 </body>
+
 </html>

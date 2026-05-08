@@ -52,7 +52,7 @@ const DashboardModule = (function () {
     console.log("KisanTrack: Cleaning up listeners...");
     _unsubscribers.forEach(unsub => { if (typeof unsub === 'function') unsub(); });
     _unsubscribers = [];
-    
+
     // Destroy charts
     Object.keys(_charts).forEach(key => {
       if (_charts[key]) {
@@ -123,7 +123,7 @@ const DashboardModule = (function () {
   }
 
   // ── UI Updates ─────────────────────────────────────────────
-  
+
   function updateWelcomeBanner(data) {
     const hours = new Date().getHours();
     let greetEn = "Good Morning", greetHi = "शुभ प्रभात";
@@ -135,7 +135,7 @@ const DashboardModule = (function () {
 
     if (el.greeting) el.greeting.innerHTML = `${greetEn}, ${data.firstName || 'Farmer'} ${emoji} <span style="display:block; font-size:16px; opacity:0.8;">${greetHi}</span>`;
     if (el.farmInfo) el.farmInfo.textContent = `${data.farmName || 'My Farm'} · ${data.village || 'Rampur'}, ${data.state || 'Rajasthan'}`;
-    
+
     // Update Sidebar
     const sbName = document.getElementById('sidebar-farmer-name');
     const sbFarm = document.getElementById('sidebar-farm-name');
@@ -151,18 +151,29 @@ const DashboardModule = (function () {
     const healthy = animals.filter(a => a.status === 'Healthy').length;
     animateCount(el.kpiHealthy, healthy);
 
-    // Bio-Gauge Update
+    // Bio-Gauge & Charts
     updateBioGauge(animals);
+    updateHealthBars(animals);
+    updateDonutChart(animals);
 
-    // Herd Grid
+    // Herd Grid & AI
     renderHerdGrid(animals);
-
-    // AI Select
     updateAISelect(animals);
     
     // Sparklines
     initSparklines();
     initMainChart();
+  }
+
+  function processAlerts(alerts) {
+    // KPI Alert Counts
+    animateCount(el.kpiAlerts, alerts.length);
+    const critical = alerts.filter(a => a.severity === 'Critical').length;
+    animateCount(el.kpiCritical, critical);
+
+    // Render Components
+    renderAlertsFeed(alerts);
+    renderTicker(alerts);
   }
 
   function updateBioGauge(animals) {
@@ -214,26 +225,6 @@ const DashboardModule = (function () {
       }
     });
   }
-
-  async function performAIAnalysis() {
-    const animalId = el.aiSelect.value;
-    if (!animalId) return alert("Select a subject for neural scanning.");
-
-    const loading = document.getElementById('ai-loading');
-    const content = el.aiContent;
-    
-    loading.style.display = 'flex';
-    content.style.opacity = '0.3';
-
-    // Simulate Neural Scan Delay
-    await new Promise(r => setTimeout(r, 2000));
-    
-    try {
-      const animalSnap = await db.collection('animals').doc(animalId).get();
-      const a = animalSnap.data();
-      
-      const apiKey = localStorage.getItem('gemini_api_key');
-      // ... (rest of Gemini logic same as before)
 
   function renderHerdGrid(animals) {
     if (!el.herdGrid) return;

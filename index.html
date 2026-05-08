@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>KisanTrack — Smart Livestock Health Monitoring</title>
-  <meta name="description" content="AI-powered IoT monitoring for your livestock. Track vitals, detect illness early, and protect your herd with KisanTrack." />
+  <meta name="description"
+    content="AI-powered IoT monitoring for your livestock. Track vitals, detect illness early, and protect your herd with KisanTrack." />
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=Noto+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=Noto+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet" />
 
   <!-- Font Awesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -19,25 +23,25 @@
        DESIGN SYSTEM & VARIABLES
     ═══════════════════════════════════════════════════════ */
     :root {
-      --bg-primary:    #1A1A0F;
-      --bg-card:       #2C2C1A;
-      --bg-footer:     #0D0D08;
-      --accent-green:  #7CB518;
-      --accent-amber:  #E5A100;
-      --accent-red:    #C0392B;
-      --accent-blue:   #3B82F6;
-      --text-primary:  #F0EAD6;
-      --text-muted:    #A89F8C;
-      --text-dim:      #6B6455;
-      --border:        #3D3D28;
-      --glow-green:    rgba(124, 181, 24, 0.15);
-      
-      --transition-fast:   0.2s ease;
+      --bg-primary: #1A1A0F;
+      --bg-card: #2C2C1A;
+      --bg-footer: #0D0D08;
+      --accent-green: #7CB518;
+      --accent-amber: #E5A100;
+      --accent-red: #C0392B;
+      --accent-blue: #3B82F6;
+      --text-primary: #F0EAD6;
+      --text-muted: #A89F8C;
+      --text-dim: #6B6455;
+      --border: #3D3D28;
+      --glow-green: rgba(124, 181, 24, 0.15);
+
+      --transition-fast: 0.2s ease;
       --transition-normal: 0.4s ease;
-      --radius-sm:     8px;
-      --radius-md:     16px;
-      --radius-lg:     24px;
-      --radius-pill:   50px;
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-pill: 50px;
     }
 
     * {
@@ -57,17 +61,35 @@
       font-family: 'Noto Sans', sans-serif;
       line-height: 1.6;
       overflow-x: hidden;
-      opacity: 0; /* Managed by landing.js */
+      opacity: 0;
+      /* Managed by landing.js */
       transition: opacity 0.5s ease;
     }
 
-    h1, h2, h3, h4, .poppins {
+    h1,
+    h2,
+    h3,
+    h4,
+    .poppins {
       font-family: 'Poppins', sans-serif;
     }
 
-    ul { list-style: none; }
-    a { text-decoration: none; color: inherit; transition: var(--transition-fast); }
-    button { cursor: pointer; border: none; outline: none; font-family: inherit; }
+    ul {
+      list-style: none;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+      transition: var(--transition-fast);
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      outline: none;
+      font-family: inherit;
+    }
 
     .container {
       max-width: 1200px;
@@ -91,6 +113,7 @@
       color: var(--bg-primary);
       box-shadow: 0 4px 20px rgba(124, 181, 24, 0.3);
     }
+
     .btn-primary:hover {
       transform: translateY(-2px) scale(1.02);
       box-shadow: 0 8px 30px rgba(124, 181, 24, 0.45);
@@ -102,6 +125,7 @@
       border: 1px solid var(--border);
       color: var(--text-primary);
     }
+
     .btn-outline:hover {
       border-color: var(--accent-green);
       color: var(--accent-green);
@@ -117,25 +141,61 @@
        ANIMATIONS
     ═══════════════════════════════════════════════════════ */
     @keyframes twinkle {
-      0%, 100% { opacity: 0.3; transform: scale(0.8); }
-      50% { opacity: 1; transform: scale(1.1); }
+
+      0%,
+      100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1.1);
+      }
     }
 
     @keyframes firefly {
-      0% { transform: translate(0, 0); opacity: 0; }
-      20% { opacity: 1; }
-      80% { opacity: 1; }
-      100% { transform: translate(100px, -150px); opacity: 0; }
+      0% {
+        transform: translate(0, 0);
+        opacity: 0;
+      }
+
+      20% {
+        opacity: 1;
+      }
+
+      80% {
+        opacity: 1;
+      }
+
+      100% {
+        transform: translate(100px, -150px);
+        opacity: 0;
+      }
     }
 
     @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(10px); }
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(10px);
+      }
     }
 
     @keyframes fadeInSlideUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .reveal {
@@ -143,6 +203,7 @@
       transform: translateY(30px);
       transition: opacity 0.8s ease, transform 0.8s ease;
     }
+
     .reveal.visible {
       opacity: 1;
       transform: translateY(0);
@@ -186,16 +247,42 @@
       gap: 12px;
     }
 
-    .brand-emoji { font-size: 24px; }
-    .brand-info { display: flex; flex-direction: column; }
-    .brand-name { font-size: 20px; font-weight: 800; color: var(--text-primary); line-height: 1; }
-    .brand-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+    .brand-emoji {
+      font-size: 24px;
+    }
 
-    .nav-actions { display: flex; gap: 16px; }
+    .brand-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 16px;
+    }
 
     @media (max-width: 768px) {
-      .brand-sub { display: none; }
-      .nav-actions .btn { padding: 8px 16px; font-size: 13px; }
+      .brand-sub {
+        display: none;
+      }
+
+      .nav-actions .btn {
+        padding: 8px 16px;
+        font-size: 13px;
+      }
     }
 
     /* ═══════════════════════════════════════════════════════
@@ -224,7 +311,8 @@
       pointer-events: none;
     }
 
-    .star-field, .firefly-field {
+    .star-field,
+    .firefly-field {
       position: absolute;
       top: 0;
       left: 0;
@@ -311,7 +399,9 @@
       opacity: 0;
     }
 
-    .hero-title span { color: var(--accent-green); }
+    .hero-title span {
+      color: var(--accent-green);
+    }
 
     .hero-desc {
       font-size: clamp(15px, 2vw, 18px);
@@ -346,7 +436,11 @@
       animation: fadeInSlideUp 1s ease 0.8s forwards;
       opacity: 0;
     }
-    .trust-strip b { color: var(--accent-green); margin-right: 4px; }
+
+    .trust-strip b {
+      color: var(--accent-green);
+      margin-right: 4px;
+    }
 
     .scroll-indicator {
       position: absolute;
@@ -409,10 +503,19 @@
       color: var(--text-muted);
       line-height: 1.4;
     }
-    .stat-label .hi { display: block; font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+    .stat-label .hi {
+      display: block;
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
 
     @media (max-width: 900px) {
-      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 32px; }
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 32px;
+      }
     }
 
     /* ═══════════════════════════════════════════════════════
@@ -510,9 +613,24 @@
       font-size: 28px;
     }
 
-    .step-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
-    .step-hi { font-size: 14px; color: var(--accent-green); font-weight: 600; margin-bottom: 16px; }
-    .step-card p { font-size: 15px; color: var(--text-muted); line-height: 1.7; }
+    .step-card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .step-hi {
+      font-size: 14px;
+      color: var(--accent-green);
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .step-card p {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
 
     .step-arrow {
       display: flex;
@@ -522,8 +640,13 @@
     }
 
     @media (max-width: 1024px) {
-      .steps-container { flex-direction: column; }
-      .step-arrow { display: none; }
+      .steps-container {
+        flex-direction: column;
+      }
+
+      .step-arrow {
+        display: none;
+      }
     }
 
     /* ═══════════════════════════════════════════════════════
@@ -571,15 +694,35 @@
       margin-bottom: 16px;
     }
 
-    .feat-card h4 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
-    .feat-hi { font-size: 12px; color: var(--accent-green); font-weight: 600; margin-bottom: 12px; }
-    .feat-card p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+    .feat-card h4 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .feat-hi {
+      font-size: 12px;
+      color: var(--accent-green);
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .feat-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
 
     @media (max-width: 1024px) {
-      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
+
     @media (max-width: 640px) {
-      .features-grid { grid-template-columns: 1fr; }
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     /* ═══════════════════════════════════════════════════════
@@ -595,10 +738,14 @@
       gap: 24px;
       overflow-x: auto;
       padding: 20px 0 40px;
-      scrollbar-width: none; /* Hide scrollbar Firefox */
+      scrollbar-width: none;
+      /* Hide scrollbar Firefox */
       scroll-snap-type: x mandatory;
     }
-    .testi-container::-webkit-scrollbar { display: none; }
+
+    .testi-container::-webkit-scrollbar {
+      display: none;
+    }
 
     .testi-card {
       min-width: 380px;
@@ -620,7 +767,11 @@
       color: rgba(124, 181, 24, 0.15);
     }
 
-    .stars { color: var(--accent-amber); font-size: 14px; margin-bottom: 16px; }
+    .stars {
+      color: var(--accent-amber);
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
 
     .testi-text {
       font-size: 15px;
@@ -630,9 +781,18 @@
       margin-bottom: 24px;
     }
 
-    .testi-divider { height: 1px; background: var(--border); margin-bottom: 24px; }
+    .testi-divider {
+      height: 1px;
+      background: var(--border);
+      margin-bottom: 24px;
+    }
 
-    .testi-user { display: flex; align-items: center; gap: 14px; }
+    .testi-user {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
     .avatar {
       width: 44px;
       height: 44px;
@@ -645,11 +805,22 @@
       font-weight: 800;
       font-size: 16px;
     }
-    .user-name { font-size: 15px; font-weight: 700; color: var(--text-primary); }
-    .user-loc { font-size: 13px; color: var(--text-muted); }
+
+    .user-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .user-loc {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
 
     @media (max-width: 768px) {
-      .testi-card { min-width: 85vw; }
+      .testi-card {
+        min-width: 85vw;
+      }
     }
 
     /* ═══════════════════════════════════════════════════════
@@ -673,15 +844,52 @@
       pointer-events: none;
     }
 
-    .cta-content { position: relative; z-index: 2; max-width: 600px; margin: 0 auto; }
-    .cta-emoji { font-size: 56px; margin-bottom: 20px; display: block; }
-    .cta-title { font-size: clamp(28px, 5vw, 40px); font-weight: 800; margin-bottom: 8px; }
-    .cta-hi { font-size: 18px; color: var(--accent-green); font-weight: 600; margin-bottom: 16px; }
-    .cta-sub { color: var(--text-muted); font-size: 16px; margin-bottom: 40px; }
+    .cta-content {
+      position: relative;
+      z-index: 2;
+      max-width: 600px;
+      margin: 0 auto;
+    }
 
-    .login-nudge { margin-top: 24px; font-size: 14px; color: var(--text-muted); }
-    .login-nudge a { color: var(--accent-green); font-weight: 600; }
-    .login-nudge a:hover { text-decoration: underline; }
+    .cta-emoji {
+      font-size: 56px;
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    .cta-title {
+      font-size: clamp(28px, 5vw, 40px);
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .cta-hi {
+      font-size: 18px;
+      color: var(--accent-green);
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .cta-sub {
+      color: var(--text-muted);
+      font-size: 16px;
+      margin-bottom: 40px;
+    }
+
+    .login-nudge {
+      margin-top: 24px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .login-nudge a {
+      color: var(--accent-green);
+      font-weight: 600;
+    }
+
+    .login-nudge a:hover {
+      text-decoration: underline;
+    }
 
     /* ═══════════════════════════════════════════════════════
        FOOTER
@@ -699,14 +907,41 @@
       margin-bottom: 40px;
     }
 
-    .footer-col.center { text-align: center; }
-    .footer-col.right { text-align: right; }
+    .footer-col.center {
+      text-align: center;
+    }
 
-    .footer-brand { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; margin-bottom: 12px; }
-    .footer-desc { font-size: 13px; color: var(--text-muted); max-width: 200px; }
+    .footer-col.right {
+      text-align: right;
+    }
 
-    .footer-team-title { font-size: 13px; color: var(--text-primary); font-weight: 600; margin-bottom: 12px; }
-    .footer-team { font-size: 12px; color: var(--text-dim); line-height: 1.8; }
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .footer-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      max-width: 200px;
+    }
+
+    .footer-team-title {
+      font-size: 13px;
+      color: var(--text-primary);
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .footer-team {
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.8;
+    }
 
     .footer-bottom {
       border-top: 1px solid var(--border);
@@ -717,13 +952,23 @@
     }
 
     @media (max-width: 768px) {
-      .footer-main { grid-template-columns: 1fr; text-align: center !important; gap: 48px; }
-      .footer-col.right { text-align: center !important; }
-      .footer-desc { margin: 0 auto; }
-    }
+      .footer-main {
+        grid-template-columns: 1fr;
+        text-align: center !important;
+        gap: 48px;
+      }
 
+      .footer-col.right {
+        text-align: center !important;
+      }
+
+      .footer-desc {
+        margin: 0 auto;
+      }
+    }
   </style>
 </head>
+
 <body>
 
   <!-- ═══════════════════════════════════════════════════════
@@ -754,7 +999,7 @@
   ═══════════════════════════════════════════════════════ -->
   <header class="hero" id="hero">
     <div class="hero-sky-glow"></div>
-    
+
     <!-- Hills Background -->
     <div class="hero-hills">
       <svg class="hill-back" viewBox="0 0 1000 200" preserveAspectRatio="none">
@@ -767,7 +1012,7 @@
 
     <div class="hero-content">
       <div class="tag-chip">
-        🌿 AI-Powered  ·  IoT Sensors  ·  Real-Time Alerts
+        🌿 AI-Powered · IoT Sensors · Real-Time Alerts
       </div>
       <h1 class="hero-title">
         Smart Health Monitoring<br><span>for Your Livestock 🐄</span>
@@ -776,18 +1021,20 @@
         Track vitals, detect illness early, and protect your herd with AI-powered IoT sensors and real-time alerts.
       </p>
       <p class="hero-hi">AI सेंसर और रियल-टाइम अलर्ट से अपने पशुओं की सुरक्षा करें।</p>
-      
+
       <div class="hero-actions">
-        <button class="btn btn-primary btn-pill" style="font-size:16px; padding:15px 36px;" onclick="window.location.href='login.html?tab=signup'">
+        <button class="btn btn-primary btn-pill" style="font-size:16px; padding:15px 36px;"
+          onclick="window.location.href='login.html?tab=signup'">
           🚀 Get Started Free / मुफ्त शुरू करें
         </button>
-        <button class="btn btn-outline btn-pill" style="font-size:16px; padding:15px 36px;" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'})">
+        <button class="btn btn-outline btn-pill" style="font-size:16px; padding:15px 36px;"
+          onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'})">
           ▶ See How It Works
         </button>
       </div>
 
       <div class="trust-strip">
-        <b>✓</b> Free to use  ·  <b>✓</b> No coding needed  ·  <b>✓</b> Works on any phone  ·  <b>✓</b> Hindi supported
+        <b>✓</b> Free to use · <b>✓</b> No coding needed · <b>✓</b> Works on any phone · <b>✓</b> Hindi supported
       </div>
     </div>
 
@@ -845,7 +1092,8 @@
           <div class="step-icon-box"><i class="fa-solid fa-tags"></i></div>
           <h3>Attach Smart Sensors</h3>
           <p class="step-hi">स्मार्ट सेंसर लगाएं</p>
-          <p>Clip lightweight IoT sensor tags onto each animal. They continuously track body temperature, heart rate, and movement — 24 hours a day.</p>
+          <p>Clip lightweight IoT sensor tags onto each animal. They continuously track body temperature, heart rate,
+            and movement — 24 hours a day.</p>
         </div>
 
         <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
@@ -856,7 +1104,8 @@
           <div class="step-icon-box"><i class="fa-solid fa-brain"></i></div>
           <h3>AI Analyses Instantly</h3>
           <p class="step-hi">AI तुरंत विश्लेषण करे</p>
-          <p>Our machine learning model monitors every reading in real time, detecting abnormal health patterns before symptoms become visible.</p>
+          <p>Our machine learning model monitors every reading in real time, detecting abnormal health patterns before
+            symptoms become visible.</p>
         </div>
 
         <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
@@ -867,7 +1116,8 @@
           <div class="step-icon-box"><i class="fa-solid fa-bell"></i></div>
           <h3>Get Alerts & Act</h3>
           <p class="step-hi">अलर्ट पाएं और कार्य करें</p>
-          <p>Receive instant alerts on your phone with animal ID and AI confidence score — so you know exactly which animal needs attention.</p>
+          <p>Receive instant alerts on your phone with animal ID and AI confidence score — so you know exactly which
+            animal needs attention.</p>
         </div>
       </div>
     </div>
@@ -890,13 +1140,15 @@
           <div class="feat-icon-box"><i class="fa-solid fa-camera"></i></div>
           <h4>AI Camera Monitor</h4>
           <p class="feat-hi">AI कैमरा मॉनिटर</p>
-          <p>ESP32-CAM captures images while Gemini Vision AI analyses each frame for health indicators automatically.</p>
+          <p>ESP32-CAM captures images while Gemini Vision AI analyses each frame for health indicators automatically.
+          </p>
         </div>
         <div class="feat-card reveal">
           <div class="feat-icon-box"><i class="fa-solid fa-chart-line"></i></div>
           <h4>Live Vitals Dashboard</h4>
           <p class="feat-hi">लाइव डैशबोर्ड</p>
-          <p>Real-time graphs of temperature, heart rate, and activity for every animal — updating every few seconds.</p>
+          <p>Real-time graphs of temperature, heart rate, and activity for every animal — updating every few seconds.
+          </p>
         </div>
         <div class="feat-card reveal">
           <div class="feat-icon-box"><i class="fa-solid fa-bell"></i></div>
@@ -942,8 +1194,10 @@
         <!-- Card 1 -->
         <div class="testi-card">
           <i class="fa-solid fa-quote-left quote-icon"></i>
-          <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
-          <p class="testi-text">"Since using KisanTrack, I detected a fever in my cow two days before visible symptoms. The vet said early treatment saved her life."</p>
+          <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
+              class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+          <p class="testi-text">"Since using KisanTrack, I detected a fever in my cow two days before visible symptoms.
+            The vet said early treatment saved her life."</p>
           <div class="testi-divider"></div>
           <div class="testi-user">
             <div class="avatar">RK</div>
@@ -957,8 +1211,10 @@
         <!-- Card 2 -->
         <div class="testi-card">
           <i class="fa-solid fa-quote-left quote-icon"></i>
-          <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
-          <p class="testi-text">"The camera feature showed me my buffalo was not moving normally at night. The AI flagged it immediately as early-stage pneumonia."</p>
+          <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
+              class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+          <p class="testi-text">"The camera feature showed me my buffalo was not moving normally at night. The AI
+            flagged it immediately as early-stage pneumonia."</p>
           <div class="testi-divider"></div>
           <div class="testi-user">
             <div class="avatar">SS</div>
@@ -972,8 +1228,10 @@
         <!-- Card 3 -->
         <div class="testi-card">
           <i class="fa-solid fa-quote-left quote-icon"></i>
-          <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
-          <p class="testi-text">"Very easy to use on my basic Android phone. The Hindi labels make everything simple. My whole village is now using it."</p>
+          <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
+              class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+          <p class="testi-text">"Very easy to use on my basic Android phone. The Hindi labels make everything simple. My
+            whole village is now using it."</p>
           <div class="testi-divider"></div>
           <div class="testi-user">
             <div class="avatar">MP</div>
@@ -998,8 +1256,9 @@
         <h2 class="cta-title">Start Protecting Your Herd Today</h2>
         <p class="cta-hi">आज ही अपने पशुओं की सुरक्षा शुरू करें</p>
         <p class="cta-sub">Free to use. No setup fees. Works on any smartphone.</p>
-        
-        <button class="btn btn-primary btn-pill" style="font-size:18px; padding:18px 48px;" onclick="window.location.href='login.html?tab=signup'">
+
+        <button class="btn btn-primary btn-pill" style="font-size:18px; padding:18px 48px;"
+          onclick="window.location.href='login.html?tab=signup'">
           🚀 Create Free Account / मुफ्त खाता बनाएं
         </button>
 
@@ -1048,4 +1307,5 @@
   <script src="js/landing.js"></script>
 
 </body>
+
 </html>
