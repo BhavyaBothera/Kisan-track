@@ -168,18 +168,28 @@ ol {
 /* ── Section Title ───────────────────────────────────────── */
 .section-title {
   font-family: var(--font-heading);
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1.15rem;
+  font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 16px;
+  margin: 32px 0 20px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  letter-spacing: -0.01em;
 }
 
 .section-title i {
   color: var(--accent-green);
-  font-size: 1rem;
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--border), transparent);
+  margin-left: 10px;
 }
 
 /* ── Bilingual Label Helper ──────────────────────────────── */
