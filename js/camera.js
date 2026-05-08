@@ -345,6 +345,16 @@ const CameraModule = (function () {
       $('cam-status-label').style.color = cameraOn ? 'var(--accent-green)' : 'var(--text-dim)';
     };
 
+    const intInp = $('capture-interval-input');
+    if (intInp) intInp.onchange = () => {
+      const val = parseInt(intInp.value);
+      if (val >= 10) {
+        captureIntSecs = val;
+        countdown = val;
+        showToast(`Interval set to ${val}s`);
+      }
+    };
+
     const saveKeyBtn = $('save-gemini-key-btn');
     if (saveKeyBtn) saveKeyBtn.onclick = () => {
       const val = $('gemini-api-key-input').value.trim();
