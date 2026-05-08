@@ -519,3 +519,47 @@ ol {
     padding: 16px 12px 100px;
   }
 }
+/* -- SPA Tab Sections -------------------------------------- */
+.tab-section {
+  display: none;
+  animation: tabFadeIn 0.4s ease-out forwards;
+}
+
+.tab-section.active {
+  display: block;
+}
+
+@keyframes tabFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* -- Ripple Effect ----------------------------------------- */
+.btn, .btn-primary, .btn-secondary, .nav-link, .mobile-nav-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: scale(0);
+  animation: ripple-effect 0.6s linear;
+  pointer-events: none;
+}
+
+@keyframes ripple-effect {
+  to { transform: scale(4); opacity: 0; }
+}
+
+/* -- Animations -------------------------------------------- */
+@keyframes pulse-green {
+  0% { box-shadow: 0 0 0 0 rgba(124, 181, 24, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(124, 181, 24, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(124, 181, 24, 0); }
+}
+
+.status-dot {
+  animation: pulse-green 2s infinite;
+}

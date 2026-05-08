@@ -1,32 +1,56 @@
-/**
- * ============================================================
- * KisanTrack — Main Application Controller & Orchestrator (app.js)
- * 
- * ROLE:
- * - Bootstraps all feature modules (Dashboard, Animals, Vitals, etc.)
- * - Handles top-level navigation and Tab Switching
- * - Manages global UI components like the Sidebar and Animal Detail Modal
- * - Provides centralized utility listeners (Ripple effects, Mutation Observers)
- * ============================================================
- */
-
 (function () {
   'use strict';
 
-  // ── Multi-page Navigation Mapping ─────────────────────────
-  const tabToUrl = {
-    'dashboard': 'dashboard.html',
-    'animals': 'herd.html',
-    'vitals': 'herd.html#section-vitals',
-    'alerts': 'alerts.html',
-    'reports': 'alerts.html#section-reports',
-    'camera': 'camera.html',
-    'upload': 'uploads.html',
-    'profile': 'profile.html'
-  };
+  // ── Selectors ─────────────────────────────────────────────
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  const hamburger = document.getElementById('hamburger');
+  const navLinks = document.querySelectorAll('.nav-link');
+  const mobileItems = document.querySelectorAll('.mobile-nav-item');
+  const sections = document.querySelectorAll('.tab-section');
+
+  // ── Tab Switching Logic (SPA) ─────────────────────────────
+  function switchTab(tabId) {
+    if (!tabId) return;
+
+    // 1. Update Sections
+    let found = false;
+    sections.forEach(sec => {
+      if (sec.id === `section-${tabId}`) {
+        sec.classList.add('active');
+        found = true;
+      } else {
+        sec.classList.remove('active');
+      }
+    });
+
+    if (!found) return; // Tab might not exist in this page
+
+    // 2. Update Nav Links
+    navLinks.forEach(link => {
+      if (link.dataset.tab === tabId) link.classList.add('active');
+      else link.classList.remove('active');
+    });
+
+    // 3. Update Mobile Nav
+    mobileItems.forEach(item => {
+      if (item.dataset.tab === tabId) item.classList.add('active');
+      else item.classList.remove('active');
+    });
+
+    // 4. Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // 5. Update URL Hash (Optional, for bookmarking)
+    history.replaceState(null, null, `#${tabId}`);
+    
+    // Close sidebar on mobile
+    if (window.innerWidth < 1024) closeSidebar();
+  }
 
   // ── Sidebar Toggle ────────────────────────────────────────
   function openSidebar() {
+    if (!sidebar) return;
     sidebar.classList.add('open');
     overlay.classList.add('active');
     hamburger.setAttribute('aria-expanded', 'true');
@@ -34,36 +58,28 @@
   }
 
   function closeSidebar() {
+    if (!sidebar) return;
     sidebar.classList.remove('open');
     overlay.classList.remove('active');
     hamburger.setAttribute('aria-expanded', 'false');
     hamburger.innerHTML = '<i class="fa-solid fa-bars"></i>';
   }
 
-  hamburger.addEventListener('click', () => {
-    sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
-  });
-
-  overlay.addEventListener('click', closeSidebar);
-
-  // ── Nav Link Click Handlers ───────────────────────────────
-  // navLinks are already <a> tags with hrefs, so they navigate natively.
-  // We just close the sidebar on mobile if clicked.
-  navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      if (window.innerWidth < 768) {
-        closeSidebar();
-      }
+  if (hamburger) {
+    hamburger.addEventListener('click', () => {
+      sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
     });
+  }
+
+  if (overlay) overlay.addEventListener('click', closeSidebar);
+
+  // ── Event Listeners ───────────────────────────────────────
+  navLinks.forEach(link => {
+    link.addEventListener('click', () => switchTab(link.dataset.tab));
   });
 
   mobileItems.forEach(item => {
-    item.addEventListener('click', () => {
-      const tab = item.dataset.tab;
-      if (tabToUrl[tab]) {
-        window.location.href = tabToUrl[tab];
-      }
-    });
+    item.addEventListener('click', () => switchTab(item.dataset.tab));
   });
 
   // ── Ripple Effect on Buttons ──────────────────────────────
@@ -84,8 +100,7 @@
   }
 
   function attachRipples() {
-    document.querySelectorAll('.btn').forEach(btn => {
-      // Avoid duplicate listeners
+    document.querySelectorAll('.btn, .btn-primary, .btn-secondary, .nav-link, .mobile-nav-item').forEach(btn => {
       btn.removeEventListener('click', addRipple);
       btn.addEventListener('click', addRipple);
     });
@@ -102,17 +117,7 @@
       profileMenu.classList.toggle('show');
     });
 
-    document.addEventListener('click', () => {
-      profileMenu.classList.remove('show');
-    });
-  }
-
-  if (globalSearch) {
-    globalSearch.addEventListener('input', (e) => {
-      const term = e.target.value.toLowerCase();
-      // Simple global search placeholder - could emit event
-      console.log('Global search:', term);
-    });
+    document.addEventListener('click', () => profileMenu.classList.remove('show'));
   }
 
   // ── Modal Helper ──────────────────────────────────────────
@@ -121,7 +126,6 @@
     const animal = state.animals.find(a => a.id === animalId || a.animalId === animalId);
     if (!animal) return;
 
-    // Map fields - Use real-time vitals from store if available
     const rtVitals = state.vitals ? state.vitals[animal.id] : null;
     const temp = rtVitals ? rtVitals.temp : (animal.vitals ? animal.vitals.lastTemp : '—');
     const hr   = rtVitals ? rtVitals.hr   : (animal.vitals ? animal.vitals.lastHeartRate : '—');
@@ -144,7 +148,12 @@
     const aEl = document.getElementById('modal-act');
     if (aEl) aEl.innerHTML = `<i class="fa-solid fa-running"></i> ${act}`;
 
-    // Render 7-day chart (Mocking history if not in Firestore yet)
+    // Info Grid
+    if (document.getElementById('modal-breed')) document.getElementById('modal-breed').textContent = animal.breed || '—';
+    if (document.getElementById('modal-age')) document.getElementById('modal-age').textContent = animal.age || '—';
+    if (document.getElementById('modal-weight')) document.getElementById('modal-weight').textContent = animal.weight || '—';
+
+    // Render 7-day chart
     const history = animal.history7d || generateMockHistory(animal);
     renderModalChart(history);
 
@@ -154,8 +163,8 @@
 
   function generateMockHistory(animal) {
     const labels = ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'Now'];
-    const baseT = animal.vitals?.lastTemp || 38.5;
-    const baseH = animal.vitals?.lastHeartRate || 68;
+    const baseT = 38.5;
+    const baseH = 68;
     return {
       labels,
       temp: labels.map(() => baseT + (Math.random() - 0.5) * 0.4),
@@ -165,7 +174,8 @@
   }
 
   window.closeAnimalModal = function () {
-    document.getElementById('animal-modal').classList.remove('open');
+    const modal = document.getElementById('animal-modal');
+    if (modal) modal.classList.remove('open');
     document.body.style.overflow = '';
     if (window._modalChart) {
       window._modalChart.destroy();
@@ -174,7 +184,9 @@
   };
 
   function renderModalChart(history) {
-    const ctx = document.getElementById('modal-chart').getContext('2d');
+    const canvas = document.getElementById('modal-chart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
     if (window._modalChart) window._modalChart.destroy();
 
     window._modalChart = new Chart(ctx, {
@@ -207,26 +219,20 @@
           legend: { labels: { color: '#A89F8C', font: { size: 10 } } }
         },
         scales: {
-          x: { ticks: { color: '#706860', font: { size: 10 } }, grid: { color: 'rgba(61,61,40,0.2)' } },
-          y: { ticks: { color: '#706860', font: { size: 10 } }, grid: { color: 'rgba(61,61,40,0.2)' } },
+          x: { ticks: { color: '#706860', font: { size: 10 } }, grid: { display: false } },
+          y: { ticks: { color: '#706860', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
         },
       },
     });
   }
 
-  // Modal Close handlers
-  document.getElementById('modal-close').addEventListener('click', window.closeAnimalModal);
-  document.getElementById('animal-modal').addEventListener('click', (e) => {
-    if (e.target === document.getElementById('animal-modal')) window.closeAnimalModal();
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') window.closeAnimalModal();
-  });
+  if (document.getElementById('modal-close')) document.getElementById('modal-close').addEventListener('click', window.closeAnimalModal);
 
   // ── Sync Last Updated Time ────────────────────────────────
   function startSyncTimer() {
-    let seconds = 120; // 2 min
     const el = document.getElementById('last-sync-time');
+    if (!el) return;
+    let seconds = 0;
     setInterval(() => {
       seconds++;
       if (seconds < 60) el.textContent = seconds + 's ago';
@@ -239,36 +245,43 @@
 
   // ── Global Init ───────────────────────────────────────────
   function init() {
-    // Initialize all modules
-    if (typeof DashboardModule  !== 'undefined' && document.getElementById('section-dashboard')) DashboardModule.init();
-    if (typeof AnimalsModule    !== 'undefined' && document.getElementById('section-animals')) AnimalsModule.init();
-    if (typeof VitalsModule     !== 'undefined' && document.getElementById('section-vitals')) VitalsModule.init();
-    if (typeof AlertsModule     !== 'undefined' && document.getElementById('section-alerts')) AlertsModule.init();
-    if (typeof ReportsModule    !== 'undefined' && document.getElementById('section-reports')) ReportsModule.init();
-    if (typeof UploadModule     !== 'undefined' && document.getElementById('section-upload')) UploadModule.init();
-    if (typeof AddAnimalModule  !== 'undefined' && document.getElementById('add-animal-modal')) AddAnimalModule.init();
-    if (typeof ProfileModule    !== 'undefined' && document.getElementById('section-profile')) ProfileModule.init();
-    if (typeof CameraModule     !== 'undefined' && document.getElementById('section-camera')) CameraModule.init();
-    if (typeof OnboardingModule !== 'undefined') OnboardingModule.init();
+    // 1. Initial tab from hash or default
+    const hash = window.location.hash.replace('#', '');
+    switchTab(hash || 'dashboard');
+
+    // 2. Initialize all modules
+    if (typeof DashboardModule  !== 'undefined') DashboardModule.init();
+    if (typeof AnimalsModule    !== 'undefined') AnimalsModule.init();
+    if (typeof VitalsModule     !== 'undefined') VitalsModule.init();
+    if (typeof AlertsModule     !== 'undefined') AlertsModule.init();
+    if (typeof ReportsModule    !== 'undefined') ReportsModule.init();
+    if (typeof UploadModule     !== 'undefined') UploadModule.init();
+    if (typeof AddAnimalModule  !== 'undefined') AddAnimalModule.init();
+    if (typeof ProfileModule    !== 'undefined') ProfileModule.init();
+    if (typeof CameraModule     !== 'undefined') CameraModule.init();
 
     attachRipples();
     startSyncTimer();
 
-    // Aurora Mouse Follow
-    const aurora = document.getElementById('aurora');
-    if (aurora) {
-      document.addEventListener('mousemove', (e) => {
-        aurora.style.left = e.clientX + 'px';
-        aurora.style.top = e.clientY + 'px';
-      });
-    }
-
-    // Re-attach ripples when DOM changes (for dynamically rendered buttons)
+    // Re-attach ripples when DOM changes
     const observer = new MutationObserver(attachRipples);
     observer.observe(document.body, { childList: true, subtree: true });
   }
 
-  // Run after DOM fully loaded
+  // Auth Listener to trigger Store Init
+  firebase.auth().onAuthStateChanged(user => {
+    if (user) {
+      if (window.FirestoreStore) {
+        window.FirestoreStore.init(user.uid);
+      }
+    } else {
+      if (window.location.pathname.includes('dashboard.html')) {
+        window.location.href = 'login.html';
+      }
+    }
+  });
+
+  // Run init
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
