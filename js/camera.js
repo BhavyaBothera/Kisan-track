@@ -299,13 +299,19 @@ window.CameraModule = (function () {
         analysis = generateSimulatedReport();
       }
 
-      // Save to Firestore
+      // 3. OPTIMIZED FIRESTORE STORAGE (Store only necessary fields)
       const captureData = {
         farmerId: user.uid,
         animalId: state.currentAnimal ? state.currentAnimal.id : 'Herd-01',
         imageUrl: imageUrl,
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        ...analysis
+        healthScore: analysis.healthScore,
+        severity: analysis.severity,
+        conditions: analysis.conditions,
+        observations: analysis.observations,
+        farmerTip: analysis.farmerTip,
+        summary: analysis.summary,
+        isSimulated: !!analysis.isSimulated
       };
 
       const docRef = await firebase.firestore().collection(COLLECTION_CAPTURES).add(captureData);
@@ -337,15 +343,17 @@ window.CameraModule = (function () {
     // Note: In a production app, proxy this through a Cloud Function to hide API Key
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${state.apiKey}`;
     
-    // We need to convert remote URL to Base64 for the inline_data part
-    // For demo, we'll fetch the image then convert
+    // We need to convert remote URL to Base64 and compress it
     const response = await fetch(imageUrl);
     const blob = await response.blob();
-    const base64 = await new Promise((resolve) => {
+    const rawBase64 = await new Promise((resolve) => {
       const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result.split(',')[1]);
+      reader.onloadend = () => resolve(reader.result);
       reader.readAsDataURL(blob);
     });
+
+    // 1. COMPRESS IMAGE to prevent 413 Payload Too Large
+    const compressedBase64 = await compressImage(rawBase64, 800);
 
     const prompt = `Analyze this livestock image for skin diseases or health issues. 
     Return ONLY a JSON object with this structure:
@@ -362,7 +370,7 @@ window.CameraModule = (function () {
       contents: [{
         parts: [
           { text: prompt },
-          { inline_data: { mime_type: "image/jpeg", data: base64 } }
+          { inline_data: { mime_type: "image/jpeg", data: compressedBase64 } }
         ]
       }]
     };
@@ -378,9 +386,48 @@ window.CameraModule = (function () {
     const data = await res.json();
     const resultText = data.candidates[0].content.parts[0].text;
     
-    // Clean JSON from Markdown blocks
-    const jsonStr = resultText.replace(/```json|```/g, '').trim();
-    return JSON.parse(jsonStr);
+    // 2. RESILIENT JSON PARSING
+    return parseGeminiResponse(resultText);
+  }
+
+  /**
+   * Prevents 413 errors by ensuring image is < 800px width
+   */
+  function compressImage(base64WithPrefix, maxWidth = 800) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ratio = Math.min(maxWidth / img.width, 1);
+        canvas.width = img.width * ratio;
+        canvas.height = img.height * ratio;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        // Return base64 without prefix
+        resolve(canvas.toDataURL('image/jpeg', 0.8).split(',')[1]);
+      };
+      img.src = base64WithPrefix;
+    });
+  }
+
+  /**
+   * Extracts JSON from Gemini response, stripping markdown and extra text
+   */
+  function parseGeminiResponse(responseText) {
+    try {
+      let clean = responseText
+        .replace(/```json/gi, '')
+        .replace(/```/g, '')
+        .trim();
+      
+      const jsonMatch = clean.match(/\{[\s\S]*\}/);
+      if (jsonMatch) clean = jsonMatch[0];
+      
+      return JSON.parse(clean);
+    } catch (err) {
+      console.error('Gemini JSON parse failed:', err);
+      throw new Error("Could not parse AI response. Please try again.");
+    }
   }
 
   function generateSimulatedReport() {
@@ -545,7 +592,23 @@ window.CameraModule = (function () {
 
   async function triggerHealthAlert(report) {
     const user = firebase.auth().currentUser;
+    if (!user) return;
+
     try {
+      // 4. PREVENT DUPLICATE ALERTS
+      const existing = await firebase.firestore().collection(COLLECTION_ALERTS)
+        .where('farmerId', '==', user.uid)
+        .where('animalId', '==', report.animalId)
+        .where('resolved', '==', false)
+        .where('source', '==', 'AI-Camera')
+        .limit(1)
+        .get();
+
+      if (!existing.empty) {
+        console.log(`Alert already active for ${report.animalId}. Skipping duplication.`);
+        return;
+      }
+
       await firebase.firestore().collection(COLLECTION_ALERTS).add({
         farmerId: user.uid,
         animalId: report.animalId,
@@ -558,6 +621,7 @@ window.CameraModule = (function () {
         source: 'AI-Camera',
         message: report.summary
       });
+
       if (window.utils && window.utils.showToast) {
         window.utils.showToast(`Critical health alert for ${report.animalId}!`, "error");
       }
@@ -596,7 +660,10 @@ window.CameraModule = (function () {
         ui.imgLive().src = item.imageUrl;
         ui.imgLive().style.display = 'block';
         ui.placeholder().style.display = 'none';
-        renderReport(item);
+        
+        // 5. FIX: RESET RING BEFORE ANIMATING (Ensures visual feedback on historical load)
+        ui.reportContent().innerHTML = '<div class="analysis-loading">Loading History...</div>';
+        setTimeout(() => renderReport(item), 100);
       }
     }
   };
