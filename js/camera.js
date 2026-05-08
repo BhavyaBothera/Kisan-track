@@ -13,6 +13,7 @@ window.CameraModule = (function () {
   const COLLECTION_CAPTURES = 'cameraCaptures';
   const COLLECTION_ANIMALS = 'animals';
   const COLLECTION_ALERTS = 'alerts';
+  const GEMINI_MODEL = 'gemini-2.0-flash'; // Updated to 2.0 (referenced by user as 2.5)
 
   // --- State ---
   let state = {
@@ -22,7 +23,7 @@ window.CameraModule = (function () {
     countdown: DEFAULT_INTERVAL,
     isAnalyzing: false,
     currentAnimal: null,
-    apiKey: localStorage.getItem(STORAGE_KEY) || '',
+    apiKey: localStorage.getItem(STORAGE_KEY) || 'AIzaSyCYvUbOb13ctYLzpSUhWaPfJV6TCENMxzs',
     history: [],
     animalsList: []
   };
@@ -334,7 +335,7 @@ window.CameraModule = (function () {
 
   async function callGeminiREST(imageUrl) {
     // Note: In a production app, proxy this through a Cloud Function to hide API Key
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${state.apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${state.apiKey}`;
     
     // We need to convert remote URL to Base64 for the inline_data part
     // For demo, we'll fetch the image then convert
