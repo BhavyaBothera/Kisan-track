@@ -9,9 +9,7 @@ const CameraModule = (function () {
   'use strict';
 
   // --- State ---
-  // NOTE: In production, Gemini API calls should be routed through a backend/Cloud Function 
-  // to protect the API key. Client-side storage/usage is for demonstration only.
-  let apiKey = 'AIzaSyCYvUbOb13ctYLzpSUhWaPfJV6TCENMxzs'; // User provided key
+  let apiKey = localStorage.getItem('kt_gemini_key') || 'AIzaSyCYvUbOb13ctYLzpSUhWaPfJV6TCENMxzs';
 
   let cameraOn       = true;
   let autoAnalysis   = true;
@@ -108,19 +106,39 @@ const CameraModule = (function () {
     const ctx = canvas.getContext('2d');
     const W = canvas.width, H = canvas.height;
 
-    // Background
-    ctx.fillStyle = '#080C04'; ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = '#0D0D04'; ctx.fillRect(0, H * 0.6, W, H * 0.4);
+    // Background: Barn Interior
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, '#12120A');
+    grad.addColorStop(0.6, '#1A1A10');
+    grad.addColorStop(1, '#0D0D05');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    // Floor texture
+    ctx.strokeStyle = 'rgba(255,255,255,0.02)';
+    ctx.lineWidth = 1;
+    for(let i=0; i<W; i+=40) { ctx.beginPath(); ctx.moveTo(i, H*0.6); ctx.lineTo(i-100, H); ctx.stroke(); }
 
     // Animals
     animals.forEach(a => drawAnimal(ctx, a, W, H));
 
     if (withBoxes) drawBoxes(ctx, animals, W, H);
 
+    // AI Scanner Effect (if analyzing)
+    if (isAnalyzing && !withBoxes) {
+      const scanY = (Date.now() % 2000 / 2000) * H;
+      ctx.fillStyle = 'rgba(124, 181, 24, 0.1)';
+      ctx.fillRect(0, scanY - 2, W, 4);
+      ctx.shadowBlur = 15; ctx.shadowColor = '#7CB518';
+      ctx.strokeStyle = 'rgba(124, 181, 24, 0.6)';
+      ctx.beginPath(); ctx.moveTo(0, scanY); ctx.lineTo(W, scanY); ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+
     // HUD
     ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(0, H - 28, W, 28);
     ctx.fillStyle = '#7CB518'; ctx.font = 'bold 11px monospace';
-    ctx.fillText(`CAM-01  ${new Date().toLocaleTimeString()}  KISANTRACK`, 10, H - 10);
+    ctx.fillText(`CAM-01  ${new Date().toLocaleTimeString()}  KISANTRACK_VISION_AI`, 10, H - 10);
   }
 
   // ── Capture & Upload ─────────────────────────────────────
@@ -295,6 +313,8 @@ const CameraModule = (function () {
     const el = $('analysis-results');
     if (!el) return;
     const col = r.herdScore >= 8 ? 'var(--accent-green)' : 'var(--accent-amber)';
+    const isSim = r.isDemo || !apiKey;
+
     el.innerHTML = `
       <div class="result-body">
         <div class="result-stats-row">
@@ -305,7 +325,10 @@ const CameraModule = (function () {
            <div class="score-bar-bg"><div class="score-bar-fill" style="width:${r.herdScore * 10}%; background:${col}"></div></div>
         </div>
         <div class="summary-section">
-          <h4><i class="fa-solid fa-robot"></i> Analysis Summary</h4>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <h4 style="margin:0;"><i class="fa-solid fa-robot"></i> Analysis Summary</h4>
+            <span class="badge ${isSim ? 'badge-sim' : 'badge-gemini'}">${isSim ? 'Simulated' : 'Gemini AI'}</span>
+          </div>
           <p>${r.summary}</p>
           <ul class="obs-list">${r.observations.map(o => `<li>${o}</li>`).join('')}</ul>
         </div>
@@ -336,10 +359,15 @@ const CameraModule = (function () {
 
   function updateKeyStatus() {
     const el = $('api-key-status');
-    if (!el) return;
+    const prompt = $('no-key-prompt');
     if (apiKey) {
-      el.className = 'api-key-status connected';
-      el.innerHTML = '<i class="fa-solid fa-circle-check"></i> API Connected';
+      if (el) {
+        el.className = 'api-key-status connected';
+        el.innerHTML = '<i class="fa-solid fa-circle-check"></i> API Connected';
+      }
+      if (prompt) prompt.style.display = 'none';
+    } else {
+      if (prompt) prompt.style.display = 'flex';
     }
   }
 
@@ -351,6 +379,11 @@ const CameraModule = (function () {
       countdown = Math.max(0, countdown - 1);
       updateCountdownDisplay();
       if (countdown === 0) doCapture();
+      
+      // Keep feed alive with scanner if analyzing
+      if (isAnalyzing) {
+         drawScene(feedCanvas, [], false); // We'd need current animals ideally
+      }
     }, 1000);
   }
 
@@ -365,22 +398,23 @@ const CameraModule = (function () {
     
     if ($('capture-now-btn')) $('capture-now-btn').onclick = doCapture;
     
-    if (apiKey && $('gemini-api-key-input')) $('gemini-api-key-input').value = '●'.repeat(20);
+    // Auto-analysis toggle
+    const aaTog = $('auto-analysis-toggle');
+    if (aaTog) aaTog.onchange = () => { autoAnalysis = aaTog.checked; };
 
     initSettings();
     updateKeyStatus();
     
-    // Wait for auth to fetch history and start captures
     if (auth.currentUser) {
       fetchHistory();
       startCountdown();
-      setTimeout(doCapture, 2000);
+      setTimeout(doCapture, 1500);
     } else {
       const unsubscribe = auth.onAuthStateChanged(user => {
         if (user) {
           fetchHistory();
           startCountdown();
-          setTimeout(doCapture, 2000);
+          setTimeout(doCapture, 1500);
           unsubscribe();
         }
       });
