@@ -559,15 +559,15 @@
             </div>
             <div class="result-stats">
               <div class="result-stat">
-                <div class="result-stat-num" id="res-parsed">142</div>
+                <div class="result-stat-num" id="res-parsed">0</div>
                 <div class="result-stat-label">Records Parsed / रिकॉर्ड पढ़े</div>
               </div>
               <div class="result-stat">
-                <div class="result-stat-num" id="res-anomalies" style="color:var(--accent-amber)">3</div>
+                <div class="result-stat-num" id="res-anomalies" style="color:var(--accent-amber)">0</div>
                 <div class="result-stat-label">Anomalies Found / असामान्यताएं</div>
               </div>
               <div class="result-stat">
-                <div class="result-stat-num" id="res-animals" style="color:var(--accent-red)">2</div>
+                <div class="result-stat-num" id="res-animals" style="color:var(--accent-red)">0</div>
                 <div class="result-stat-label">Animals Affected / प्रभावित पशु</div>
               </div>
             </div>
@@ -620,123 +620,293 @@
           <h1><i class="fa-solid fa-camera" style="color:var(--accent-green);margin-right:10px;"></i>Camera Monitor /
             <span style="color:var(--text-muted);">कैमरा मॉनिटर</span>
           </h1>
-          <p class="subtitle">ESP32-CAM visual health detection with Gemini AI | आई से पशु स्वास्थ्य बिश्लेषण</p>
+          <p class="subtitle">AI Skin & Visual Health Detection | AI त्वचा और स्वास्थ्य विश्लेषण</p>
         </div>
 
-        <!-- Settings Bar -->
+        <!-- ⚙️ Settings Bar -->
         <div class="cam-settings-bar">
           <div class="cam-setting-group">
-            <label class="cam-setting-label">Camera / कैमरा</label>
-            <label class="toggle-switch" aria-label="Camera on/off">
+            <label class="cam-setting-label">ESP32-CAM / कैमरा</label>
+            <label class="toggle-switch">
               <input type="checkbox" id="cam-toggle" checked />
               <span class="toggle-track"><span class="toggle-thumb"></span></span>
             </label>
             <span class="cam-setting-val" id="cam-status-label">ON</span>
           </div>
+
           <div class="cam-setting-group">
-            <label class="cam-setting-label" for="capture-interval-input">Interval / अंतराल</label>
-            <input type="number" id="capture-interval-input" class="cam-num-input" value="120" min="10" max="3600"
-              aria-label="Capture interval in seconds" />
+            <label class="cam-setting-label">Interval / अंतराल</label>
+            <input type="number" id="capture-interval-input" class="cam-num-input" value="120" min="30" max="600" />
             <span class="cam-setting-val">s</span>
           </div>
+
           <div class="cam-setting-group">
-            <label class="cam-setting-label">Auto-AI / ऑटो AI</label>
-            <label class="toggle-switch" aria-label="Auto analysis on/off">
+            <label class="cam-setting-label">Animal / पशु</label>
+            <select id="animal-selector" class="cam-select-input">
+              <option value="">Loading animals...</option>
+            </select>
+          </div>
+
+          <div class="cam-setting-group">
+            <label class="cam-setting-label">Auto AI / ऑटो AI</label>
+            <label class="toggle-switch">
               <input type="checkbox" id="auto-analysis-toggle" checked />
               <span class="toggle-track"><span class="toggle-thumb"></span></span>
             </label>
           </div>
+
           <div class="cam-setting-group">
-            <label class="cam-setting-label" for="cam-location-input">Location / स्थान</label>
-            <input type="text" id="cam-location-input" class="cam-text-input" value="Main Barn"
-              aria-label="Camera location" />
+            <label class="cam-setting-label">Location / स्थान</label>
+            <input type="text" id="cam-location-input" class="cam-text-input" placeholder="Main Barn / मुख्य तबेला" />
+          </div>
+
+          <div id="api-key-chip" class="api-status-chip" onclick="window.CameraModule.openKeyModal()">
+            <i class="fa-solid fa-key"></i> <span id="api-key-text">Add API Key</span>
           </div>
         </div>
 
-        <!-- Main Grid: Feed + Analysis -->
+        <!-- 📷 Main Grid: Feed + Status -->
         <div class="camera-main-grid">
 
-          <!-- LEFT: Live Feed -->
+          <!-- LEFT: Feed Card -->
           <div class="camera-feed-card">
             <div class="cam-feed-header">
-              <h3 class="section-title" style="margin:0;"><i class="fa-solid fa-video"></i> ESP32-CAM Live Feed / लाइव
-                कैमरा फ़ीड</h3>
+              <h3 class="section-title" style="margin:0;"><i class="fa-solid fa-camera"></i> Live Feed / लाइव फ़ीड</h3>
               <div class="cam-live-badge" id="camera-live-badge">
                 <span class="cam-live-dot"></span> LIVE
               </div>
             </div>
-            <div class="cam-feed-box">
-              <canvas id="camera-feed-canvas" width="640" height="360" aria-label="Live camera feed"></canvas>
-              <div class="cam-flash" id="cam-flash"></div>
+
+            <div class="cam-feed-area" id="cam-feed-area">
+              <!-- States: Active, Flash, No Image, Offline -->
+              <div id="feed-container" class="feed-container">
+                <img id="live-image" src="" alt="Camera Feed" style="display:none;" />
+                <canvas id="detection-canvas-overlay"></canvas>
+                <div class="cam-flash" id="cam-flash"></div>
+                
+                <div id="feed-placeholder" class="feed-placeholder">
+                  <i class="fa-solid fa-camera"></i>
+                  <p>Waiting for capture...<br>पहली तस्वीर का इंतज़ार है...</p>
+                  <div class="pulsing-dots"><span></span><span></span><span></span></div>
+                </div>
+
+                <div class="feed-overlay-top">
+                  <span class="overlay-pill">CAM-01</span>
+                  <span class="overlay-pill" id="overlay-location">Main Barn</span>
+                </div>
+
+                <div class="feed-overlay-bottom">
+                  <div class="overlay-animal" id="overlay-animal-id">🐄 Select an Animal</div>
+                  <div class="overlay-time" id="overlay-timestamp">Captured: --</div>
+                </div>
+              </div>
             </div>
-            <div class="cam-feed-meta">
-              <span><i class="fa-solid fa-microchip" style="color:var(--accent-green)"></i> CAM-01</span>
-              <span><i class="fa-solid fa-location-dot" style="color:var(--text-dim)"></i> <span
-                  id="cam-location-display">Main Barn</span></span>
-              <span><i class="fa-regular fa-clock" style="color:var(--text-dim)"></i> <span
-                  id="last-capture-time">—</span></span>
-              <span class="cam-countdown-wrap"><i class="fa-solid fa-rotate" style="color:var(--accent-amber)"></i>
-                Next: <span id="cam-countdown" class="cam-countdown">120s</span></span>
+
+            <div class="capture-controls-row">
+              <button class="btn btn-primary" id="capture-now-btn">
+                <i class="fa-solid fa-camera"></i> Capture Now / अभी कैप्चर करें
+              </button>
+              <div class="countdown-display">
+                <i class="fa-solid fa-clock"></i>
+                <div class="countdown-text">
+                  <span>Next capture in:</span>
+                  <strong id="cam-countdown">120</strong>
+                </div>
+              </div>
+              <button class="btn btn-secondary" id="upload-photo-btn">
+                <i class="fa-solid fa-upload"></i> Upload / अपलोड
+              </button>
+              <input type="file" id="cam-file-input" hidden accept="image/*" />
             </div>
-            <button class="btn btn-primary" id="capture-now-btn" style="margin-top:14px;width:100%;">
-              <i class="fa-solid fa-camera"></i> Capture Now / अभी कैप्चर करें
-            </button>
           </div>
 
-          <!-- RIGHT: Gemini AI Analysis -->
-          <div class="camera-analysis-card">
-            <h3 class="section-title" style="margin-bottom:16px;">
-              <i class="fa-solid fa-robot" style="color:var(--accent-green);"></i>
-              Gemini Vision Analysis / जेमिनी विश्लेषण
-            </h3>
-
-            <!-- No-key prompt -->
-            <div id="no-key-prompt" class="no-key-prompt">
-              <i class="fa-solid fa-key"></i>
-              <p>🔑 Connect Gemini API to enable AI analysis<br><span
-                  style="color:var(--text-dim);font-size:0.78rem;">AI विश्लेषण के लिए Gemini API जोड़ें</span></p>
-              <p style="font-size:0.78rem;color:var(--text-dim);margin-top:6px;">Simulated analysis will run until API
-                key is set.</p>
+          <!-- RIGHT: Status Card -->
+          <div class="camera-status-card">
+            <div class="status-card-header">
+              <i class="fa-solid fa-shield-halved"></i> Detection Status / पहचान स्थिति
+            </div>
+            
+            <div class="current-animal-box" id="current-animal-info">
+              <div class="animal-info-main">
+                <span class="animal-emoji" id="info-emoji">🐄</span>
+                <div class="animal-ids">
+                  <strong id="info-id">--</strong>
+                  <span id="info-breed">--</span>
+                </div>
+              </div>
+              <div class="mini-vitals-row" id="info-vitals">
+                <div class="mini-vital-chip">Temp: --</div>
+                <div class="mini-vital-chip">HR: --</div>
+                <div class="mini-vital-chip">Act: --</div>
+              </div>
             </div>
 
-            <!-- Results area -->
-            <div id="analysis-results" class="analysis-results-area"></div>
+            <div class="divider"></div>
+
+            <div class="analysis-summary-box" id="analysis-summary">
+              <div class="empty-analysis">
+                <i class="fa-solid fa-circle-info"></i>
+                <p>No analysis yet / अभी तक कोई विश्लेषण नहीं</p>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="auto-status-line" id="auto-ai-status">
+              <i class="fa-solid fa-robot"></i> Auto-analysis: Active
+            </div>
           </div>
 
         </div><!-- /.camera-main-grid -->
 
-        <!-- Detection Overlay Canvas -->
-        <div class="detection-card">
-          <h3 class="section-title"><i class="fa-solid fa-object-group"></i> Detection Results / पहचान परिणाम</h3>
-          <div class="detection-canvas-wrap">
-            <canvas id="detection-canvas" width="640" height="360" aria-label="Animal detection overlay"></canvas>
+        <!-- 🧠 AI Analysis Section -->
+        <div class="analysis-report-section" id="analysis-report-section">
+          <div class="section-header">
+            <div class="header-left">
+              <i class="fa-solid fa-microscope"></i>
+              <h3>AI Skin & Health Analysis / AI त्वचा और स्वास्थ्य विश्लेषण</h3>
+            </div>
+            <div class="header-right">
+              <span class="model-chip">gemini-1.5-flash</span>
+              <button class="btn btn-primary btn-sm" id="re-analyse-btn">
+                <i class="fa-solid fa-rotate"></i> Analyse Now / विश्लेषण
+              </button>
+            </div>
           </div>
-          <div class="detection-stats-row" id="detection-stats-row">
-            <!-- Populated by camera.js -->
+
+          <!-- API Key Prompt (Hidden if key exists) -->
+          <div id="gemini-key-prompt" class="key-prompt-card" style="display:none;">
+            <i class="fa-solid fa-key"></i>
+            <div class="prompt-text">
+              <h4>Connect Gemini API / Gemini API जोड़ें</h4>
+              <p>Enter your Gemini API key to enable AI skin analysis</p>
+            </div>
+            <div class="prompt-input-row">
+              <input type="password" id="gemini-prompt-input" placeholder="AIza..." />
+              <button class="btn btn-primary" id="save-prompt-key">Save / सहेजें</button>
+            </div>
           </div>
-          <p class="powered-by-note">
-            <i class="fa-solid fa-microchip"></i>
-            Powered by OpenCV + Gemini Vision / OpenCV + जेमिनी विज़न द्वारा संचालित
-          </p>
+
+          <!-- Analysis Content Area -->
+          <div id="analysis-content" class="analysis-content">
+            <!-- Populated by camera.js (Loading or Result) -->
+          </div>
         </div>
 
-        <!-- Capture History Filmstrip -->
-        <div class="filmstrip-card">
+        <!-- 🕐 Capture History -->
+        <div class="filmstrip-section">
           <div class="filmstrip-header">
-            <h3 class="section-title"><i class="fa-solid fa-film"></i> Capture History / कैप्चर इतिहास</h3>
-            <button class="btn btn-secondary btn-sm" id="view-all-history-btn">
-              <i class="fa-solid fa-clock-rotate-left"></i> View All / पूरा इतिहास
-            </button>
+            <h3><i class="fa-solid fa-clock-rotate-left"></i> Capture History / कैप्चर इतिहास</h3>
+            <button class="btn btn-text">View All / सभी देखें</button>
           </div>
-          <div class="filmstrip" id="filmstrip">
-            <div class="filmstrip-empty"><i class="fa-solid fa-camera-slash"></i>
-              <p>No captures yet. Camera will auto-capture every 120 seconds. / अभी कोई कैप्चर नहीं।</p>
+          <div class="filmstrip" id="cam-filmstrip">
+            <!-- Populated by camera.js -->
+          </div>
+        </div>
+
+        <!-- 📊 Disease Guide -->
+        <div class="disease-guide-section">
+          <button class="guide-toggle" id="guide-toggle">
+            <span><i class="fa-solid fa-book-medical"></i> Disease Reference Guide / रोग संदर्भ मार्गदर्शिका</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="guide-content" id="guide-content">
+            <div class="disease-grid">
+              <!-- Mange -->
+              <div class="disease-card">
+                <div class="disease-name">Mange / खुजली रोग</div>
+                <div class="disease-hi">त्वचा संक्रमण</div>
+                <ul class="symptom-list">
+                  <li>Hair loss in patches</li>
+                  <li>Intense scratching behavior</li>
+                  <li>Crusty, thickened skin</li>
+                  <li>Redness and sores</li>
+                </ul>
+                <div class="disease-footer">
+                  <span class="badge badge-warning">Warning</span>
+                  <span class="species-tag">Cows, Buffaloes, Goats</span>
+                </div>
+              </div>
+              <!-- Ringworm -->
+              <div class="disease-card">
+                <div class="disease-name">Ringworm / दाद</div>
+                <div class="disease-hi">कवक संक्रमण</div>
+                <ul class="symptom-list">
+                  <li>Circular hairless patches</li>
+                  <li>Grey-white crusty center</li>
+                  <li>Slightly raised ring edge</li>
+                  <li>Usually on face and neck</li>
+                </ul>
+                <div class="disease-footer">
+                  <span class="badge badge-warning">Warning</span>
+                  <span class="species-tag">Calves, Young Animals</span>
+                </div>
+              </div>
+              <!-- Lumpy Skin -->
+              <div class="disease-card">
+                <div class="disease-name">Lumpy Skin Disease / गांठदार त्वचा रोग</div>
+                <div class="disease-hi">गंभीर वायरल रोग</div>
+                <ul class="symptom-list">
+                  <li>Firm nodules on skin (2–5cm)</li>
+                  <li>Nodules on head, neck, limbs</li>
+                  <li>Nasal and eye discharge</li>
+                  <li>Fever and lethargy</li>
+                </ul>
+                <div class="disease-footer">
+                  <span class="badge badge-critical">Critical</span>
+                  <span class="species-tag">Cows, Buffaloes</span>
+                </div>
+              </div>
+              <!-- Foot & Mouth -->
+              <div class="disease-card">
+                <div class="disease-name">Foot & Mouth / खुरपका-मुंहपका</div>
+                <div class="disease-hi">अत्यधिक संक्रामक</div>
+                <ul class="symptom-list">
+                  <li>Blisters on lips and tongue</li>
+                  <li>Blisters between hooves</li>
+                  <li>Lameness / difficulty walking</li>
+                  <li>Excessive salivation</li>
+                </ul>
+                <div class="disease-footer">
+                  <span class="badge badge-critical">Critical</span>
+                  <span class="species-tag">All Species</span>
+                </div>
+              </div>
+              <!-- Parasites -->
+              <div class="disease-card">
+                <div class="disease-name">External Parasites / बाहरी परजीवी</div>
+                <div class="disease-hi">जूँ और टिक्स</div>
+                <ul class="symptom-list">
+                  <li>Visible ticks on skin</li>
+                  <li>Restlessness and scratching</li>
+                  <li>Rough dull coat</li>
+                  <li>Weight loss signs</li>
+                </ul>
+                <div class="disease-footer">
+                  <span class="badge badge-warning">Warning</span>
+                  <span class="species-tag">All Species</span>
+                </div>
+              </div>
+              <!-- Nutritional -->
+              <div class="disease-card">
+                <div class="disease-name">Nutritional Deficiency / पोषण की कमी</div>
+                <div class="disease-hi">खराब आहार</div>
+                <ul class="symptom-list">
+                  <li>Dull, rough, brittle coat</li>
+                  <li>Visible hip and rib bones</li>
+                  <li>Slow movement, weakness</li>
+                  <li>Poor body condition overall</li>
+                </ul>
+                <div class="disease-footer">
+                  <span class="badge badge-warning">Warning</span>
+                  <span class="species-tag">All Species</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
       </section>
-
     </div><!-- /.content-area -->
   </main>
 

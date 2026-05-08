@@ -1,435 +1,603 @@
 /**
  * ============================================================
- * KisanTrack — Camera Monitor Module (camera.js)
- * ESP32-CAM simulation, Gemini API, canvas bounding boxes,
- * capture history filmstrip, alert integration
+ * KisanTrack — AI Camera Monitor Module (camera.js)
+ * Mission Control Visual Health Detection System
  * ============================================================
  */
-const CameraModule = (function () {
+window.CameraModule = (function () {
   'use strict';
 
+  // --- Configuration ---
+  const DEFAULT_INTERVAL = 120;
+  const STORAGE_KEY = 'kt_gemini_api_key';
+  const COLLECTION_CAPTURES = 'cameraCaptures';
+  const COLLECTION_ANIMALS = 'animals';
+  const COLLECTION_ALERTS = 'alerts';
+
   // --- State ---
-  let apiKey = localStorage.getItem('kt_gemini_key') || 'AIzaSyCYvUbOb13ctYLzpSUhWaPfJV6TCENMxzs';
+  let state = {
+    cameraOn: true,
+    autoAnalysis: true,
+    interval: DEFAULT_INTERVAL,
+    countdown: DEFAULT_INTERVAL,
+    isAnalyzing: false,
+    currentAnimal: null,
+    apiKey: localStorage.getItem(STORAGE_KEY) || '',
+    history: [],
+    animalsList: []
+  };
 
-  let cameraOn       = true;
-  let autoAnalysis   = true;
-  let captureIntSecs = 120;
-  let countdown      = 120;
-  let countdownTimer = null;
-  let isAnalyzing    = false;
-  let lastCaptureTs  = null;
+  let timers = {
+    countdown: null,
+    scan: null
+  };
 
-  let feedCanvas, detCanvas;
+  // --- UI Elements ---
+  const ui = {
+    // Settings
+    togCam: () => document.getElementById('cam-toggle'),
+    lblStatus: () => document.getElementById('cam-status-label'),
+    inpInterval: () => document.getElementById('capture-interval-input'),
+    selAnimal: () => document.getElementById('animal-selector'),
+    togAuto: () => document.getElementById('auto-analysis-toggle'),
+    inpLoc: () => document.getElementById('cam-location-input'),
+    btnKeyChip: () => document.getElementById('api-key-chip'),
+    lblKeyText: () => document.getElementById('api-key-text'),
 
-  // --- Helpers ---
-  const $ = (id) => document.getElementById(id);
-  const pad = (n) => String(n).padStart(2, '0');
-  const fmtCountdown = (s) => s >= 60 ? `${Math.floor(s / 60)}:${pad(s % 60)}` : `${s}s`;
-  
-  function timeAgo(date) {
-    if (!date) return '—';
-    const s = Math.round((Date.now() - date.getTime()) / 1000);
-    return s < 60 ? `${s}s ago` : `${Math.floor(s / 60)} min ago`;
-  }
+    // Feed Area
+    feedArea: () => document.getElementById('cam-feed-area'),
+    imgLive: () => document.getElementById('live-image'),
+    canvasOverlay: () => document.getElementById('detection-canvas-overlay'),
+    placeholder: () => document.getElementById('feed-placeholder'),
+    lblCountdown: () => document.getElementById('cam-countdown'),
+    overlayAnimal: () => document.getElementById('overlay-animal-id'),
+    overlayTime: () => document.getElementById('overlay-timestamp'),
+    flash: () => document.getElementById('cam-flash'),
 
-  // ── Scene Generation & Drawing ───────────────────────────
-  function genScene() {
-    const count = 3 + Math.floor(Math.random() * 3);
-    const pool  = ['Cow','Cow','Buffalo','Goat'];
-    const sc    = {};
-    const out   = [];
-    const used  = [];
+    // Buttons
+    btnCapture: () => document.getElementById('capture-now-btn'),
+    btnUpload: () => document.getElementById('upload-photo-btn'),
+    fileInput: () => document.getElementById('cam-file-input'),
+    btnReAnalyse: () => document.getElementById('re-analyse-btn'),
 
-    for (let i = 0; i < count; i++) {
-      let x, y, t = 0;
-      do {
-        x = 0.05 + Math.random() * 0.70;
-        y = 0.28 + Math.random() * 0.36;
-        t++;
-      } while (t < 20 && used.some(u => Math.abs(u.x - x) < 0.15 && Math.abs(u.y - y) < 0.10));
-      used.push({ x, y });
+    // Status Panel
+    boxAnimalInfo: () => document.getElementById('current-animal-info'),
+    boxAnalysisSummary: () => document.getElementById('analysis-summary'),
+    lblAutoAIStatus: () => document.getElementById('auto-ai-status'),
 
-      const sp = pool[Math.floor(Math.random() * pool.length)];
-      sc[sp] = (sc[sp] || 0) + 1;
-      const r = Math.random();
-      const st = r < 0.15 ? 'flagged' : r < 0.3 ? 'observation' : 'healthy';
+    // Analysis Report
+    reportSection: () => document.getElementById('analysis-report-section'),
+    reportContent: () => document.getElementById('analysis-content'),
+    keyPrompt: () => document.getElementById('gemini-key-prompt'),
+    inpPromptKey: () => document.getElementById('gemini-prompt-input'),
+    btnSavePrompt: () => document.getElementById('save-prompt-key'),
 
-      out.push({
-        x, y,
-        w: sp === 'Goat' ? 0.07 : 0.14,
-        h: sp === 'Goat' ? 0.11 : 0.18,
-        species: sp, status: st, flipped: Math.random() > 0.5,
-        label: `${sp} #${sc[sp]}`, id: i + 1,
-      });
-    }
-    return out;
-  }
+    // History
+    filmstrip: () => document.getElementById('cam-filmstrip'),
 
-  function drawAnimal(ctx, a, W, H) {
-    const x = a.x * W, y = a.y * H, w = a.w * W, h = a.h * H;
-    const isBuff = a.species === 'Buffalo', isGoat = a.species === 'Goat';
-    const bc = isBuff ? '#2C200E' : isGoat ? '#48382A' : '#564630';
+    // Guide
+    guideToggle: () => document.getElementById('guide-toggle'),
+    guideContent: () => document.getElementById('guide-content'),
+
+    // Key Modal
+    modalOverlay: () => document.getElementById('api-modal-overlay'),
+    modalInput: () => document.getElementById('gemini-modal-input'),
+    btnSaveModal: () => document.getElementById('save-modal-key')
+  };
+
+  // ── Initialization ────────────────────────────────────────
+
+  function init() {
+    console.log("Initializing Camera Module...");
+    bindEvents();
+    loadApiKey();
+    fetchAnimals();
+    fetchHistory();
+    startCountdown();
     
-    ctx.save();
-    if (a.flipped) { ctx.translate(x + w, y); ctx.scale(-1, 1); ctx.translate(-x - w, -y); }
-    ctx.fillStyle = bc;
-    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h * 0.65, 4) : ctx.rect(x, y, w, h * 0.65);
-    ctx.fill();
-    ctx.fillRect(x + w * 0.75, y + h * 0.06, w * 0.1, h * 0.28); // neck
-    ctx.restore();
-  }
-
-  function drawBoxes(ctx, animals, W, H) {
-    animals.forEach(a => {
-      const x = Math.round(a.x * W) - 6;
-      const y = Math.round((a.y - a.h * 0.14) * H) - 20;
-      const w = Math.round(a.w * W) + 12;
-      const h = Math.round(a.h * H * 1.48) + 20;
-      const col = a.status === 'flagged' ? '#C0392B' : a.status === 'observation' ? '#E5A100' : '#7CB518';
-
-      ctx.fillStyle = col + '22'; ctx.fillRect(x, y, w, h);
-      ctx.strokeStyle = col; ctx.lineWidth = 2;
-      ctx.strokeRect(x, y, w, h);
-
-      ctx.fillStyle = col;
-      ctx.beginPath(); ctx.arc(x + 6, y + 6, 4, 0, Math.PI * 2); ctx.fill();
-
-      const lW = a.label.length * 6.8 + 8;
-      ctx.fillRect(x, y - 18, lW, 18);
-      ctx.fillStyle = '#fff'; ctx.font = 'bold 10px monospace';
-      ctx.fillText(a.label, x + 4, y - 5);
+    // Initial UI state
+    updateKeyUI();
+    
+    // If user changes, refresh
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        fetchAnimals();
+        fetchHistory();
+      }
     });
   }
 
-  function drawScene(canvas, animals, withBoxes) {
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
+  function bindEvents() {
+    ui.togCam().onchange = (e) => {
+      state.cameraOn = e.target.checked;
+      ui.lblStatus().textContent = state.cameraOn ? 'ON' : 'OFF';
+      ui.lblStatus().style.color = state.cameraOn ? 'var(--accent-green)' : 'var(--text-dim)';
+    };
 
-    // Background: Barn Interior
-    const grad = ctx.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, '#12120A');
-    grad.addColorStop(0.6, '#1A1A10');
-    grad.addColorStop(1, '#0D0D05');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, W, H);
+    ui.inpInterval().onchange = (e) => {
+      let val = parseInt(e.target.value);
+      if (val < 30) val = 30;
+      if (val > 600) val = 600;
+      state.interval = val;
+      state.countdown = val;
+      ui.inpInterval().value = val;
+    };
 
-    // Floor texture
-    ctx.strokeStyle = 'rgba(255,255,255,0.02)';
-    ctx.lineWidth = 1;
-    for(let i=0; i<W; i+=40) { ctx.beginPath(); ctx.moveTo(i, H*0.6); ctx.lineTo(i-100, H); ctx.stroke(); }
+    ui.selAnimal().onchange = (e) => {
+      const animalId = e.target.value;
+      state.currentAnimal = state.animalsList.find(a => a.id === animalId) || null;
+      updateAnimalDisplay();
+    };
 
-    // Animals
-    animals.forEach(a => drawAnimal(ctx, a, W, H));
+    ui.togAuto().onchange = (e) => {
+      state.autoAnalysis = e.target.checked;
+      ui.lblAutoAIStatus().innerHTML = state.autoAnalysis ? 
+        '<i class="fa-solid fa-robot"></i> Auto-analysis: Active' : 
+        '<i class="fa-solid fa-robot"></i> Auto-analysis: Disabled';
+    };
 
-    if (withBoxes) drawBoxes(ctx, animals, W, H);
+    ui.btnCapture().onclick = () => doCapture();
+    ui.btnReAnalyse().onclick = () => doCapture(true); // Force analysis
 
-    // AI Scanner Effect (if analyzing)
-    if (isAnalyzing && !withBoxes) {
-      const scanY = (Date.now() % 2000 / 2000) * H;
-      ctx.fillStyle = 'rgba(124, 181, 24, 0.1)';
-      ctx.fillRect(0, scanY - 2, W, 4);
-      ctx.shadowBlur = 15; ctx.shadowColor = '#7CB518';
-      ctx.strokeStyle = 'rgba(124, 181, 24, 0.6)';
-      ctx.beginPath(); ctx.moveTo(0, scanY); ctx.lineTo(W, scanY); ctx.stroke();
-      ctx.shadowBlur = 0;
-    }
+    ui.btnSavePrompt().onclick = () => saveApiKey(ui.inpPromptKey().value);
+    ui.btnSaveModal().onclick = () => saveApiKey(ui.modalInput().value);
 
-    // HUD
-    ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(0, H - 28, W, 28);
-    ctx.fillStyle = '#7CB518'; ctx.font = 'bold 11px monospace';
-    ctx.fillText(`CAM-01  ${new Date().toLocaleTimeString()}  KISANTRACK_VISION_AI`, 10, H - 10);
+    ui.guideToggle().onclick = () => {
+      ui.guideContent().classList.toggle('active');
+      ui.guideToggle().querySelector('.fa-chevron-down').style.transform = 
+        ui.guideContent().classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
+    };
+
+    // Upload simulation
+    ui.btnUpload().onclick = () => ui.fileInput().click();
+    ui.fileInput().onchange = handleFileUpload;
   }
 
-  // ── Capture & Upload ─────────────────────────────────────
-  async function doCapture() {
-    if (!cameraOn || isAnalyzing) return;
-    if (!auth.currentUser) return;
-    const uid = auth.currentUser.uid;
-    const animals = genScene();
-    
-    drawScene(feedCanvas, animals, false);
-    drawScene(detCanvas, animals, true);
-    
-    const flash = $('cam-flash');
-    if (flash) { flash.classList.add('active'); setTimeout(() => flash.classList.remove('active'), 300); }
+  // ── API Key Management ────────────────────────────────────
 
-    isAnalyzing = true;
-    showLoading();
+  function loadApiKey() {
+    state.apiKey = localStorage.getItem(STORAGE_KEY) || '';
+    updateKeyUI();
+  }
+
+  function saveApiKey(key) {
+    if (!key) return;
+    state.apiKey = key;
+    localStorage.setItem(STORAGE_KEY, key);
+    updateKeyUI();
+    ui.modalOverlay().classList.remove('active');
+    ui.keyPrompt().style.display = 'none';
+    if (window.utils && window.utils.showToast) {
+      window.utils.showToast("API Key Connected / API कुंजी जुड़ गयी", "success");
+    }
+  }
+
+  function updateKeyUI() {
+    const hasKey = !!state.apiKey;
+    const chip = ui.btnKeyChip();
+    const prompt = ui.keyPrompt();
+    const keyText = ui.lblKeyText();
+
+    if (hasKey) {
+      chip.classList.add('connected');
+      keyText.textContent = "API Connected";
+      prompt.style.display = 'none';
+    } else {
+      chip.classList.remove('connected');
+      keyText.textContent = "Add API Key";
+      prompt.style.display = 'flex';
+    }
+  }
+
+  // ── Logic ─────────────────────────────────────────────────
+
+  async function fetchAnimals() {
+    const user = firebase.auth().currentUser;
+    if (!user) return;
 
     try {
-      // 1. Upload to Storage (Simulated blob from canvas)
-      const blob = await new Promise(res => feedCanvas.toBlob(res, 'image/jpeg', 0.8));
-      const fileName = `captures/${uid}/${Date.now()}.jpg`;
-      const storageRef = storage.ref().child(fileName);
-      const uploadSnap = await storageRef.put(blob);
-      const downloadURL = await uploadSnap.ref.getDownloadURL();
+      const snap = await firebase.firestore().collection(COLLECTION_ANIMALS)
+        .where('farmerId', '==', user.uid)
+        .get();
 
-      // 2. Analysis Logic (Real Gemini if key exists, else simulated)
-      let analysisResult;
-      if (apiKey && autoAnalysis) {
-          analysisResult = await analyzeGemini(feedCanvas);
-      } else {
-          analysisResult = runSimulatedAnalysis(animals);
-      }
+      state.animalsList = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       
-      const captureDoc = {
-        farmerId: uid,
+      const sel = ui.selAnimal();
+      sel.innerHTML = '<option value="">Select Animal / पशु चुनें</option>';
+      state.animalsList.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a.id;
+        opt.textContent = `${a.id} (${a.breed || a.species})`;
+        sel.appendChild(opt);
+      });
+    } catch (e) {
+      console.error("Error fetching animals:", e);
+    }
+  }
+
+  async function fetchHistory() {
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    try {
+      const snap = await firebase.firestore().collection(COLLECTION_CAPTURES)
+        .where('farmerId', '==', user.uid)
+        .orderBy('timestamp', 'desc')
+        .limit(10)
+        .get();
+
+      state.history = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderFilmstrip();
+    } catch (e) {
+      console.error("Error fetching history:", e);
+    }
+  }
+
+  function startCountdown() {
+    if (timers.countdown) clearInterval(timers.countdown);
+    timers.countdown = setInterval(() => {
+      if (!state.cameraOn || state.isAnalyzing) return;
+      
+      state.countdown--;
+      if (state.countdown <= 0) {
+        doCapture();
+        state.countdown = state.interval;
+      }
+      ui.lblCountdown().textContent = state.countdown;
+    }, 1000);
+  }
+
+  async function doCapture(forceAnalysis = false) {
+    if (!state.cameraOn && !forceAnalysis) return;
+    
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    state.isAnalyzing = true;
+    showFlash();
+    ui.feedArea().classList.add('scanning');
+    
+    // Simulate getting image from ESP32-CAM (Demo mode)
+    // In real app, this would be a fetch to ESP32 local IP or a Cloud Function
+    const demoImg = `https://loremflickr.com/800/600/cow,farm?lock=${Math.floor(Math.random() * 1000)}`;
+    
+    ui.imgLive().src = demoImg;
+    ui.imgLive().style.display = 'block';
+    ui.placeholder().style.display = 'none';
+    
+    ui.overlayTime().textContent = `Captured: ${new Date().toLocaleTimeString()}`;
+    ui.overlayAnimal().textContent = state.currentAnimal ? `🐄 ${state.currentAnimal.id}` : '🐄 Surveillance Mode';
+
+    // AI Analysis
+    if (state.autoAnalysis || forceAnalysis) {
+      await runAIAnalysis(demoImg);
+    } else {
+      state.isAnalyzing = false;
+      ui.feedArea().classList.remove('scanning');
+    }
+  }
+
+  async function runAIAnalysis(imageUrl) {
+    ui.reportContent().innerHTML = `
+      <div class="analysis-loading" style="grid-column: span 3; padding: 40px; text-align:center;">
+        <div class="analysis-spinner"></div>
+        <p style="margin-top:20px; color:var(--text-muted);">Gemini AI is examining skin patterns... / जेमिनी एआई त्वचा के नमूनों की जांच कर रहा है...</p>
+      </div>
+    `;
+
+    try {
+      const user = firebase.auth().currentUser;
+      let analysis;
+
+      if (state.apiKey) {
+        // REAL GEMINI CALL
+        analysis = await callGeminiREST(imageUrl);
+      } else {
+        // SIMULATED ANALYSIS
+        await new Promise(r => setTimeout(r, 2000));
+        analysis = generateSimulatedReport();
+      }
+
+      // Save to Firestore
+      const captureData = {
+        farmerId: user.uid,
+        animalId: state.currentAnimal ? state.currentAnimal.id : 'Herd-01',
+        imageUrl: imageUrl,
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        imageUrl: downloadURL,
-        storagePath: fileName,
-        animalCount: analysisResult.animalCount,
-        herdScore: analysisResult.herdScore,
-        observations: analysisResult.observations,
-        summary: analysisResult.summary,
-        isDemo: true
+        ...analysis
       };
 
-      // 3. Write to Firestore
-      const docRef = await db.collection('cameraCaptures').add(captureDoc);
-      
-      // 4. Create Alert if flagged
-      if (analysisResult.herdScore < 7) {
-        await db.collection('alerts').add({
-          farmerId: uid,
-          animalId: 'Visual-Check',
-          parameter: 'Camera Analysis',
-          readingValue: `Score ${analysisResult.herdScore}/10`,
-          alertType: 'Mobility Flag',
-          severity: analysisResult.herdScore < 5 ? 'Critical' : 'Warning',
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-          resolved: false,
-          source: 'Camera'
-        });
-        showToast('⚠ AI detected potential health issue in herd.', 'warning');
+      const docRef = await firebase.firestore().collection(COLLECTION_CAPTURES).add(captureData);
+      captureData.id = docRef.id;
+
+      // Update state & UI
+      state.history.unshift(captureData);
+      renderFilmstrip();
+      renderReport(captureData);
+
+      // Trigger Alert if critical
+      if (analysis.healthScore < 6) {
+        triggerHealthAlert(captureData);
       }
 
-      lastCaptureTs = new Date();
-      updateCountdownDisplay();
-      fetchHistory();
-      showResult(captureDoc);
-
-    } catch (err) {
-      console.error('Capture/Upload Error:', err);
-      showError(err.message);
+    } catch (e) {
+      console.error("AI Analysis Failed:", e);
+      ui.reportContent().innerHTML = `<div class="analysis-error" style="grid-column: span 3; color:var(--accent-red); text-align:center; padding:20px;">
+        <i class="fa-solid fa-triangle-exclamation" style="font-size:2rem; margin-bottom:10px;"></i>
+        <p>AI Analysis Failed: ${e.message}</p>
+      </div>`;
     } finally {
-      isAnalyzing = false;
-      countdown = captureIntSecs;
+      state.isAnalyzing = false;
+      ui.feedArea().classList.remove('scanning');
     }
   }
 
-  // ── Gemini API ────────────────────────────────────────────
-  async function analyzeGemini(canvas) {
-    try {
-      const b64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [
-              { inline_data: { mime_type: 'image/jpeg', data: b64 } },
-              { text: 'Analyze this cattle surveillance image. Respond in JSON: {"animalCount":N, "herdScore":N, "observations":["..."], "summary":"..."}' }
-            ]}]
-          })
-        }
-      );
-      if (!res.ok) throw new Error('Gemini API Error');
-      const data = await res.json();
-      const text = data.candidates[0].content.parts[0].text;
-      return JSON.parse(text.match(/\{[\s\S]*\}/)[0]);
-    } catch (err) {
-      console.warn('Gemini failed, falling back to simulation:', err);
-      throw err;
-    }
+  async function callGeminiREST(imageUrl) {
+    // Note: In a production app, proxy this through a Cloud Function to hide API Key
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${state.apiKey}`;
+    
+    // We need to convert remote URL to Base64 for the inline_data part
+    // For demo, we'll fetch the image then convert
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    const base64 = await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result.split(',')[1]);
+      reader.readAsDataURL(blob);
+    });
+
+    const prompt = `Analyze this livestock image for skin diseases or health issues. 
+    Return ONLY a JSON object with this structure:
+    {
+      "healthScore": 0-10,
+      "severity": "Healthy" | "Warning" | "Critical",
+      "conditions": [{"name": "Disease Name", "confidence": "95%"}],
+      "observations": ["bullet point 1", "bullet point 2"],
+      "farmerTip": "Actionable advice for the farmer in English and Hindi",
+      "summary": "Short 1 sentence summary"
+    }`;
+
+    const body = {
+      contents: [{
+        parts: [
+          { text: prompt },
+          { inline_data: { mime_type: "image/jpeg", data: base64 } }
+        ]
+      }]
+    };
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok) throw new Error(`Gemini API Error: ${res.statusText}`);
+    
+    const data = await res.json();
+    const resultText = data.candidates[0].content.parts[0].text;
+    
+    // Clean JSON from Markdown blocks
+    const jsonStr = resultText.replace(/```json|```/g, '').trim();
+    return JSON.parse(jsonStr);
   }
 
-  function runSimulatedAnalysis(animals) {
-    const flagged = animals.filter(a => a.status === 'flagged');
-    const score = flagged.length > 0 ? 6.5 : 9.2;
+  function generateSimulatedReport() {
+    const scores = [9, 8, 5, 4, 9, 8, 7];
+    const score = scores[Math.floor(Math.random() * scores.length)];
+    const severity = score >= 8 ? 'Healthy' : (score >= 6 ? 'Warning' : 'Critical');
+    
     return {
-      animalCount: animals.length,
-      herdScore: score,
+      healthScore: score,
+      severity: severity,
+      conditions: severity === 'Healthy' ? [] : [{ name: "Potential Dermatitis", confidence: "72%" }],
       observations: [
-        `Detected ${animals.length} animals.`,
-        flagged.length > 0 ? `⚠ ${flagged.length} animal(s) flagged for mobility issues.` : 'All animals appear healthy.'
+        "Animal appears active and responsive",
+        severity === 'Healthy' ? "Skin texture is normal" : "Minor lesions detected on flank",
+        "Body condition score: 3.5/5"
       ],
-      summary: flagged.length > 0 ? 'Warning: Some animals showing signs of distress.' : 'Herd health is excellent.'
+      farmerTip: "Keep the area dry and consult a vet if redness persists. / क्षेत्र को सूखा रखें और लालिमा बनी रहने पर पशु चिकित्सक से परामर्श करें।",
+      summary: severity === 'Healthy' ? "Visual check confirms good health status." : "Visual anomalies detected requiring manual inspection.",
+      isSimulated: true
     };
   }
 
-  // ── History Filmstrip ─────────────────────────────────────
-  async function fetchHistory() {
-    if (!auth.currentUser) return;
-    const uid = auth.currentUser.uid;
-    const strip = $('filmstrip');
-    if (!strip) return;
+  // ── UI Rendering ──────────────────────────────────────────
 
-    try {
-      const snapshot = await db.collection('cameraCaptures')
-        .where('farmerId', '==', uid)
-        .orderBy('timestamp', 'desc')
-        .limit(8)
-        .get();
+  function renderReport(report) {
+    const col = report.healthScore >= 8 ? 'var(--accent-green)' : (report.healthScore >= 6 ? 'var(--accent-amber)' : 'var(--accent-red)');
+    const radius = 60;
+    const circ = 2 * Math.PI * radius;
+    const offset = circ - (report.healthScore / 10) * circ;
 
-      strip.innerHTML = snapshot.docs.map(doc => {
-        const d = doc.data();
-        const time = d.timestamp ? d.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '...';
-        return `
-          <div class="filmstrip-item" onclick="CameraModule.viewFromHistory('${doc.id}')">
-            <div class="fs-thumb-wrap">
-              <img src="${d.imageUrl}" class="fs-thumb">
-              ${d.herdScore < 7 ? '<div class="fs-alert-dot">⚠</div>' : ''}
-            </div>
-            <div class="fs-meta">
-              <span class="fs-time">${time}</span>
-              <span class="fs-score">${d.herdScore}/10</span>
-            </div>
+    ui.reportContent().innerHTML = `
+      <!-- Score Column -->
+      <div class="diag-summary-col">
+        <div class="score-ring-container">
+          <svg class="score-ring-svg" width="140" height="140">
+            <circle class="score-ring-bg" cx="70" cy="70" r="${radius}"></circle>
+            <circle class="score-ring-fill" cx="70" cy="70" r="${radius}" 
+              style="stroke-dasharray: ${circ}; stroke-dashoffset: ${circ}; stroke: ${col}">
+            </circle>
+          </svg>
+          <div class="score-ring-text">
+            <span class="score-num" style="color:${col}">${report.healthScore}</span>
+            <span class="score-label">Health Score</span>
           </div>
-        `;
-      }).join('');
-    } catch (err) {
-      console.error('Error fetching history:', err);
-    }
-  }
-
-  window.CameraModule = window.CameraModule || {};
-  window.CameraModule.viewFromHistory = async (id) => {
-     const doc = await db.collection('cameraCaptures').doc(id).get();
-     if (doc.exists) showResult(doc.data());
-  };
-
-  // ── UI Displays ───────────────────────────────────────────
-  function showLoading() {
-    $('analysis-results').innerHTML = '<div class="analysis-loading"><div class="analysis-spinner"></div><p>Uploading & Analyzing...</p></div>';
-  }
-
-  function showError(msg) {
-    $('analysis-results').innerHTML = `<div class="analysis-error"><i class="fa-solid fa-circle-exclamation"></i><p>Error: ${msg}</p></div>`;
-  }
-
-  function showResult(r) {
-    const el = $('analysis-results');
-    if (!el) return;
-    const col = r.herdScore >= 8 ? 'var(--accent-green)' : 'var(--accent-amber)';
-    const isSim = r.isDemo || !apiKey;
-
-    el.innerHTML = `
-      <div class="result-body">
-        <div class="result-stats-row">
-          <div class="res-stat"><div class="res-stat-num">${r.animalCount}</div><div class="res-stat-lbl">Detected</div></div>
-          <div class="res-stat"><div class="res-stat-num" style="color:${col}">${r.herdScore}<small>/10</small></div><div class="res-stat-lbl">Herd Score</div></div>
         </div>
-        <div class="score-bar-row">
-           <div class="score-bar-bg"><div class="score-bar-fill" style="width:${r.herdScore * 10}%; background:${col}"></div></div>
+        <div class="severity-pill ${report.severity.toLowerCase()}">${report.severity}</div>
+      </div>
+
+      <!-- Details Column -->
+      <div class="diag-details-col">
+        <div class="obs-section">
+          <h4><i class="fa-solid fa-list-check"></i> Observations / अवलोकन</h4>
+          <ul class="obs-list">
+            ${report.observations.map(o => `<li>${o}</li>`).join('')}
+          </ul>
         </div>
+        <div class="condition-section">
+          <h4><i class="fa-solid fa-virus"></i> Detected Conditions / पाई गई स्थितियां</h4>
+          <div class="condition-list">
+            ${report.conditions.length > 0 ? 
+              report.conditions.map(c => `
+                <div class="condition-item" style="border-left-color:${col}">
+                  <span class="condition-name">${c.name}</span>
+                  <span class="condition-conf">${c.confidence} Confidence</span>
+                </div>
+              `).join('') : 
+              '<p style="font-size:0.85rem; color:var(--text-muted);">No major skin issues detected.</p>'
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions Column -->
+      <div class="diag-actions-col">
         <div class="summary-section">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <h4 style="margin:0;"><i class="fa-solid fa-robot"></i> Analysis Summary</h4>
-            <span class="badge ${isSim ? 'badge-sim' : 'badge-gemini'}">${isSim ? 'Simulated' : 'Gemini AI'}</span>
-          </div>
-          <p>${r.summary}</p>
-          <ul class="obs-list">${r.observations.map(o => `<li>${o}</li>`).join('')}</ul>
+          <h4><i class="fa-solid fa-comment-medical"></i> AI Summary / सारांश</h4>
+          <p class="summary-para">${report.summary}</p>
         </div>
+        <div class="farmer-tip-box">
+          <h5><i class="fa-solid fa-lightbulb"></i> Farmer Tip / किसान सुझाव</h5>
+          <p>${report.farmerTip}</p>
+        </div>
+        ${report.isSimulated ? '<div class="badge-sim" style="margin-top:20px; width:fit-content;">Simulated Result</div>' : ''}
+      </div>
+    `;
+
+    // Animate the ring
+    setTimeout(() => {
+      const fill = ui.reportContent().querySelector('.score-ring-fill');
+      if (fill) fill.style.strokeDashoffset = offset;
+    }, 100);
+
+    // Also update the small status card on the right
+    updateStatusCard(report);
+  }
+
+  function updateStatusCard(report) {
+    const col = report.healthScore >= 8 ? 'var(--accent-green)' : (report.healthScore >= 6 ? 'var(--accent-amber)' : 'var(--accent-red)');
+    ui.boxAnalysisSummary().innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:0.75rem; color:var(--text-muted);">Health Score</span>
+        <strong style="color:${col}; font-size:1.2rem;">${report.healthScore}/10</strong>
+      </div>
+      <p style="font-size:0.8rem; margin:8px 0 0; line-height:1.4;">${report.summary}</p>
+    `;
+  }
+
+  function renderFilmstrip() {
+    const strip = ui.filmstrip();
+    if (state.history.length === 0) {
+      strip.innerHTML = '<div class="empty-analysis"><p>No history yet.</p></div>';
+      return;
+    }
+
+    strip.innerHTML = state.history.map(cap => {
+      const time = cap.timestamp ? (cap.timestamp.toDate ? cap.timestamp.toDate() : new Date(cap.timestamp)).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'Now';
+      const col = cap.healthScore >= 8 ? 'var(--accent-green)' : (cap.healthScore >= 6 ? 'var(--accent-amber)' : 'var(--accent-red)');
+      
+      return `
+        <div class="film-card" onclick="window.CameraModule.loadHistoryItem('${cap.id}')">
+          <img src="${cap.imageUrl}" class="film-img" alt="Capture">
+          <div class="film-meta">
+            <span class="film-time">${time}</span>
+            <span class="film-status" style="color:${col}">${cap.severity} (${cap.healthScore}/10)</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function updateAnimalDisplay() {
+    if (!state.currentAnimal) {
+      ui.boxAnimalInfo().innerHTML = `
+        <div class="empty-analysis"><p>Select an animal to track its history.</p></div>
+      `;
+      return;
+    }
+
+    const a = state.currentAnimal;
+    ui.boxAnimalInfo().innerHTML = `
+      <div class="animal-info-main">
+        <span class="animal-emoji">🐄</span>
+        <div class="animal-ids">
+          <strong id="info-id">${a.id}</strong>
+          <span id="info-breed">${a.breed || a.species}</span>
+        </div>
+      </div>
+      <div class="mini-vitals-row">
+        <div class="mini-vital-chip">Age: ${a.age || '--'}y</div>
+        <div class="mini-vital-chip">Weight: ${a.weight || '--'}kg</div>
       </div>
     `;
   }
 
-  // ── Settings ──────────────────────────────────────────────
-  function initSettings() {
-    const camTog = $('cam-toggle');
-    if (camTog) camTog.onchange = () => {
-      cameraOn = camTog.checked;
-      $('cam-status-label').textContent = cameraOn ? 'ON' : 'OFF';
-      $('cam-status-label').style.color = cameraOn ? 'var(--accent-green)' : 'var(--text-dim)';
-    };
+  // ── Utils ─────────────────────────────────────────────────
 
-    const intInp = $('capture-interval-input');
-    if (intInp) intInp.onchange = () => {
-      const val = parseInt(intInp.value);
-      if (val >= 10) {
-        captureIntSecs = val;
-        countdown = val;
-        showToast(`Interval set to ${val}s`);
-      }
-    };
-
-    const saveKeyBtn = $('save-gemini-key-btn');
-    if (saveKeyBtn) saveKeyBtn.onclick = () => {
-      const val = $('gemini-api-key-input').value.trim();
-      if (val) {
-        apiKey = val;
-        localStorage.setItem('kt_gemini_key', val);
-        showToast('API Key saved.');
-        updateKeyStatus();
-      }
-    };
+  function showFlash() {
+    const flash = ui.flash();
+    flash.classList.add('active');
+    setTimeout(() => flash.classList.remove('active'), 150);
   }
 
-  function updateKeyStatus() {
-    const el = $('api-key-status');
-    const prompt = $('no-key-prompt');
-    if (apiKey) {
-      if (el) {
-        el.className = 'api-key-status connected';
-        el.innerHTML = '<i class="fa-solid fa-circle-check"></i> API Connected';
-      }
-      if (prompt) prompt.style.display = 'none';
-    } else {
-      if (prompt) prompt.style.display = 'flex';
-    }
-  }
-
-  // ── Initialization ────────────────────────────────────────
-  function startCountdown() {
-    if (countdownTimer) clearInterval(countdownTimer);
-    countdownTimer = setInterval(() => {
-      if (!cameraOn || isAnalyzing) return;
-      countdown = Math.max(0, countdown - 1);
-      updateCountdownDisplay();
-      if (countdown === 0) doCapture();
-      
-      // Keep feed alive with scanner if analyzing
-      if (isAnalyzing) {
-         drawScene(feedCanvas, [], false); // We'd need current animals ideally
-      }
-    }, 1000);
-  }
-
-  function updateCountdownDisplay() {
-    if ($('cam-countdown')) $('cam-countdown').textContent = fmtCountdown(countdown);
-    if ($('last-capture-time')) $('last-capture-time').textContent = timeAgo(lastCaptureTs);
-  }
-
-  function init() {
-    feedCanvas = $('camera-feed-canvas');
-    detCanvas  = $('detection-canvas');
-    
-    if ($('capture-now-btn')) $('capture-now-btn').onclick = doCapture;
-    
-    // Auto-analysis toggle
-    const aaTog = $('auto-analysis-toggle');
-    if (aaTog) aaTog.onchange = () => { autoAnalysis = aaTog.checked; };
-
-    initSettings();
-    updateKeyStatus();
-    
-    if (auth.currentUser) {
-      fetchHistory();
-      startCountdown();
-      setTimeout(doCapture, 1500);
-    } else {
-      const unsubscribe = auth.onAuthStateChanged(user => {
-        if (user) {
-          fetchHistory();
-          startCountdown();
-          setTimeout(doCapture, 1500);
-          unsubscribe();
-        }
+  async function triggerHealthAlert(report) {
+    const user = firebase.auth().currentUser;
+    try {
+      await firebase.firestore().collection(COLLECTION_ALERTS).add({
+        farmerId: user.uid,
+        animalId: report.animalId,
+        parameter: 'Visual Health (AI)',
+        readingValue: `${report.healthScore}/10`,
+        severity: report.severity,
+        alertType: 'Skin Disease Detection',
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        resolved: false,
+        source: 'AI-Camera',
+        message: report.summary
       });
+      if (window.utils && window.utils.showToast) {
+        window.utils.showToast(`Critical health alert for ${report.animalId}!`, "error");
+      }
+    } catch (e) {
+      console.error("Error triggering alert:", e);
     }
   }
 
-  return { init };
+  function handleFileUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      ui.imgLive().src = event.target.result;
+      ui.imgLive().style.display = 'block';
+      ui.placeholder().style.display = 'none';
+      ui.overlayTime().textContent = `Uploaded: ${new Date().toLocaleTimeString()}`;
+      runAIAnalysis(event.target.result);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // --- Exposed API ---
+  return {
+    init,
+    openKeyModal: () => ui.modalOverlay().classList.add('active'),
+    closeKeyModal: () => ui.modalOverlay().classList.remove('active'),
+    toggleKeyVisibility: () => {
+      const inp = ui.modalInput();
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+    },
+    loadHistoryItem: (id) => {
+      const item = state.history.find(h => h.id === id);
+      if (item) {
+        ui.imgLive().src = item.imageUrl;
+        ui.imgLive().style.display = 'block';
+        ui.placeholder().style.display = 'none';
+        renderReport(item);
+      }
+    }
+  };
+
 })();
