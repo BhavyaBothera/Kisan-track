@@ -624,191 +624,143 @@
         </div>
 
         <!-- ⚙️ Settings Bar -->
-        <div class="cam-settings-bar">
-          <div class="cam-setting-group">
-            <label class="cam-setting-label">ESP32-CAM / कैमरा</label>
-            <label class="toggle-switch">
-              <input type="checkbox" id="cam-toggle" checked />
-              <span class="toggle-track"><span class="toggle-thumb"></span></span>
-            </label>
-            <span class="cam-setting-val" id="cam-status-label">ON</span>
-          </div>
+        <!-- 🚀 NEW COMMAND CENTER LAYOUT -->
+        <div class="camera-command-center">
+          
+          <!-- LEFT SIDEBAR: Controls & Settings -->
+          <aside class="cam-sidebar">
+            <div class="sidebar-block">
+              <h4 class="sidebar-title"><i class="fa-solid fa-sliders"></i> Config / विन्यास</h4>
+              
+              <div class="setting-item">
+                <label>Camera Power / कैमरा पावर</label>
+                <div class="flex-row">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="cam-toggle" checked />
+                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                  </label>
+                  <span id="cam-status-label" class="status-on">ON</span>
+                </div>
+              </div>
 
-          <div class="cam-setting-group">
-            <label class="cam-setting-label">Interval / अंतराल</label>
-            <input type="number" id="capture-interval-input" class="cam-num-input" value="120" min="30" max="600" />
-            <span class="cam-setting-val">s</span>
-          </div>
+              <div class="setting-item">
+                <label>Auto-AI / ऑटो-AI</label>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="auto-analysis-toggle" checked />
+                  <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                </label>
+              </div>
 
-          <div class="cam-setting-group">
-            <label class="cam-setting-label">Animal / पशु</label>
-            <select id="animal-selector" class="cam-select-input">
-              <option value="">Loading animals...</option>
-            </select>
-          </div>
-
-          <div class="cam-setting-group">
-            <label class="cam-setting-label">Auto AI / ऑटो AI</label>
-            <label class="toggle-switch">
-              <input type="checkbox" id="auto-analysis-toggle" checked />
-              <span class="toggle-track"><span class="toggle-thumb"></span></span>
-            </label>
-          </div>
-
-          <div class="cam-setting-group">
-            <label class="cam-setting-label">Location / स्थान</label>
-            <input type="text" id="cam-location-input" class="cam-text-input" placeholder="Main Barn / मुख्य तबेला" />
-          </div>
-
-          <div id="api-key-chip" class="api-status-chip" onclick="window.CameraModule.openKeyModal()">
-            <i class="fa-solid fa-key"></i> <span id="api-key-text">Add API Key</span>
-          </div>
-        </div>
-
-        <!-- 📷 Main Grid: Feed + Status -->
-        <div class="camera-main-grid">
-
-          <!-- LEFT: Feed Card -->
-          <div class="camera-feed-card">
-            <div class="cam-feed-header">
-              <h3 class="section-title" style="margin:0;"><i class="fa-solid fa-camera"></i> Live Feed / लाइव फ़ीड</h3>
-              <div class="cam-live-badge" id="camera-live-badge">
-                <span class="cam-live-dot"></span> LIVE
+              <div class="setting-item">
+                <label>Interval (sec) / अंतराल</label>
+                <input type="number" id="capture-interval-input" class="cam-input" value="120" min="30" max="600" />
               </div>
             </div>
 
-            <div class="cam-feed-area" id="cam-feed-area">
-              <div id="feed-container" class="feed-container">
-                <img id="live-image" src="" alt="Camera Feed" style="display:none;" />
-                <canvas id="detection-canvas-overlay"></canvas>
-                <div class="cam-flash" id="cam-flash"></div>
-                
-                <div id="feed-placeholder" class="feed-placeholder">
-                  <i class="fa-solid fa-satellite-dish"></i>
-                  <p>Awaiting Uplink...<br>अपलिंक की प्रतीक्षा है...</p>
-                  <div class="pulsing-dots"><span></span><span></span><span></span></div>
-                </div>
-
-                <div class="feed-overlay-top">
-                  <div class="overlay-pill">
-                    <i class="fa-solid fa-tower-broadcast"></i> <span id="overlay-signal">UPLINK: 92%</span>
-                  </div>
-                  <div class="overlay-pill rec-pill">
-                    <i class="fa-solid fa-circle" style="color:var(--accent-red); animation: pulse-red 1s infinite;"></i> LIVE REC
-                  </div>
-                </div>
-
-                <div class="feed-overlay-bottom">
-                  <div class="overlay-pill overlay-animal" id="overlay-animal-id">🐄 Surveillance Mode</div>
-                  <div class="overlay-pill">
-                    <i class="fa-solid fa-battery-three-quarters"></i> 72%
-                  </div>
-                  <div class="overlay-time" id="overlay-timestamp">Captured: --</div>
-                </div>
+            <div class="sidebar-block">
+              <h4 class="sidebar-title"><i class="fa-solid fa-cow"></i> Subject / पशु चुनें</h4>
+              <select id="animal-selector" class="cam-select-input">
+                <option value="">Loading...</option>
+              </select>
+              <div class="animal-mini-card" id="current-animal-info">
+                <div class="empty-state">No animal selected</div>
               </div>
             </div>
 
-            <div class="capture-controls-row">
-              <button class="btn btn-primary" id="capture-now-btn">
-                <i class="fa-solid fa-camera"></i> Capture Now / अभी कैप्चर करें
+            <div class="sidebar-block">
+              <h4 class="sidebar-title"><i class="fa-solid fa-gears"></i> API Status</h4>
+              <div id="api-key-chip" class="api-key-chip" onclick="window.CameraModule.openKeyModal()">
+                <i class="fa-solid fa-circle-check"></i> <span id="api-key-text">Gemini Connected</span>
+              </div>
+            </div>
+
+            <div class="sidebar-actions">
+              <button class="btn btn-primary btn-full" id="capture-now-btn">
+                <i class="fa-solid fa-camera"></i> CAPTURE / कैप्चर
               </button>
-              <div class="countdown-display">
-                <i class="fa-solid fa-clock"></i>
-                <div class="countdown-text">
-                  <span>Next capture in:</span>
-                  <strong id="cam-countdown">120</strong>
-                </div>
-              </div>
-              <button class="btn btn-secondary" id="upload-photo-btn">
-                <i class="fa-solid fa-upload"></i> Upload / अपलोड
+              <button class="btn btn-secondary btn-full" id="upload-photo-btn">
+                <i class="fa-solid fa-upload"></i> UPLOAD / अपलोड
               </button>
               <input type="file" id="cam-file-input" hidden accept="image/*" />
             </div>
-          </div>
+          </aside>
 
-          <!-- RIGHT: Status Card -->
-          <div class="camera-status-card">
-            <div class="status-card-header">
-              <i class="fa-solid fa-shield-halved"></i> Detection Status / पहचान स्थिति
-            </div>
-            
-            <div class="current-animal-box" id="current-animal-info">
-              <div class="animal-info-main">
-                <span class="animal-emoji" id="info-emoji">🐄</span>
-                <div class="animal-ids">
-                  <strong id="info-id">--</strong>
-                  <span id="info-breed">--</span>
+          <!-- CENTER VIEWPORT: Feed & Analysis -->
+          <main class="cam-viewport">
+            <div class="viewport-header">
+              <div class="v-header-left">
+                <span class="live-indicator"><span class="dot"></span> LIVE UPLINK</span>
+                <span class="cam-id">FEED: CAM_ALPHA_01</span>
+              </div>
+              <div class="v-header-right">
+                <div class="countdown-tag">
+                  NEXT SCAN: <span id="cam-countdown">120</span>s
                 </div>
               </div>
-              <div class="mini-vitals-row" id="info-vitals">
-                <div class="mini-vital-chip">Temp: --</div>
-                <div class="mini-vital-chip">HR: --</div>
-                <div class="mini-vital-chip">Act: --</div>
+            </div>
+
+            <div class="feed-container-wrap">
+              <div class="cam-feed-area" id="cam-feed-area">
+                <div id="feed-container" class="feed-container">
+                  <img id="live-image" src="" alt="Camera Feed" style="display:none;" />
+                  <canvas id="detection-canvas-overlay"></canvas>
+                  <div class="cam-flash" id="cam-flash"></div>
+                  
+                  <div id="feed-placeholder" class="feed-placeholder">
+                    <i class="fa-solid fa-satellite-dish"></i>
+                    <p>SYNCHRONIZING FEED...<br>फ़ीड सिंक्रनाइज़ हो रही है...</p>
+                  </div>
+
+                  <!-- HUD Overlays -->
+                  <div class="hud-top-left">
+                    <div class="hud-item"><i class="fa-solid fa-tower-broadcast"></i> 94%</div>
+                    <div class="hud-item"><i class="fa-solid fa-battery-full"></i> 88%</div>
+                  </div>
+                  <div class="hud-top-right">
+                    <div class="hud-item rec-status"><i class="fa-solid fa-circle"></i> REC</div>
+                  </div>
+                  <div class="hud-bottom-left">
+                    <div class="hud-item animal-tag" id="overlay-animal-id">🐄 Surveillance Mode</div>
+                  </div>
+                  <div class="hud-bottom-right">
+                    <div class="hud-item timestamp" id="overlay-timestamp">00:00:00</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 🧠 Floating Analysis Result -->
+              <div class="floating-report" id="analysis-report-section">
+                <div class="report-header">
+                  <span><i class="fa-solid fa-microscope"></i> AI DIAGNOSTICS</span>
+                  <div class="report-controls">
+                    <span class="model-badge">Gemini 2.0</span>
+                    <button class="btn-icon" id="re-analyse-btn"><i class="fa-solid fa-rotate"></i></button>
+                  </div>
+                </div>
+                
+                <div id="gemini-key-prompt" class="report-key-prompt" style="display:none;">
+                   <p>API Key required for AI analysis</p>
+                   <button class="btn btn-primary btn-sm" onclick="window.CameraModule.openKeyModal()">Add Key</button>
+                </div>
+
+                <div id="analysis-content" class="report-body">
+                   <div class="empty-report">
+                     <i class="fa-solid fa-brain"></i>
+                     <p>Awaiting scan results... / स्कैन परिणामों की प्रतीक्षा है...</p>
+                   </div>
+                </div>
               </div>
             </div>
+          </main>
 
-            <div class="divider"></div>
-
-            <div class="analysis-summary-box" id="analysis-summary">
-              <div class="empty-analysis">
-                <i class="fa-solid fa-circle-info"></i>
-                <p>No analysis yet / अभी तक कोई विश्लेषण नहीं</p>
-              </div>
+          <!-- RIGHT SIDEBAR: History Timeline -->
+          <aside class="cam-history-sidebar">
+            <h4 class="sidebar-title"><i class="fa-solid fa-timeline"></i> Events / समयरेखा</h4>
+            <div class="timeline-container" id="cam-filmstrip">
+              <!-- Populated by JS -->
             </div>
-
-            <div class="divider"></div>
-
-            <div class="auto-status-line" id="auto-ai-status">
-              <i class="fa-solid fa-robot"></i> Auto-analysis: Active
-            </div>
-          </div>
-
-        </div><!-- /.camera-main-grid -->
-
-        <!-- 🧠 AI Analysis Section -->
-        <div class="analysis-report-section" id="analysis-report-section">
-          <div class="section-header">
-            <div class="header-left">
-              <i class="fa-solid fa-microscope"></i>
-              <h3>AI Skin & Health Analysis / AI त्वचा और स्वास्थ्य विश्लेषण</h3>
-            </div>
-            <div class="header-right">
-              <span class="model-chip">gemini-1.5-flash</span>
-              <button class="btn btn-primary btn-sm" id="re-analyse-btn">
-                <i class="fa-solid fa-rotate"></i> Analyse Now / विश्लेषण
-              </button>
-            </div>
-          </div>
-
-          <!-- API Key Prompt (Hidden if key exists) -->
-          <div id="gemini-key-prompt" class="key-prompt-card" style="display:none;">
-            <i class="fa-solid fa-key"></i>
-            <div class="prompt-text">
-              <h4>Connect Gemini API / Gemini API जोड़ें</h4>
-              <p>Enter your Gemini API key to enable AI skin analysis</p>
-            </div>
-            <div class="prompt-input-row">
-              <input type="password" id="gemini-prompt-input" placeholder="AIza..." />
-              <button class="btn btn-primary" id="save-prompt-key">Save / सहेजें</button>
-            </div>
-          </div>
-
-          <!-- Analysis Content Area -->
-          <div id="analysis-content" class="analysis-content">
-            <!-- Populated by camera.js (Loading or Result) -->
-          </div>
-        </div>
-
-        <!-- 🕐 Capture History -->
-        <div class="filmstrip-section">
-          <div class="filmstrip-header">
-            <h3><i class="fa-solid fa-clock-rotate-left"></i> Capture History / कैप्चर इतिहास</h3>
-            <button class="btn btn-text">View All / सभी देखें</button>
-          </div>
-          <div class="filmstrip" id="cam-filmstrip">
-            <!-- Populated by camera.js -->
-          </div>
-        </div>
+          </aside>
+        </div><!-- /.camera-command-center -->
 
         <!-- 📊 Disease Guide -->
         <div class="disease-guide-section">

@@ -453,6 +453,8 @@ window.CameraModule = (function () {
   // ── UI Rendering ──────────────────────────────────────────
 
   function renderReport(report) {
+    ui.reportSection().classList.add('active');
+    
     const col = report.healthScore >= 8 ? 'var(--accent-green)' : (report.healthScore >= 6 ? 'var(--accent-amber)' : 'var(--accent-red)');
     const radius = 60;
     const circ = 2 * Math.PI * radius;
@@ -547,11 +549,12 @@ window.CameraModule = (function () {
       const col = cap.healthScore >= 8 ? 'var(--accent-green)' : (cap.healthScore >= 6 ? 'var(--accent-amber)' : 'var(--accent-red)');
       
       return `
-        <div class="film-card" onclick="window.CameraModule.loadHistoryItem('${cap.id}')">
-          <img src="${cap.imageUrl}" class="film-img" alt="Capture">
-          <div class="film-meta">
-            <span class="film-time">${time}</span>
-            <span class="film-status" style="color:${col}">${cap.severity} (${cap.healthScore}/10)</span>
+      return `
+        <div class="timeline-item" onclick="window.CameraModule.loadHistoryItem('${cap.id}')">
+          <img src="${cap.imageUrl}" class="timeline-img" alt="Capture">
+          <div class="timeline-meta">
+            <span class="timeline-time">${time}</span>
+            <span class="timeline-status" style="color:${col}; font-weight:800;">${cap.healthScore}/10</span>
           </div>
         </div>
       `;
@@ -568,18 +571,23 @@ window.CameraModule = (function () {
 
     const a = state.currentAnimal;
     ui.boxAnimalInfo().innerHTML = `
-      <div class="animal-info-main">
-        <span class="animal-emoji">🐄</span>
-        <div class="animal-ids">
-          <strong id="info-id">${a.id}</strong>
-          <span id="info-breed">${a.breed || a.species}</span>
+      <div class="animal-mini-info" style="width:100%;">
+        <div class="flex-row" style="justify-content:space-between; margin-bottom:8px;">
+          <strong style="color:var(--accent-green); font-size:1.1rem;">${a.id}</strong>
+          <span style="font-size:1.5rem;">🐄</span>
+        </div>
+        <div class="mini-stats" style="font-size:0.7rem; color:var(--text-muted); display:flex; gap:10px;">
+          <span>BREED: ${a.breed || a.species}</span>
+          <span>AGE: ${a.age || '--'}Y</span>
         </div>
       </div>
-      <div class="mini-vitals-row">
-        <div class="mini-vital-chip">Age: ${a.age || '--'}y</div>
-        <div class="mini-vital-chip">Weight: ${a.weight || '--'}kg</div>
-      </div>
     `;
+
+    // Animate ring
+    setTimeout(() => {
+      const fill = ui.reportContent().querySelector('.score-ring-fill');
+      if (fill) fill.style.strokeDashoffset = offset;
+    }, 150);
   }
 
   // ── Utils ─────────────────────────────────────────────────
