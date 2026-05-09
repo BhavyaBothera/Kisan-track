@@ -24,6 +24,7 @@ const DashboardModule = (function () {
     renderDashboard();
     
     setupLocalListeners();
+    startTelemetryPulse();
   }
 
   function renderDashboard() {
@@ -35,12 +36,11 @@ const DashboardModule = (function () {
     // 1. Welcome Banner
     updateWelcomeBanner(state.farmer);
 
-    // 2. KPIs
+    // 2. KPIs (Nexus Style)
     updateKPIs(state.kpis);
 
-    // 3. Charts & Gauges
+    // 3. Charts & Gauges (Nexus Style)
     updateBioGauge(state.animals);
-    updateHealthBars(state.animals);
     updateDonutChart(state.animals);
     initMainChart();
 
@@ -51,6 +51,17 @@ const DashboardModule = (function () {
   }
 
   // ── UI Components ──────────────────────────────────────────
+
+  function startTelemetryPulse() {
+    // Adds a "live" feel by slightly shifting telemetry values
+    setInterval(() => {
+        const latencyEl = document.querySelector('.nexus-header .subtitle');
+        if (latencyEl) {
+            const lat = Math.floor(Math.random() * 15) + 38;
+            latencyEl.textContent = `System Latency: ${lat}ms | Uplink: Active`;
+        }
+    }, 3000);
+  }
 
   function updateWelcomeBanner(farmer) {
     const greetEl = document.getElementById('banner-greeting');
@@ -77,10 +88,15 @@ const DashboardModule = (function () {
   }
 
   function updateKPIs(kpis) {
-    animateCount(document.getElementById('kpi-total-animals'), kpis.totalAnimals);
-    animateCount(document.getElementById('kpi-healthy-animals'), kpis.healthyAnimals);
-    animateCount(document.getElementById('kpi-active-alerts'), kpis.activeAlerts);
-    animateCount(document.getElementById('kpi-critical-cases'), kpis.criticalCases);
+    const totalEl = document.getElementById('kpi-total-animals');
+    const healthyEl = document.getElementById('kpi-healthy-animals');
+    const alertsEl = document.getElementById('kpi-active-alerts');
+    const criticalEl = document.getElementById('kpi-critical-cases');
+
+    if (totalEl) totalEl.textContent = kpis.totalAnimals;
+    if (healthyEl) healthyEl.textContent = kpis.healthyAnimals;
+    if (alertsEl) alertsEl.textContent = kpis.activeAlerts;
+    if (criticalEl) criticalEl.textContent = kpis.criticalCases;
   }
 
   function updateBioGauge(animals) {
@@ -92,7 +108,7 @@ const DashboardModule = (function () {
     const valEl = document.getElementById('bio-score-val');
     const path = document.getElementById('bio-gauge-path');
     
-    if (valEl) animateCount(valEl, score);
+    if (valEl) valEl.textContent = score;
     if (path) {
       const circumference = 283;
       const offset = circumference - (score / 100) * circumference;

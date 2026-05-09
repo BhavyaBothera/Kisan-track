@@ -951,20 +951,84 @@
       color: var(--text-dim);
     }
 
+    /* ═══════════════════════════════════════════════════════
+       NEXUS HUD PREVIEW
+    ═══════════════════════════════════════════════════════ */
+    .nexus-preview {
+      background: #000;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      overflow: hidden;
+      position: relative;
+      margin-top: 60px;
+      aspect-ratio: 16/9;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+    }
+    .nexus-preview-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.6));
+      pointer-events: none;
+    }
+    .nexus-preview-hud {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-family: monospace;
+      color: var(--accent-green);
+      font-size: 12px;
+    }
+    .nexus-preview-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nexus-preview-mid {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex: 1;
+    }
+    .nexus-preview-crosshair {
+      width: 100px; height: 100px;
+      border: 1px solid rgba(124, 181, 24, 0.4);
+      position: relative;
+    }
+    .nexus-preview-crosshair::before, .nexus-preview-crosshair::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--accent-green);
+    }
+    .nexus-preview-crosshair::before { width: 20px; height: 1px; }
+    .nexus-preview-crosshair::after { width: 1px; height: 20px; }
+    
+    .nexus-preview-bottom {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .nexus-p-stat {
+      background: rgba(124, 181, 24, 0.1);
+      border: 1px solid rgba(124, 181, 24, 0.2);
+      padding: 10px;
+      border-radius: 8px;
+    }
+    .nexus-p-val {
+      font-size: 18px;
+      font-weight: 800;
+      display: block;
+    }
+
     @media (max-width: 768px) {
-      .footer-main {
-        grid-template-columns: 1fr;
-        text-align: center !important;
-        gap: 48px;
-      }
-
-      .footer-col.right {
-        text-align: center !important;
-      }
-
-      .footer-desc {
-        margin: 0 auto;
-      }
+      .nexus-preview { aspect-ratio: 4/3; }
+      .nexus-preview-bottom { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -1119,6 +1183,66 @@
           <p>Receive instant alerts on your phone with animal ID and AI confidence score — so you know exactly which
             animal needs attention.</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════
+       NEXUS INTELLIGENCE ENGINE (PREVIEW)
+  ═══════════════════════════════════════════════════════ -->
+  <section class="nexus-engine-section" style="padding: 100px 0; background: #0a0a05;">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="eyebrow">NEXT-GEN TECHNOLOGY / अगली पीढ़ी की तकनीक</span>
+        <h2 class="section-title">The Nexus Intelligence Engine</h2>
+        <p class="section-subtitle">Real-time AI diagnostic suite for premium livestock care</p>
+        <div class="header-line"></div>
+      </div>
+
+      <div class="nexus-preview reveal">
+        <div class="nexus-preview-overlay"></div>
+        <!-- Mock Viewport -->
+        <div style="width:100%; height:100%; background: url('https://images.unsplash.com/photo-1546445317-29f4545e9d53?auto=format&fit=crop&q=80&w=1200') center/cover; opacity: 0.4;"></div>
+        
+        <div class="nexus-preview-hud">
+          <div class="nexus-preview-top">
+            <div>UPLINK: ACTIVE<br>LATENCY: 42ms</div>
+            <div style="text-align:right;">SUBJECT: #A06-COW<br>LOC: NORTH PADDOCK</div>
+          </div>
+          
+          <div class="nexus-preview-mid">
+            <div class="nexus-preview-crosshair">
+              <div class="nexus-scan-line"></div>
+            </div>
+          </div>
+          
+          <div class="nexus-preview-bottom">
+            <div class="nexus-p-stat">
+              <span style="font-size:10px; opacity:0.6;">BODY TEMP</span>
+              <span class="nexus-p-val">38.4°C</span>
+              <span style="color:var(--accent-green)">✓ NOMINAL</span>
+            </div>
+            <div class="nexus-p-stat">
+              <span style="font-size:10px; opacity:0.6;">HEART RATE</span>
+              <span class="nexus-p-val">72 BPM</span>
+              <span style="color:var(--accent-green)">✓ STABLE</span>
+            </div>
+            <div class="nexus-p-stat">
+              <span style="font-size:10px; opacity:0.6;">AI DIAGNOSTIC</span>
+              <span class="nexus-p-val">HEALTHY</span>
+              <span style="color:var(--accent-green)">98% CONFIDENCE</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align:center; margin-top:40px;" class="reveal">
+        <p style="color:var(--text-muted); max-width:700px; margin: 0 auto 30px;">
+          Experience the most advanced livestock monitoring interface ever built. Our Nexus HUD provides a tactical overview of your herd's health, powered by Gemini Vision AI.
+        </p>
+        <button class="btn btn-primary btn-pill" onclick="window.location.href='login.html?tab=signup'">
+          Explore the Full Suite / पूर्ण सुइट देखें
+        </button>
       </div>
     </div>
   </section>

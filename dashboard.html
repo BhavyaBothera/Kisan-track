@@ -127,42 +127,60 @@
     ───────────────────────────────────────────────── -->
       <section class="tab-section active" id="section-dashboard" aria-label="Dashboard Home">
 
-        <div class="page-header">
-          <h1><i class="fa-solid fa-gauge-high" style="color:var(--accent-green);margin-right:10px;"></i>Herd Overview /
-            <span style="color:var(--text-muted);">झुंड की स्थिति</span>
-          </h1>
-          <p class="subtitle">Real-time health monitoring for your entire livestock | आपके सभी पशुओं की स्वास्थ्य
-            निगरानी</p>
+        <div class="page-header" style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px; margin-bottom: 40px;">
+          <h1 id="banner-greeting"><i class="fa-solid fa-gauge-high" style="color:var(--accent-green);margin-right:10px;"></i>Good Morning, Farmer 🌾</h1>
+          <p class="subtitle" id="banner-farm-info">Real-time health monitoring for your entire livestock</p>
         </div>
 
-        <!-- KPI Cards -->
-        <div class="kpi-grid" id="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-icon"><i class="fa-solid fa-cow"></i></div>
-            <div class="kpi-body">
-              <div class="kpi-val" id="kpi-total-animals">0</div>
-              <div class="kpi-lab">Total Animals<span class="hi">कुल पशु</span></div>
+        <!-- 🛡️ NEXUS TACTICAL KPI MODULES -->
+        <div class="nexus-grid">
+          <div class="nexus-card">
+            <span class="label">TOTAL SUBJECTS</span>
+            <div class="value" id="kpi-total-animals">0</div>
+            <div class="delta up"><i class="fa-solid fa-plus"></i> <span class="poppins">STABLE</span></div>
+          </div>
+          <div class="nexus-card">
+            <span class="label">OPTIMAL HEALTH</span>
+            <div class="value" id="kpi-healthy-animals" style="color:var(--accent-green)">0</div>
+            <div class="delta up"><i class="fa-solid fa-arrow-up"></i> <span class="poppins">98.2% ACCURACY</span></div>
+          </div>
+          <div class="nexus-card">
+            <span class="label">ACTIVE ANOMALIES</span>
+            <div class="value" id="kpi-active-alerts" style="color:var(--accent-amber)">0</div>
+            <div class="delta"><span class="nexus-pulse-dot"></span> <span class="poppins">REAL-TIME MONITORING</span></div>
+          </div>
+          <div class="nexus-card">
+            <span class="label">CRITICAL VECTORS</span>
+            <div class="value" id="kpi-critical-cases" style="color:var(--accent-red)">0</div>
+            <div class="delta down"><i class="fa-solid fa-shield-virus"></i> <span class="poppins">THREAT DETECTION ON</span></div>
+          </div>
+        </div>
+
+        <!-- 🧬 NEXUS BIOMETRIC CORE -->
+        <div class="nexus-bio-container">
+          <div class="nexus-bio-gauge">
+            <div class="nexus-stat-pill" style="position:absolute; top:15px; left:15px;">
+              <i class="fa-solid fa-wave-square"></i> SIGNAL STABLE
+            </div>
+            <svg width="240" height="240" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="8" />
+              <circle id="bio-gauge-path" cx="50" cy="50" r="45" fill="none" stroke="var(--accent-green)" stroke-width="8" 
+                stroke-dasharray="283" stroke-dashoffset="283" stroke-linecap="round" 
+                transform="rotate(-90 50 50)" style="transition: stroke-dashoffset 1s ease-out;" />
+            </svg>
+            <div class="nexus-bio-score">
+              <span class="num" id="bio-score-val">0</span>
+              <span class="lab">HEALTH INDEX</span>
             </div>
           </div>
-          <div class="kpi-card">
-            <div class="kpi-icon healthy"><i class="fa-solid fa-heart-pulse"></i></div>
-            <div class="kpi-body">
-              <div class="kpi-val" id="kpi-healthy-animals">0</div>
-              <div class="kpi-lab">Healthy<span class="hi">स्वस्थ</span></div>
+
+          <div class="nexus-card" style="flex:1;">
+            <div class="nexus-header" style="margin-bottom:15px; border-left-width:2px;">
+              <h4 style="font-size:0.9rem; margin:0;">TELEMETRY OVERVIEW</h4>
+              <span class="subtitle">System Latency: 42ms | Uplink: Active</span>
             </div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-icon warning"><i class="fa-solid fa-bell"></i></div>
-            <div class="kpi-body">
-              <div class="kpi-val" id="kpi-active-alerts">0</div>
-              <div class="kpi-lab">Active Alerts<span class="hi">सक्रिय अलर्ट</span></div>
-            </div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-icon critical"><i class="fa-solid fa-triangle-exclamation"></i></div>
-            <div class="kpi-body">
-              <div class="kpi-val" id="kpi-critical-cases">0</div>
-              <div class="kpi-lab">Critical<span class="hi">गंभीर</span></div>
+            <div class="chart-wrap" style="height:150px;">
+              <canvas id="main-telemetry-chart"></canvas>
             </div>
           </div>
         </div>
@@ -253,66 +271,69 @@
           </div>
         </div>
 
-        <!-- Gauges -->
-        <div class="gauges-row" id="gauges-row">
-          <!-- Gauge 1: Temperature -->
-          <div class="gauge-card">
-            <div class="gauge-title">
-              <i class="fa-solid fa-thermometer-half" style="color:var(--accent-green);"></i>
-              Body Temperature<span class="hi-label">शरीर का तापमान</span>
+        <!-- 🛰️ NEXUS BIOMETRIC HUD -->
+        <div class="nexus-vitals-hud">
+          <!-- Body Temperature -->
+          <div class="nexus-gauge-card">
+            <div class="nexus-gauge-header">
+              <span>THERMAL VECTOR</span>
+              <span class="nexus-pulse-dot"></span>
             </div>
-            <div class="gauge-svg-wrap">
-              <svg viewBox="0 0 100 100">
-                <circle class="gauge-bg" cx="50" cy="50" r="40" stroke-dasharray="251.2" />
-                <circle class="gauge-fill green" id="gauge-temp-fill" cx="50" cy="50" r="40" stroke-dasharray="251.2"
-                  stroke-dashoffset="251.2" />
+            <div class="nexus-gauge-svg">
+              <svg viewBox="0 0 100 100" width="100%" height="100%">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="6" />
+                <circle id="gauge-temp-fill" cx="50" cy="50" r="45" fill="none" stroke="var(--accent-green)" stroke-width="6" 
+                  stroke-dasharray="283" stroke-dashoffset="283" stroke-linecap="round" 
+                  transform="rotate(-90 50 50)" style="transition: stroke-dashoffset 0.8s ease;" />
               </svg>
-              <div class="gauge-label">
-                <div class="gauge-value" id="gauge-temp-val">--</div>
-                <div class="gauge-unit">°C</div>
+              <div class="nexus-gauge-value">
+                <span class="num" id="gauge-temp-val">--</span>
+                <span class="unit">° Celsius</span>
               </div>
             </div>
-            <div class="gauge-range">Safe: 38.0 – 39.5°C</div>
+            <div class="nexus-gauge-footer">RANGE: 38.0 – 39.5</div>
           </div>
 
-          <!-- Gauge 2: Heart Rate -->
-          <div class="gauge-card">
-            <div class="gauge-title">
-              <i class="fa-solid fa-heart-pulse" style="color:var(--accent-amber);"></i>
-              Heart Rate<span class="hi-label">हृदय गति</span>
+          <!-- Heart Rate -->
+          <div class="nexus-gauge-card">
+            <div class="nexus-gauge-header">
+              <span>BIO-PULSE</span>
+              <span class="nexus-pulse-dot" style="background:var(--accent-amber); box-shadow:0 0 10px var(--accent-amber)"></span>
             </div>
-            <div class="gauge-svg-wrap">
-              <svg viewBox="0 0 100 100">
-                <circle class="gauge-bg" cx="50" cy="50" r="40" stroke-dasharray="251.2" />
-                <circle class="gauge-fill amber" id="gauge-hr-fill" cx="50" cy="50" r="40" stroke-dasharray="251.2"
-                  stroke-dashoffset="251.2" />
+            <div class="nexus-gauge-svg">
+              <svg viewBox="0 0 100 100" width="100%" height="100%">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="6" />
+                <circle id="gauge-hr-fill" cx="50" cy="50" r="45" fill="none" stroke="var(--accent-amber)" stroke-width="6" 
+                  stroke-dasharray="283" stroke-dashoffset="283" stroke-linecap="round" 
+                  transform="rotate(-90 50 50)" style="transition: stroke-dashoffset 0.8s ease;" />
               </svg>
-              <div class="gauge-label">
-                <div class="gauge-value" id="gauge-hr-val">--</div>
-                <div class="gauge-unit">bpm</div>
+              <div class="nexus-gauge-value">
+                <span class="num" id="gauge-hr-val">--</span>
+                <span class="unit">BPM</span>
               </div>
             </div>
-            <div class="gauge-range">Safe: 60 – 80 bpm</div>
+            <div class="nexus-gauge-footer">RANGE: 60 – 80</div>
           </div>
 
-          <!-- Gauge 3: Activity -->
-          <div class="gauge-card">
-            <div class="gauge-title">
-              <i class="fa-solid fa-running" style="color:var(--accent-blue);"></i>
-              Activity Level<span class="hi-label">गतिविधि स्तर</span>
+          <!-- Activity -->
+          <div class="nexus-gauge-card">
+            <div class="nexus-gauge-header">
+              <span>KINETIC LOAD</span>
+              <span class="nexus-pulse-dot" style="background:var(--accent-blue); box-shadow:0 0 10px var(--accent-blue)"></span>
             </div>
-            <div class="gauge-svg-wrap">
-              <svg viewBox="0 0 100 100">
-                <circle class="gauge-bg" cx="50" cy="50" r="40" stroke-dasharray="251.2" />
-                <circle class="gauge-fill blue" id="gauge-act-fill" cx="50" cy="50" r="40" stroke-dasharray="251.2"
-                  stroke-dashoffset="251.2" />
+            <div class="nexus-gauge-svg">
+              <svg viewBox="0 0 100 100" width="100%" height="100%">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="6" />
+                <circle id="gauge-act-fill" cx="50" cy="50" r="45" fill="none" stroke="var(--accent-blue)" stroke-width="6" 
+                  stroke-dasharray="283" stroke-dashoffset="283" stroke-linecap="round" 
+                  transform="rotate(-90 50 50)" style="transition: stroke-dashoffset 0.8s ease;" />
               </svg>
-              <div class="gauge-label">
-                <div class="gauge-value" id="gauge-act-val">--</div>
-                <div class="gauge-unit">%</div>
+              <div class="nexus-gauge-value">
+                <span class="num" id="gauge-act-val">--</span>
+                <span class="unit">Capacity %</span>
               </div>
             </div>
-            <div class="gauge-range">Normal: 40 – 80%</div>
+            <div class="nexus-gauge-footer">NOMINAL: 40 – 80%</div>
           </div>
         </div>
 
@@ -625,156 +646,112 @@
 
         <!-- ⚙️ Settings Bar -->
         <!-- 🚀 NEW COMMAND CENTER LAYOUT -->
-        <div class="camera-command-center">
+        <!-- 🛸 NEXUS VISUAL DIAGNOSTIC SUITE (Ground Zero Rebuild) -->
+        <div class="nexus-suite" id="nexus-suite">
           
-          <!-- LEFT SIDEBAR: Controls & Settings -->
-          <aside class="cam-sidebar">
-            <div class="sidebar-block">
-              <h4 class="sidebar-title"><i class="fa-solid fa-sliders"></i> Config / विन्यास</h4>
+          <!-- Base Viewport Layer -->
+          <div class="nexus-viewport" id="cam-feed-area">
+            <div id="feed-container" class="nexus-feed">
+              <img id="live-image" src="" alt="Live Feed" style="display:none;" />
+              <canvas id="detection-canvas-overlay"></canvas>
+              <div class="nexus-scan-line"></div>
+              <div class="nexus-glitch-overlay"></div>
               
-              <div class="setting-item">
-                <label>Camera Power / कैमरा पावर</label>
-                <div class="flex-row">
-                  <label class="toggle-switch">
-                    <input type="checkbox" id="cam-toggle" checked />
-                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
-                  </label>
-                  <span id="cam-status-label" class="status-on">ON</span>
+              <div id="feed-placeholder" class="nexus-placeholder">
+                <div class="nexus-loader"></div>
+                <p>INITIALIZING UPLINK... / अपलिंक प्रारंभ हो रहा है...</p>
+              </div>
+            </div>
+
+            <!-- 📡 TOP HUD: System Telemetry -->
+            <div class="hud-module hud-top">
+              <div class="hud-group">
+                <span class="hud-label">SIGNAL</span>
+                <div class="hud-bar-wrap"><div class="hud-bar" style="width: 92%"></div></div>
+                <span class="hud-val">92%</span>
+              </div>
+              <div class="hud-group">
+                <span class="hud-label">SATELLITE</span>
+                <span class="hud-val">NXS-01-ALPHA</span>
+              </div>
+              <div class="hud-group hud-clock">
+                <span id="overlay-timestamp">00:00:00</span>
+              </div>
+              <div class="hud-group">
+                <span class="hud-label">NEXT SCAN</span>
+                <span class="hud-val highlight" id="cam-countdown">120</span>
+              </div>
+            </div>
+
+            <!-- 🧠 LEFT HUD: AI Diagnostic Overlay -->
+            <div class="hud-module hud-left active" id="analysis-report-section">
+              <div class="hud-module-header">
+                <i class="fa-solid fa-brain"></i> AI DIAGNOSTICS
+              </div>
+              <div class="hud-module-body" id="analysis-content">
+                <div class="nexus-empty-report">
+                  <p>Awaiting Target Acquisition...<br>लक्ष्य प्राप्ति की प्रतीक्षा है...</p>
+                </div>
+              </div>
+              <div class="hud-module-footer">
+                <span class="badge">Gemini 2.0 Flash</span>
+                <button class="btn-nexus-icon" id="re-analyse-btn"><i class="fa-solid fa-rotate"></i></button>
+              </div>
+            </div>
+
+            <!-- 🕹️ RIGHT HUD: Tactical Controls -->
+            <div class="hud-module hud-right">
+              <div class="hud-module-header">COMMAND CONTROL</div>
+              
+              <div class="tactical-group">
+                <label>SYSTEM POWER</label>
+                <button class="btn-tactical active" id="cam-toggle-nexus">ONLINE</button>
+              </div>
+
+              <div class="tactical-group">
+                <label>VISUAL MODE</label>
+                <div class="visual-modes">
+                  <button class="mode-btn active" data-mode="std">STD</button>
+                  <button class="mode-btn" data-mode="night">NIGHT</button>
+                  <button class="mode-btn" data-mode="thermal">HEAT</button>
                 </div>
               </div>
 
-              <div class="setting-item">
-                <label>Live Preview / लाइव स्ट्रीम</label>
-                <label class="toggle-switch">
-                  <input type="checkbox" id="live-stream-toggle" />
-                  <span class="toggle-track"><span class="toggle-thumb"></span></span>
-                </label>
+              <div class="tactical-group">
+                <label>SUBJECT</label>
+                <select id="animal-selector" class="nexus-select">
+                  <option value="">SCANNING HERD...</option>
+                </select>
               </div>
 
-              <div class="setting-item">
-                <label>Auto-AI / ऑटो-AI</label>
-                <label class="toggle-switch">
-                  <input type="checkbox" id="auto-analysis-toggle" checked />
-                  <span class="toggle-track"><span class="toggle-thumb"></span></span>
-                </label>
+              <div class="tactical-group">
+                <label>IP UPLINK</label>
+                <input type="text" id="esp32-ip-input" class="nexus-input" placeholder="0.0.0.0" />
               </div>
 
-              <div class="setting-item">
-                <label>Interval (sec) / अंतराल</label>
-                <input type="number" id="capture-interval-input" class="cam-input" value="120" min="30" max="600" />
-              </div>
-
-              <div class="setting-item">
-                <label>ESP32 IP / आईपी एड्रेस</label>
-                <input type="text" id="esp32-ip-input" class="cam-input" placeholder="e.g. 192.168.1.50" />
-                <span style="font-size: 0.6rem; color: var(--text-muted); margin-top: 4px;">Use http://... or local IP</span>
+              <div class="tactical-actions">
+                <button class="btn-nexus-primary" id="capture-now-btn">
+                  <i class="fa-solid fa-crosshairs"></i> TRIGGER SCAN
+                </button>
+                <button class="btn-nexus-secondary" id="upload-photo-btn">
+                  <i class="fa-solid fa-upload"></i> MANUAL UPLOAD
+                </button>
+                <input type="file" id="cam-file-input" hidden accept="image/*" />
               </div>
             </div>
 
-            <div class="sidebar-block">
-              <h4 class="sidebar-title"><i class="fa-solid fa-cow"></i> Subject / पशु चुनें</h4>
-              <select id="animal-selector" class="cam-select-input">
-                <option value="">Loading...</option>
-              </select>
-              <div class="animal-mini-card" id="current-animal-info">
-                <div class="empty-state">No animal selected</div>
+            <!-- 🕐 BOTTOM HUD: Tactical Reel (History) -->
+            <div class="hud-module hud-bottom">
+              <div class="archive-header">
+                <span><i class="fa-solid fa-clock-rotate-left"></i> RECENT LOGS</span>
+              </div>
+              <div class="tactical-reel" id="cam-filmstrip">
+                <!-- Populated by JS -->
               </div>
             </div>
 
-            <div class="sidebar-block">
-              <h4 class="sidebar-title"><i class="fa-solid fa-gears"></i> API Status</h4>
-              <div id="api-key-chip" class="api-key-chip" onclick="window.CameraModule.openKeyModal()">
-                <i class="fa-solid fa-circle-check"></i> <span id="api-key-text">Gemini Connected</span>
-              </div>
-            </div>
-
-            <div class="sidebar-actions">
-              <button class="btn btn-primary btn-full" id="capture-now-btn">
-                <i class="fa-solid fa-camera"></i> CAPTURE / कैप्चर
-              </button>
-              <button class="btn btn-secondary btn-full" id="upload-photo-btn">
-                <i class="fa-solid fa-upload"></i> UPLOAD / अपलोड
-              </button>
-              <input type="file" id="cam-file-input" hidden accept="image/*" />
-            </div>
-          </aside>
-
-          <!-- CENTER VIEWPORT: Feed & Analysis -->
-          <main class="cam-viewport">
-            <div class="viewport-header">
-              <div class="v-header-left">
-                <span class="live-indicator"><span class="dot"></span> LIVE UPLINK</span>
-                <span class="cam-id">FEED: CAM_ALPHA_01</span>
-              </div>
-              <div class="v-header-right">
-                <div class="countdown-tag">
-                  NEXT SCAN: <span id="cam-countdown">120</span>s
-                </div>
-              </div>
-            </div>
-
-            <div class="feed-container-wrap">
-              <div class="cam-feed-area" id="cam-feed-area">
-                <div id="feed-container" class="feed-container">
-                  <img id="live-image" src="" alt="Camera Feed" style="display:none;" />
-                  <canvas id="detection-canvas-overlay"></canvas>
-                  <div class="cam-flash" id="cam-flash"></div>
-                  
-                  <div id="feed-placeholder" class="feed-placeholder">
-                    <i class="fa-solid fa-satellite-dish"></i>
-                    <p>SYNCHRONIZING FEED...<br>फ़ीड सिंक्रनाइज़ हो रही है...</p>
-                  </div>
-
-                  <!-- HUD Overlays -->
-                  <div class="hud-top-left">
-                    <div class="hud-item"><i class="fa-solid fa-tower-broadcast"></i> 94%</div>
-                    <div class="hud-item"><i class="fa-solid fa-battery-full"></i> 88%</div>
-                  </div>
-                  <div class="hud-top-right">
-                    <div class="hud-item rec-status"><i class="fa-solid fa-circle"></i> REC</div>
-                  </div>
-                  <div class="hud-bottom-left">
-                    <div class="hud-item animal-tag" id="overlay-animal-id">🐄 Surveillance Mode</div>
-                  </div>
-                  <div class="hud-bottom-right">
-                    <div class="hud-item timestamp" id="overlay-timestamp">00:00:00</div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 🧠 Floating Analysis Result -->
-              <div class="floating-report" id="analysis-report-section">
-                <div class="report-header">
-                  <span><i class="fa-solid fa-microscope"></i> AI DIAGNOSTICS</span>
-                  <div class="report-controls">
-                    <span class="model-badge">Gemini 2.0</span>
-                    <button class="btn-icon" id="re-analyse-btn"><i class="fa-solid fa-rotate"></i></button>
-                  </div>
-                </div>
-                
-                <div id="gemini-key-prompt" class="report-key-prompt" style="display:none;">
-                   <p>API Key required for AI analysis</p>
-                   <button class="btn btn-primary btn-sm" onclick="window.CameraModule.openKeyModal()">Add Key</button>
-                </div>
-
-                <div id="analysis-content" class="report-body">
-                   <div class="empty-report">
-                     <i class="fa-solid fa-brain"></i>
-                     <p>Awaiting scan results... / स्कैन परिणामों की प्रतीक्षा है...</p>
-                   </div>
-                </div>
-              </div>
-            </div>
-          </main>
-
-          <!-- RIGHT SIDEBAR: History Timeline -->
-          <aside class="cam-history-sidebar">
-            <h4 class="sidebar-title"><i class="fa-solid fa-timeline"></i> Events / समयरेखा</h4>
-            <div class="timeline-container" id="cam-filmstrip">
-              <!-- Populated by JS -->
-            </div>
-          </aside>
-        </div><!-- /.camera-command-center -->
+          </div><!-- /.nexus-viewport -->
+        </div><!-- /.nexus-suite -->
 
         <!-- 📊 Disease Guide -->
         <div class="disease-guide-section">

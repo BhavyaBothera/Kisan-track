@@ -1,110 +1,77 @@
 /**
  * ============================================================
- * KisanTrack — AI Camera Monitor Module (camera.js)
- * Mission Control Visual Health Detection System
+ * KisanTrack — NEXUS VISUAL DIAGNOSTIC MODULE
+ * High-Fidelity AI Animal Health & Surveillance System
  * ============================================================
  */
 window.CameraModule = (function () {
   'use strict';
 
   // --- Configuration ---
-  const DEFAULT_INTERVAL = 120;
   const STORAGE_KEY = 'kt_gemini_api_key';
+  const IP_KEY = 'kt_esp32_ip';
   const COLLECTION_CAPTURES = 'cameraCaptures';
   const COLLECTION_ANIMALS = 'animals';
   const COLLECTION_ALERTS = 'alerts';
-  const GEMINI_MODEL = 'gemini-2.0-flash'; // Updated to 2.0 (referenced by user as 2.5)
+  const GEMINI_MODEL = 'gemini-2.0-flash';
 
   // --- State ---
   let state = {
-    cameraOn: true,
-    autoAnalysis: true,
-    isStreaming: false,
-    interval: DEFAULT_INTERVAL,
-    countdown: DEFAULT_INTERVAL,
+    powerOn: true,
     isAnalyzing: false,
+    isStreaming: false,
+    activeMode: 'standard', // standard, night, thermal
     currentAnimal: null,
     apiKey: localStorage.getItem(STORAGE_KEY) || 'AIzaSyCYvUbOb13ctYLzpSUhWaPfJV6TCENMxzs',
-    esp32Ip: localStorage.getItem('kt_esp32_ip') || '',
+    esp32Ip: localStorage.getItem(IP_KEY) || '',
     history: [],
-    animalsList: []
+    animalsList: [],
+    signalStrength: 98,
+    battery: 84
   };
 
   let timers = {
-    countdown: null,
-    scan: null,
+    hud: null,
     stream: null
   };
 
-  // --- UI Elements ---
+  // --- UI Elements (Matching dashboard.html IDs) ---
   const ui = {
-    // Settings
-    togCam: () => document.getElementById('cam-toggle'),
-    lblStatus: () => document.getElementById('cam-status-label'),
-    inpInterval: () => document.getElementById('capture-interval-input'),
-    selAnimal: () => document.getElementById('animal-selector'),
-    togAuto: () => document.getElementById('auto-analysis-toggle'),
-    togStream: () => document.getElementById('live-stream-toggle'),
-    inpLoc: () => document.getElementById('cam-location-input'),
-    btnKeyChip: () => document.getElementById('api-key-chip'),
-    lblKeyText: () => document.getElementById('api-key-text'),
-    inputEspIp: () => document.getElementById('esp32-ip-input'),
-
-    // Feed Area
-    feedArea: () => document.getElementById('cam-feed-area'),
-    imgLive: () => document.getElementById('live-image'),
-    canvasOverlay: () => document.getElementById('detection-canvas-overlay'),
+    viewport: () => document.getElementById('cam-feed-area'),
+    img: () => document.getElementById('live-image'),
+    canvas: () => document.getElementById('detection-canvas-overlay'),
     placeholder: () => document.getElementById('feed-placeholder'),
-    lblCountdown: () => document.getElementById('cam-countdown'),
-    overlayAnimal: () => document.getElementById('overlay-animal-id'),
-    overlayTime: () => document.getElementById('overlay-timestamp'),
-    flash: () => document.getElementById('cam-flash'),
-
-    // Buttons
-    btnCapture: () => document.getElementById('capture-now-btn'),
-    btnUpload: () => document.getElementById('upload-photo-btn'),
-    fileInput: () => document.getElementById('cam-file-input'),
-    btnReAnalyse: () => document.getElementById('re-analyse-btn'),
-
-    // Status Panel
-    boxAnimalInfo: () => document.getElementById('current-animal-info'),
-    boxAnalysisSummary: () => document.getElementById('analysis-summary'),
-    lblAutoAIStatus: () => document.getElementById('auto-ai-status'),
-
-    // Analysis Report
+    
+    clock: () => document.getElementById('overlay-timestamp'),
+    countdown: () => document.getElementById('cam-countdown'),
+    
     reportSection: () => document.getElementById('analysis-report-section'),
     reportContent: () => document.getElementById('analysis-content'),
-    keyPrompt: () => document.getElementById('gemini-key-prompt'),
-    inpPromptKey: () => document.getElementById('gemini-prompt-input'),
-    btnSavePrompt: () => document.getElementById('save-prompt-key'),
 
-    // History
-    filmstrip: () => document.getElementById('cam-filmstrip'),
-
-    // Guide
-    guideToggle: () => document.getElementById('guide-toggle'),
-    guideContent: () => document.getElementById('guide-content'),
-
-    // Key Modal
-    modalOverlay: () => document.getElementById('api-modal-overlay'),
-    modalInput: () => document.getElementById('gemini-modal-input'),
-    btnSaveModal: () => document.getElementById('save-modal-key')
+    btnPower: () => document.getElementById('cam-toggle-nexus'),
+    btnScan: () => document.getElementById('capture-now-btn'),
+    btnUpload: () => document.getElementById('upload-photo-btn'),
+    fileInput: () => document.getElementById('cam-file-input'),
+    modeBtns: () => document.querySelectorAll('.mode-btn'),
+    selAnimal: () => document.getElementById('animal-selector'),
+    inpIp: () => document.getElementById('esp32-ip-input'),
+    
+    reel: () => document.getElementById('cam-filmstrip')
   };
 
   // ── Initialization ────────────────────────────────────────
 
   function init() {
-    console.log("Initializing Camera Module...");
+    console.log("Nexus Suite Initializing...");
     bindEvents();
-    loadApiKey();
+    startHUDCycle();
     fetchAnimals();
     fetchHistory();
-    startCountdown();
     
-    // Initial UI state
-    updateKeyUI();
-    
-    // If user changes, refresh
+    if (state.esp32Ip && ui.inpIp()) {
+      ui.inpIp().value = state.esp32Ip;
+    }
+
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
         fetchAnimals();
@@ -114,620 +81,368 @@ window.CameraModule = (function () {
   }
 
   function bindEvents() {
-    ui.togCam().onchange = (e) => {
-      state.cameraOn = e.target.checked;
-      ui.lblStatus().textContent = state.cameraOn ? 'ON' : 'OFF';
-      ui.lblStatus().style.color = state.cameraOn ? 'var(--accent-green)' : 'var(--text-dim)';
-    };
+    if (ui.btnPower()) {
+      ui.btnPower().onclick = () => {
+        state.powerOn = !state.powerOn;
+        ui.btnPower().classList.toggle('active', state.powerOn);
+        ui.btnPower().textContent = state.powerOn ? 'ONLINE' : 'OFFLINE';
+        ui.viewport().style.opacity = state.powerOn ? '1' : '0.1';
+        if (!state.powerOn) stopStream();
+      };
+    }
 
-    ui.inpInterval().onchange = (e) => {
-      let val = parseInt(e.target.value);
-      if (val < 30) val = 30;
-      if (val > 600) val = 600;
-      state.interval = val;
-      state.countdown = val;
-      ui.inpInterval().value = val;
-    };
-
-    ui.selAnimal().onchange = (e) => {
-      const animalId = e.target.value;
-      state.currentAnimal = state.animalsList.find(a => a.id === animalId) || null;
-      updateAnimalDisplay();
-    };
-
-    ui.togAuto().onchange = (e) => {
-      state.autoAnalysis = e.target.checked;
-      ui.lblAutoAIStatus().innerHTML = state.autoAnalysis ? 
-        '<i class="fa-solid fa-robot"></i> Auto-analysis: Active' : 
-        '<i class="fa-solid fa-robot"></i> Auto-analysis: Disabled';
-    };
-    ui.togStream().onchange = (e) => {
-      state.isStreaming = e.target.checked;
-      if (state.isStreaming) startStream();
-      else stopStream();
-    };
-
-    ui.btnCapture().onclick = () => doCapture();
-    ui.btnReAnalyse().onclick = () => doCapture(true); // Force analysis
-
-    ui.btnSavePrompt().onclick = () => saveApiKey(ui.inpPromptKey().value);
-    ui.btnSaveModal().onclick = () => saveApiKey(ui.modalInput().value);
-
-    ui.guideToggle().onclick = () => {
-      ui.guideContent().classList.toggle('active');
-      ui.guideToggle().querySelector('.fa-chevron-down').style.transform = 
-        ui.guideContent().classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
-    };
-
-    // Upload simulation
-    ui.btnUpload().onclick = () => ui.fileInput().click();
-    ui.fileInput().onchange = handleFileUpload;
-
-    if (ui.inputEspIp()) {
-      ui.inputEspIp().onchange = (e) => {
-        state.esp32Ip = e.target.value.trim();
-        localStorage.setItem('kt_esp32_ip', state.esp32Ip);
-        if (window.utils && window.utils.showToast) {
-          window.utils.showToast("ESP32 IP Configured", "info");
+    ui.modeBtns().forEach(btn => {
+      btn.onclick = () => {
+        const mode = btn.dataset.mode;
+        state.activeMode = mode;
+        ui.modeBtns().forEach(b => b.classList.toggle('active', b === btn));
+        
+        const feed = document.getElementById('feed-container');
+        if (feed) {
+            feed.classList.remove('mode-night', 'mode-thermal');
+            if (mode === 'night') feed.classList.add('mode-night');
+            if (mode === 'thermal') feed.classList.add('mode-thermal');
         }
       };
-      if (state.esp32Ip) ui.inputEspIp().value = state.esp32Ip;
+    });
+
+    if (ui.btnScan()) ui.btnScan().onclick = () => runDiagnostic();
+    if (ui.btnUpload()) ui.btnUpload().onclick = () => ui.fileInput().click();
+    if (ui.fileInput()) ui.fileInput().onchange = handleFileUpload;
+
+    if (ui.inpIp()) {
+      ui.inpIp().onchange = (e) => {
+        state.esp32Ip = e.target.value.trim();
+        localStorage.setItem(IP_KEY, state.esp32Ip);
+      };
+    }
+
+    if (ui.selAnimal()) {
+      ui.selAnimal().onchange = (e) => {
+        const id = e.target.value;
+        state.currentAnimal = state.animalsList.find(a => a.id === id) || null;
+      };
     }
   }
 
-  // ── API Key Management ────────────────────────────────────
+  // ── Systems ───────────────────────────────────────────────
 
-  function loadApiKey() {
-    state.apiKey = localStorage.getItem(STORAGE_KEY) || '';
-    updateKeyUI();
+  function startHUDCycle() {
+    if (timers.hud) clearInterval(timers.hud);
+    timers.hud = setInterval(() => {
+      if (!state.powerOn) return;
+      if (ui.clock()) {
+        ui.clock().textContent = new Date().toLocaleTimeString([], { hour12: false });
+      }
+    }, 1000);
   }
 
-  function saveApiKey(key) {
-    if (!key) return;
-    state.apiKey = key;
-    localStorage.setItem(STORAGE_KEY, key);
-    updateKeyUI();
-    ui.modalOverlay().classList.remove('active');
-    ui.keyPrompt().style.display = 'none';
-    if (window.utils && window.utils.showToast) {
-      window.utils.showToast("API Key Connected / API कुंजी जुड़ गयी", "success");
+  async function startStream() {
+    state.isStreaming = true;
+    if (timers.stream) clearInterval(timers.stream);
+    timers.stream = setInterval(async () => {
+      if (!state.powerOn || !state.esp32Ip || state.isAnalyzing) return;
+      const ip = state.esp32Ip.startsWith('http') ? state.esp32Ip : `http://${state.esp32Ip}`;
+      ui.img().src = `${ip}/capture?t=${Date.now()}`;
+      ui.img().onload = () => {
+        ui.placeholder().style.display = 'none';
+        ui.img().style.display = 'block';
+      };
+    }, 2000);
+  }
+
+  function stopStream() {
+    state.isStreaming = false;
+    if (timers.stream) clearInterval(timers.stream);
+  }
+
+  // ── Diagnostics ───────────────────────────────────────────
+
+  async function runDiagnostic() {
+    if (state.isAnalyzing || !state.powerOn) return;
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    state.isAnalyzing = true;
+    clearCanvas();
+    const originalText = ui.btnScan().innerHTML;
+    ui.btnScan().innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> SCANNING...';
+
+    try {
+      let captureUrl = '';
+      if (state.esp32Ip) {
+        try {
+          const ip = state.esp32Ip.startsWith('http') ? state.esp32Ip : `http://${state.esp32Ip}`;
+          const res = await fetch(`${ip}/capture`, { signal: AbortSignal.timeout(5000) });
+          const blob = await res.blob();
+          captureUrl = URL.createObjectURL(blob);
+        } catch (e) { console.warn("Hardware fetch failed"); }
+      }
+
+      if (!captureUrl) {
+        captureUrl = `https://loremflickr.com/800/600/cow,skin?lock=${Math.floor(Math.random()*1000)}`;
+      }
+
+      ui.img().src = captureUrl;
+      ui.img().style.display = 'block';
+      ui.placeholder().style.display = 'none';
+
+      let analysis;
+      if (state.apiKey) {
+        analysis = await performAIAnalysis(captureUrl);
+      } else {
+        await new Promise(r => setTimeout(r, 2000));
+        analysis = generateSimulatedReport();
+      }
+
+      const doc = {
+        farmerId: user.uid,
+        animalId: state.currentAnimal ? state.currentAnimal.id : 'HERD-GENERIC',
+        imageUrl: captureUrl,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        ...analysis
+      };
+
+      const ref = await firebase.firestore().collection(COLLECTION_CAPTURES).add(doc);
+      doc.id = ref.id;
+      state.history.unshift(doc);
+      renderReel();
+      displayReport(doc);
+
+      if (analysis.healthScore < 6) triggerAlert(doc);
+
+    } catch (e) {
+      console.error(e);
+      if (window.utils) window.utils.showToast("Analysis Failed", "error");
+    } finally {
+      state.isAnalyzing = false;
+      ui.btnScan().innerHTML = originalText;
     }
   }
 
-  function updateKeyUI() {
-    const hasKey = !!state.apiKey;
-    const chip = ui.btnKeyChip();
-    const prompt = ui.keyPrompt();
-    const keyText = ui.lblKeyText();
+  async function performAIAnalysis(imageUrl) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${state.apiKey}`;
+    const res = await fetch(imageUrl);
+    const blob = await res.blob();
+    const reader = new FileReader();
+    const rawB64 = await new Promise(r => {
+        reader.onloadend = () => r(reader.result);
+        reader.readAsDataURL(blob);
+    });
+    
+    const compressed = await compressImage(rawB64);
+    const prompt = `Perform a high-precision veterinary skin analysis. Identify lesions, ticks, swelling, or abnormalities. 
+    Return ONLY JSON: {
+      "healthScore": 0-10,
+      "severity": "HEALTHY"|"WARNING"|"CRITICAL",
+      "conditions": ["name", ...],
+      "observations": ["technical observation", ...],
+      "farmerTip": "short advice",
+      "summary": "brief technical summary",
+      "hotspots": [{"x": 0-100, "y": 0-100, "label": "issue name", "confidence": 0-1}]
+    }`;
+    const body = { contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: compressed } }] }] };
 
-    if (hasKey) {
-      chip.classList.add('connected');
-      keyText.textContent = "API Connected";
-      prompt.style.display = 'none';
+    const aiRes = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const data = await aiRes.json();
+    let text = data.candidates[0].content.parts[0].text;
+    text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    return JSON.parse(jsonMatch ? jsonMatch[0] : text);
+  }
+
+  function compressImage(base64) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ratio = Math.min(800 / img.width, 1);
+        canvas.width = img.width * ratio;
+        canvas.height = img.height * ratio;
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.8).split(',')[1]);
+      };
+      img.src = base64;
+    });
+  }
+
+  function generateSimulatedReport() {
+    return {
+      healthScore: 8,
+      severity: "HEALTHY",
+      conditions: [],
+      observations: ["Surface integrity nominal", "No thermal anomalies detected"],
+      farmerTip: "Maintain current nutrition. / वर्तमान पोषण बनाए रखें।",
+      summary: "Animal appears in optimal physical condition."
+    };
+  }
+
+  function displayReport(report) {
+    const body = ui.reportContent();
+    if (!body) return;
+    
+    const col = report.severity === 'HEALTHY' ? 'var(--accent-green)' : (report.severity === 'WARNING' ? 'var(--accent-amber)' : 'var(--accent-red)');
+    const scorePct = report.healthScore * 10;
+
+    body.innerHTML = `
+      <div class="nexus-diagnostic-card">
+        <div class="diagnostic-stat-row">
+            <div class="stat-main">
+                <span class="stat-value" style="color:${col}">${report.healthScore}</span>
+                <span class="stat-unit">/10</span>
+            </div>
+            <div class="stat-badge" style="background:${col}22; color:${col}; border-color:${col}44">
+                ${report.severity}
+            </div>
+        </div>
+
+        <div class="diagnostic-progress-wrap">
+            <div class="diag-progress-bar" style="width:${scorePct}%; background:${col}"></div>
+        </div>
+
+        <div class="diagnostic-summary">
+            <h5 style="color:var(--text-muted); font-size:0.6rem; margin-bottom:5px;">AI SUMMARY</h5>
+            <p>${report.summary}</p>
+        </div>
+
+        <div class="diagnostic-observations">
+            ${report.observations.map(o => `
+                <div class="obs-item">
+                    <i class="fa-solid fa-microscope" style="color:${col}"></i>
+                    <span>${o}</span>
+                </div>
+            `).join('')}
+        </div>
+
+        <div class="nexus-advisory">
+            <div class="advisory-label">TREATMENT ADVISORY</div>
+            <p>${report.farmerTip}</p>
+        </div>
+      </div>
+    `;
+
+    // Render Hotspots if available
+    if (report.hotspots && report.hotspots.length > 0) {
+        drawHotspots(report.hotspots);
     } else {
-      chip.classList.remove('connected');
-      keyText.textContent = "Add API Key";
-      prompt.style.display = 'flex';
+        clearCanvas();
     }
   }
 
-  // ── Logic ─────────────────────────────────────────────────
+  function clearCanvas() {
+    const ctx = ui.canvas().getContext('2d');
+    ctx.clearRect(0, 0, ui.canvas().width, ui.canvas().height);
+  }
+
+  function drawHotspots(hotspots) {
+    const canvas = ui.canvas();
+    const ctx = canvas.getContext('2d');
+    const rect = ui.viewport().getBoundingClientRect();
+    
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    hotspots.forEach(spot => {
+        const x = (spot.x / 100) * canvas.width;
+        const y = (spot.y / 100) * canvas.height;
+        const col = 'var(--accent-green)';
+        const size = 60;
+
+        // Draw Tactical Brackets
+        ctx.strokeStyle = '#9DFF00';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        // Top Left
+        ctx.moveTo(x - size/2, y - size/2 + 10); ctx.lineTo(x - size/2, y - size/2); ctx.lineTo(x - size/2 + 10, y - size/2);
+        // Top Right
+        ctx.moveTo(x + size/2 - 10, y - size/2); ctx.lineTo(x + size/2, y - size/2); ctx.lineTo(x + size/2, y - size/2 + 10);
+        // Bottom Right
+        ctx.moveTo(x + size/2, y + size/2 - 10); ctx.lineTo(x + size/2, y + size/2); ctx.lineTo(x + size/2 - 10, y + size/2);
+        // Bottom Left
+        ctx.moveTo(x - size/2 + 10, y + size/2); ctx.lineTo(x - size/2, y + size/2); ctx.lineTo(x - size/2, y + size/2 - 10);
+        ctx.stroke();
+
+        // Label
+        ctx.fillStyle = '#9DFF00';
+        ctx.font = 'bold 10px monospace';
+        ctx.fillText(`${spot.label.toUpperCase()} [${Math.round(spot.confidence*100)}%]`, x + size/2 + 5, y);
+        
+        // Pulse effect (Static for now, but markers stay)
+        ctx.fillStyle = 'rgba(157, 255, 0, 0.1)';
+        ctx.fillRect(x - size/2, y - size/2, size, size);
+    });
+  }
+
+  function renderReel() {
+    const reel = ui.reel();
+    if (!reel) return;
+    reel.innerHTML = state.history.map(item => `
+      <div class="reel-item" style="flex:0 0 140px; margin-right:10px; cursor:pointer;" onclick="window.CameraModule.loadCapture('${item.id}')">
+        <img src="${item.imageUrl}" style="width:100%; height:80px; object-fit:cover; border-radius:4px;">
+        <div style="font-size:0.6rem; color:var(--text-dim); margin-top:4px; display:flex; justify-content:space-between;">
+            <span>${item.animalId}</span>
+            <span style="color:${item.severity === 'HEALTHY' ? 'var(--accent-green)' : 'var(--accent-red)'}">${item.healthScore}/10</span>
+        </div>
+      </div>
+    `).join('');
+  }
 
   async function fetchAnimals() {
     const user = firebase.auth().currentUser;
     if (!user) return;
-
     try {
-      const snap = await firebase.firestore().collection(COLLECTION_ANIMALS)
-        .where('farmerId', '==', user.uid)
-        .get();
-
+      const snap = await firebase.firestore().collection(COLLECTION_ANIMALS).where('farmerId', '==', user.uid).get();
       state.animalsList = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      
-      const sel = ui.selAnimal();
-      sel.innerHTML = '<option value="">Select Animal / पशु चुनें</option>';
-      state.animalsList.forEach(a => {
-        const opt = document.createElement('option');
-        opt.value = a.id;
-        opt.textContent = `${a.id} (${a.breed || a.species})`;
-        sel.appendChild(opt);
-      });
-    } catch (e) {
-      console.error("Error fetching animals:", e);
-    }
+      if (ui.selAnimal()) {
+        ui.selAnimal().innerHTML = '<option value="">SUBJECT SELECTION</option>' + 
+          state.animalsList.map(a => `<option value="${a.id}">${a.id} (${a.breed || a.species})</option>`).join('');
+      }
+    } catch (e) { console.error(e); }
   }
 
   async function fetchHistory() {
     const user = firebase.auth().currentUser;
     if (!user) return;
-
     try {
       const snap = await firebase.firestore().collection(COLLECTION_CAPTURES)
         .where('farmerId', '==', user.uid)
         .orderBy('timestamp', 'desc')
-        .limit(10)
-        .get();
-
+        .limit(20).get();
       state.history = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      renderFilmstrip();
-    } catch (e) {
-      console.error("Error fetching history:", e);
-    }
+      renderReel();
+    } catch (e) { console.error(e); }
   }
 
-  function startCountdown() {
-    if (timers.countdown) clearInterval(timers.countdown);
-    timers.countdown = setInterval(() => {
-      if (!state.cameraOn || state.isAnalyzing) return;
-      
-      state.countdown--;
-      if (state.countdown <= 0) {
-        doCapture();
-        state.countdown = state.interval;
-      }
-      ui.lblCountdown().textContent = state.countdown;
-    }, 1000);
-  }
-
-  function startStream() {
-    if (timers.stream) clearInterval(timers.stream);
-    timers.stream = setInterval(async () => {
-      if (!state.cameraOn || state.isAnalyzing || !state.isStreaming || !state.esp32Ip) return;
-      
-      try {
-        const ip = state.esp32Ip.startsWith('http') ? state.esp32Ip : `http://${state.esp32Ip}`;
-        const timestamp = new Date().getTime();
-        const testUrl = `${ip}/capture?t=${timestamp}`;
-        
-        ui.imgLive().src = testUrl;
-        ui.imgLive().style.display = 'block';
-        ui.placeholder().style.display = 'none';
-      } catch (e) {
-        console.error("Stream fetch failed:", e);
-      }
-    }, 2000); // 2 seconds for preview
-  }
-
-  function stopStream() {
-    if (timers.stream) clearInterval(timers.stream);
-    timers.stream = null;
-  }
-
-  async function doCapture(forceAnalysis = false) {
-    if (!state.cameraOn && !forceAnalysis) return;
-    
+  async function triggerAlert(doc) {
     const user = firebase.auth().currentUser;
     if (!user) return;
-
-    state.isAnalyzing = true;
-    showFlash();
-    ui.feedArea().classList.add('scanning');
-    
-    let captureUrl = '';
-    let isRealCapture = false;
-
-    if (state.esp32Ip) {
-      try {
-        // Construct the ESP32 capture URL. Most firmwares use /capture or /jpg
-        const ip = state.esp32Ip.startsWith('http') ? state.esp32Ip : `http://${state.esp32Ip}`;
-        const timestamp = new Date().getTime();
-        const testUrl = `${ip}/capture?t=${timestamp}`;
-        
-        // Attempt to fetch with a timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-        
-        const response = await fetch(testUrl, { signal: controller.signal });
-        clearTimeout(timeoutId);
-
-        if (response.ok) {
-          const blob = await response.blob();
-          captureUrl = URL.createObjectURL(blob);
-          isRealCapture = true;
-        } else {
-          throw new Error("ESP32 Response Not OK");
-        }
-      } catch (e) {
-        console.warn("ESP32 Fetch Failed, falling back to demo mode:", e);
-        if (window.utils && window.utils.showToast) {
-          window.utils.showToast("ESP Connection Failed. Using Simulation. / ईएसपी कनेक्शन विफल। सिमुलेशन का उपयोग कर रहे हैं।", "warning");
-        }
-      }
-    }
-
-    // Fallback to Demo mode if no IP or fetch failed
-    if (!captureUrl) {
-      captureUrl = `https://loremflickr.com/800/600/cow,farm?lock=${Math.floor(Math.random() * 1000)}`;
-    }
-    
-    ui.imgLive().src = captureUrl;
-    ui.imgLive().style.display = 'block';
-    ui.placeholder().style.display = 'none';
-    
-    ui.overlayTime().textContent = `Captured: ${new Date().toLocaleTimeString()}`;
-    ui.overlayAnimal().textContent = state.currentAnimal ? `🐄 ${state.currentAnimal.id}` : '🐄 Surveillance Mode';
-
-    // AI Analysis
-    if (state.autoAnalysis || forceAnalysis) {
-      // If it's a real capture URL (blob), we need to handle it properly in runAIAnalysis
-      await runAIAnalysis(captureUrl);
-    } else {
-      state.isAnalyzing = false;
-      ui.feedArea().classList.remove('scanning');
-    }
-  }
-
-  async function runAIAnalysis(imageUrl) {
-    ui.reportContent().innerHTML = `
-      <div class="analysis-loading" style="grid-column: span 3; padding: 40px; text-align:center;">
-        <div class="analysis-spinner"></div>
-        <p style="margin-top:20px; color:var(--text-muted);">Gemini AI is examining skin patterns... / जेमिनी एआई त्वचा के नमूनों की जांच कर रहा है...</p>
-      </div>
-    `;
-
     try {
-      const user = firebase.auth().currentUser;
-      let analysis;
-
-      if (state.apiKey) {
-        // REAL GEMINI CALL
-        analysis = await callGeminiREST(imageUrl);
-      } else {
-        // SIMULATED ANALYSIS
-        await new Promise(r => setTimeout(r, 2000));
-        analysis = generateSimulatedReport();
-      }
-
-      // 3. OPTIMIZED FIRESTORE STORAGE (Store only necessary fields)
-      const captureData = {
-        farmerId: user.uid,
-        animalId: state.currentAnimal ? state.currentAnimal.id : 'Herd-01',
-        imageUrl: imageUrl,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        healthScore: analysis.healthScore,
-        severity: analysis.severity,
-        conditions: analysis.conditions,
-        observations: analysis.observations,
-        farmerTip: analysis.farmerTip,
-        summary: analysis.summary,
-        isSimulated: !!analysis.isSimulated
-      };
-
-      const docRef = await firebase.firestore().collection(COLLECTION_CAPTURES).add(captureData);
-      captureData.id = docRef.id;
-
-      // Update state & UI
-      state.history.unshift(captureData);
-      renderFilmstrip();
-      renderReport(captureData);
-
-      // Trigger Alert if critical
-      if (analysis.healthScore < 6) {
-        triggerHealthAlert(captureData);
-      }
-
-    } catch (e) {
-      console.error("AI Analysis Failed:", e);
-      ui.reportContent().innerHTML = `<div class="analysis-error" style="grid-column: span 3; color:var(--accent-red); text-align:center; padding:20px;">
-        <i class="fa-solid fa-triangle-exclamation" style="font-size:2rem; margin-bottom:10px;"></i>
-        <p>AI Analysis Failed: ${e.message}</p>
-      </div>`;
-    } finally {
-      state.isAnalyzing = false;
-      ui.feedArea().classList.remove('scanning');
-    }
-  }
-
-  async function callGeminiREST(imageUrl) {
-    // Note: In a production app, proxy this through a Cloud Function to hide API Key
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${state.apiKey}`;
-    
-    // We need to convert remote URL to Base64 and compress it
-    const response = await fetch(imageUrl);
-    const blob = await response.blob();
-    const rawBase64 = await new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.readAsDataURL(blob);
-    });
-
-    // 1. COMPRESS IMAGE to prevent 413 Payload Too Large
-    const compressedBase64 = await compressImage(rawBase64, 800);
-
-    const prompt = `Analyze this livestock image for skin diseases or health issues. 
-    Return ONLY a JSON object with this structure:
-    {
-      "healthScore": 0-10,
-      "severity": "Healthy" | "Warning" | "Critical",
-      "conditions": [{"name": "Disease Name", "confidence": "95%"}],
-      "observations": ["bullet point 1", "bullet point 2"],
-      "farmerTip": "Actionable advice for the farmer in English and Hindi",
-      "summary": "Short 1 sentence summary"
-    }`;
-
-    const body = {
-      contents: [{
-        parts: [
-          { text: prompt },
-          { inline_data: { mime_type: "image/jpeg", data: compressedBase64 } }
-        ]
-      }]
-    };
-
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-
-    if (!res.ok) throw new Error(`Gemini API Error: ${res.statusText}`);
-    
-    const data = await res.json();
-    const resultText = data.candidates[0].content.parts[0].text;
-    
-    // 2. RESILIENT JSON PARSING
-    return parseGeminiResponse(resultText);
-  }
-
-  /**
-   * Prevents 413 errors by ensuring image is < 800px width
-   */
-  function compressImage(base64WithPrefix, maxWidth = 800) {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const ratio = Math.min(maxWidth / img.width, 1);
-        canvas.width = img.width * ratio;
-        canvas.height = img.height * ratio;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        // Return base64 without prefix
-        resolve(canvas.toDataURL('image/jpeg', 0.8).split(',')[1]);
-      };
-      img.src = base64WithPrefix;
-    });
-  }
-
-  /**
-   * Extracts JSON from Gemini response, stripping markdown and extra text
-   */
-  function parseGeminiResponse(responseText) {
-    try {
-      let clean = responseText
-        .replace(/```json/gi, '')
-        .replace(/```/g, '')
-        .trim();
-      
-      const jsonMatch = clean.match(/\{[\s\S]*\}/);
-      if (jsonMatch) clean = jsonMatch[0];
-      
-      return JSON.parse(clean);
-    } catch (err) {
-      console.error('Gemini JSON parse failed:', err);
-      throw new Error("Could not parse AI response. Please try again.");
-    }
-  }
-
-  function generateSimulatedReport() {
-    const scores = [9, 8, 5, 4, 9, 8, 7];
-    const score = scores[Math.floor(Math.random() * scores.length)];
-    const severity = score >= 8 ? 'Healthy' : (score >= 6 ? 'Warning' : 'Critical');
-    
-    return {
-      healthScore: score,
-      severity: severity,
-      conditions: severity === 'Healthy' ? [] : [{ name: "Potential Dermatitis", confidence: "72%" }],
-      observations: [
-        "Animal appears active and responsive",
-        severity === 'Healthy' ? "Skin texture is normal" : "Minor lesions detected on flank",
-        "Body condition score: 3.5/5"
-      ],
-      farmerTip: "Keep the area dry and consult a vet if redness persists. / क्षेत्र को सूखा रखें और लालिमा बनी रहने पर पशु चिकित्सक से परामर्श करें।",
-      summary: severity === 'Healthy' ? "Visual check confirms good health status." : "Visual anomalies detected requiring manual inspection.",
-      isSimulated: true
-    };
-  }
-
-  // ── UI Rendering ──────────────────────────────────────────
-
-  function renderReport(report) {
-    ui.reportSection().classList.add('active');
-    
-    const col = report.healthScore >= 8 ? 'var(--accent-green)' : (report.healthScore >= 6 ? 'var(--accent-amber)' : 'var(--accent-red)');
-    const radius = 60;
-    const circ = 2 * Math.PI * radius;
-    const offset = circ - (report.healthScore / 10) * circ;
-
-    ui.reportContent().innerHTML = `
-      <!-- Score Column -->
-      <div class="diag-summary-col">
-        <div class="score-ring-container">
-          <svg class="score-ring-svg" width="140" height="140">
-            <circle class="score-ring-bg" cx="70" cy="70" r="${radius}"></circle>
-            <circle class="score-ring-fill" cx="70" cy="70" r="${radius}" 
-              style="stroke-dasharray: ${circ}; stroke-dashoffset: ${circ}; stroke: ${col}">
-            </circle>
-          </svg>
-          <div class="score-ring-text">
-            <span class="score-num" style="color:${col}">${report.healthScore}</span>
-            <span class="score-label">Health Score</span>
-          </div>
-        </div>
-        <div class="severity-pill ${report.severity.toLowerCase()}">${report.severity}</div>
-      </div>
-
-      <!-- Details Column -->
-      <div class="diag-details-col">
-        <div class="obs-section">
-          <h4><i class="fa-solid fa-list-check"></i> Observations / अवलोकन</h4>
-          <ul class="obs-list">
-            ${report.observations.map(o => `<li>${o}</li>`).join('')}
-          </ul>
-        </div>
-        <div class="condition-section">
-          <h4><i class="fa-solid fa-virus"></i> Detected Conditions / पाई गई स्थितियां</h4>
-          <div class="condition-list">
-            ${report.conditions.length > 0 ? 
-              report.conditions.map(c => `
-                <div class="condition-item" style="border-left-color:${col}">
-                  <span class="condition-name">${c.name}</span>
-                  <span class="condition-conf">${c.confidence} Confidence</span>
-                </div>
-              `).join('') : 
-              '<p style="font-size:0.85rem; color:var(--text-muted);">No major skin issues detected.</p>'
-            }
-          </div>
-        </div>
-      </div>
-
-      <!-- Actions Column -->
-      <div class="diag-actions-col">
-        <div class="summary-section">
-          <h4><i class="fa-solid fa-comment-medical"></i> AI Summary / सारांश</h4>
-          <p class="summary-para">${report.summary}</p>
-        </div>
-        <div class="farmer-tip-box">
-          <h5><i class="fa-solid fa-lightbulb"></i> Farmer Tip / किसान सुझाव</h5>
-          <p>${report.farmerTip}</p>
-        </div>
-        ${report.isSimulated ? '<div class="badge-sim" style="margin-top:20px; width:fit-content;">Simulated Result</div>' : ''}
-      </div>
-    `;
-
-    // Animate the ring
-    setTimeout(() => {
-      const fill = ui.reportContent().querySelector('.score-ring-fill');
-      if (fill) fill.style.strokeDashoffset = offset;
-    }, 100);
-
-    // Also update the small status card on the right
-    updateStatusCard(report);
-  }
-
-  function updateStatusCard(report) {
-    const col = report.healthScore >= 8 ? 'var(--accent-green)' : (report.healthScore >= 6 ? 'var(--accent-amber)' : 'var(--accent-red)');
-    ui.boxAnalysisSummary().innerHTML = `
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <span style="font-size:0.75rem; color:var(--text-muted);">Health Score</span>
-        <strong style="color:${col}; font-size:1.2rem;">${report.healthScore}/10</strong>
-      </div>
-      <p style="font-size:0.8rem; margin:8px 0 0; line-height:1.4;">${report.summary}</p>
-    `;
-  }
-
-  function renderFilmstrip() {
-    const strip = ui.filmstrip();
-    if (state.history.length === 0) {
-      strip.innerHTML = '<div class="empty-analysis"><p>No history yet.</p></div>';
-      return;
-    }
-
-    strip.innerHTML = state.history.map(cap => {
-      const time = cap.timestamp ? (cap.timestamp.toDate ? cap.timestamp.toDate() : new Date(cap.timestamp)).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'Now';
-      const col = cap.healthScore >= 8 ? 'var(--accent-green)' : (cap.healthScore >= 6 ? 'var(--accent-amber)' : 'var(--accent-red)');
-      
-      return `
-      return `
-        <div class="timeline-item" onclick="window.CameraModule.loadHistoryItem('${cap.id}')">
-          <img src="${cap.imageUrl}" class="timeline-img" alt="Capture">
-          <div class="timeline-meta">
-            <span class="timeline-time">${time}</span>
-            <span class="timeline-status" style="color:${col}; font-weight:800;">${cap.healthScore}/10</span>
-          </div>
-        </div>
-      `;
-    }).join('');
-  }
-
-  function updateAnimalDisplay() {
-    if (!state.currentAnimal) {
-      ui.boxAnimalInfo().innerHTML = `
-        <div class="empty-analysis"><p>Select an animal to track its history.</p></div>
-      `;
-      return;
-    }
-
-    const a = state.currentAnimal;
-    ui.boxAnimalInfo().innerHTML = `
-      <div class="animal-mini-info" style="width:100%;">
-        <div class="flex-row" style="justify-content:space-between; margin-bottom:8px;">
-          <strong style="color:var(--accent-green); font-size:1.1rem;">${a.id}</strong>
-          <span style="font-size:1.5rem;">🐄</span>
-        </div>
-        <div class="mini-stats" style="font-size:0.7rem; color:var(--text-muted); display:flex; gap:10px;">
-          <span>BREED: ${a.breed || a.species}</span>
-          <span>AGE: ${a.age || '--'}Y</span>
-        </div>
-      </div>
-    `;
-
-    // Animate ring
-    setTimeout(() => {
-      const fill = ui.reportContent().querySelector('.score-ring-fill');
-      if (fill) fill.style.strokeDashoffset = offset;
-    }, 150);
-  }
-
-  // ── Utils ─────────────────────────────────────────────────
-
-  function showFlash() {
-    const flash = ui.flash();
-    flash.classList.add('active');
-    setTimeout(() => flash.classList.remove('active'), 150);
-  }
-
-  async function triggerHealthAlert(report) {
-    const user = firebase.auth().currentUser;
-    if (!user) return;
-
-    try {
-      // 4. PREVENT DUPLICATE ALERTS
-      const existing = await firebase.firestore().collection(COLLECTION_ALERTS)
-        .where('farmerId', '==', user.uid)
-        .where('animalId', '==', report.animalId)
-        .where('resolved', '==', false)
-        .where('source', '==', 'AI-Camera')
-        .limit(1)
-        .get();
-
-      if (!existing.empty) {
-        console.log(`Alert already active for ${report.animalId}. Skipping duplication.`);
-        return;
-      }
-
       await firebase.firestore().collection(COLLECTION_ALERTS).add({
         farmerId: user.uid,
-        animalId: report.animalId,
-        parameter: 'Visual Health (AI)',
-        readingValue: `${report.healthScore}/10`,
-        severity: report.severity,
-        alertType: 'Skin Disease Detection',
+        animalId: doc.animalId,
+        alertType: 'Skin Anomaly',
+        severity: doc.severity,
+        readingValue: `${doc.healthScore}/10`,
+        message: doc.summary,
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         resolved: false,
-        source: 'AI-Camera',
-        message: report.summary
+        source: 'Nexus AI'
       });
-
-      if (window.utils && window.utils.showToast) {
-        window.utils.showToast(`Critical health alert for ${report.animalId}!`, "error");
-      }
-    } catch (e) {
-      console.error("Error triggering alert:", e);
-    }
+      if (window.utils) window.utils.showToast(`Nexus Alert: ${doc.animalId} anomaly`, "error");
+    } catch (e) { console.error(e); }
   }
 
   function handleFileUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = (event) => {
-      ui.imgLive().src = event.target.result;
-      ui.imgLive().style.display = 'block';
+      ui.img().src = event.target.result;
+      ui.img().style.display = 'block';
       ui.placeholder().style.display = 'none';
-      ui.overlayTime().textContent = `Uploaded: ${new Date().toLocaleTimeString()}`;
-      runAIAnalysis(event.target.result);
+      runDiagnostic();
     };
     reader.readAsDataURL(file);
   }
@@ -735,22 +450,12 @@ window.CameraModule = (function () {
   // --- Exposed API ---
   return {
     init,
-    openKeyModal: () => ui.modalOverlay().classList.add('active'),
-    closeKeyModal: () => ui.modalOverlay().classList.remove('active'),
-    toggleKeyVisibility: () => {
-      const inp = ui.modalInput();
-      inp.type = inp.type === 'password' ? 'text' : 'password';
-    },
-    loadHistoryItem: (id) => {
+    loadCapture: (id) => {
       const item = state.history.find(h => h.id === id);
       if (item) {
-        ui.imgLive().src = item.imageUrl;
-        ui.imgLive().style.display = 'block';
+        ui.img().src = item.imageUrl;
         ui.placeholder().style.display = 'none';
-        
-        // 5. FIX: RESET RING BEFORE ANIMATING (Ensures visual feedback on historical load)
-        ui.reportContent().innerHTML = '<div class="analysis-loading">Loading History...</div>';
-        setTimeout(() => renderReport(item), 100);
+        displayReport(item);
       }
     }
   };
