@@ -19,18 +19,21 @@ window.CameraModule = (function () {
   let state = {
     cameraOn: true,
     autoAnalysis: true,
+    isStreaming: false,
     interval: DEFAULT_INTERVAL,
     countdown: DEFAULT_INTERVAL,
     isAnalyzing: false,
     currentAnimal: null,
     apiKey: localStorage.getItem(STORAGE_KEY) || 'AIzaSyCYvUbOb13ctYLzpSUhWaPfJV6TCENMxzs',
+    esp32Ip: localStorage.getItem('kt_esp32_ip') || '',
     history: [],
     animalsList: []
   };
 
   let timers = {
     countdown: null,
-    scan: null
+    scan: null,
+    stream: null
   };
 
   // --- UI Elements ---
@@ -41,9 +44,11 @@ window.CameraModule = (function () {
     inpInterval: () => document.getElementById('capture-interval-input'),
     selAnimal: () => document.getElementById('animal-selector'),
     togAuto: () => document.getElementById('auto-analysis-toggle'),
+    togStream: () => document.getElementById('live-stream-toggle'),
     inpLoc: () => document.getElementById('cam-location-input'),
     btnKeyChip: () => document.getElementById('api-key-chip'),
     lblKeyText: () => document.getElementById('api-key-text'),
+    inputEspIp: () => document.getElementById('esp32-ip-input'),
 
     // Feed Area
     feedArea: () => document.getElementById('cam-feed-area'),
@@ -136,6 +141,11 @@ window.CameraModule = (function () {
         '<i class="fa-solid fa-robot"></i> Auto-analysis: Active' : 
         '<i class="fa-solid fa-robot"></i> Auto-analysis: Disabled';
     };
+    ui.togStream().onchange = (e) => {
+      state.isStreaming = e.target.checked;
+      if (state.isStreaming) startStream();
+      else stopStream();
+    };
 
     ui.btnCapture().onclick = () => doCapture();
     ui.btnReAnalyse().onclick = () => doCapture(true); // Force analysis
@@ -152,6 +162,17 @@ window.CameraModule = (function () {
     // Upload simulation
     ui.btnUpload().onclick = () => ui.fileInput().click();
     ui.fileInput().onchange = handleFileUpload;
+
+    if (ui.inputEspIp()) {
+      ui.inputEspIp().onchange = (e) => {
+        state.esp32Ip = e.target.value.trim();
+        localStorage.setItem('kt_esp32_ip', state.esp32Ip);
+        if (window.utils && window.utils.showToast) {
+          window.utils.showToast("ESP32 IP Configured", "info");
+        }
+      };
+      if (state.esp32Ip) ui.inputEspIp().value = state.esp32Ip;
+    }
   }
 
   // ── API Key Management ────────────────────────────────────
@@ -248,6 +269,30 @@ window.CameraModule = (function () {
     }, 1000);
   }
 
+  function startStream() {
+    if (timers.stream) clearInterval(timers.stream);
+    timers.stream = setInterval(async () => {
+      if (!state.cameraOn || state.isAnalyzing || !state.isStreaming || !state.esp32Ip) return;
+      
+      try {
+        const ip = state.esp32Ip.startsWith('http') ? state.esp32Ip : `http://${state.esp32Ip}`;
+        const timestamp = new Date().getTime();
+        const testUrl = `${ip}/capture?t=${timestamp}`;
+        
+        ui.imgLive().src = testUrl;
+        ui.imgLive().style.display = 'block';
+        ui.placeholder().style.display = 'none';
+      } catch (e) {
+        console.error("Stream fetch failed:", e);
+      }
+    }, 2000); // 2 seconds for preview
+  }
+
+  function stopStream() {
+    if (timers.stream) clearInterval(timers.stream);
+    timers.stream = null;
+  }
+
   async function doCapture(forceAnalysis = false) {
     if (!state.cameraOn && !forceAnalysis) return;
     
@@ -258,11 +303,44 @@ window.CameraModule = (function () {
     showFlash();
     ui.feedArea().classList.add('scanning');
     
-    // Simulate getting image from ESP32-CAM (Demo mode)
-    // In real app, this would be a fetch to ESP32 local IP or a Cloud Function
-    const demoImg = `https://loremflickr.com/800/600/cow,farm?lock=${Math.floor(Math.random() * 1000)}`;
+    let captureUrl = '';
+    let isRealCapture = false;
+
+    if (state.esp32Ip) {
+      try {
+        // Construct the ESP32 capture URL. Most firmwares use /capture or /jpg
+        const ip = state.esp32Ip.startsWith('http') ? state.esp32Ip : `http://${state.esp32Ip}`;
+        const timestamp = new Date().getTime();
+        const testUrl = `${ip}/capture?t=${timestamp}`;
+        
+        // Attempt to fetch with a timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
+        const response = await fetch(testUrl, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          const blob = await response.blob();
+          captureUrl = URL.createObjectURL(blob);
+          isRealCapture = true;
+        } else {
+          throw new Error("ESP32 Response Not OK");
+        }
+      } catch (e) {
+        console.warn("ESP32 Fetch Failed, falling back to demo mode:", e);
+        if (window.utils && window.utils.showToast) {
+          window.utils.showToast("ESP Connection Failed. Using Simulation. / ईएसपी कनेक्शन विफल। सिमुलेशन का उपयोग कर रहे हैं।", "warning");
+        }
+      }
+    }
+
+    // Fallback to Demo mode if no IP or fetch failed
+    if (!captureUrl) {
+      captureUrl = `https://loremflickr.com/800/600/cow,farm?lock=${Math.floor(Math.random() * 1000)}`;
+    }
     
-    ui.imgLive().src = demoImg;
+    ui.imgLive().src = captureUrl;
     ui.imgLive().style.display = 'block';
     ui.placeholder().style.display = 'none';
     
@@ -271,7 +349,8 @@ window.CameraModule = (function () {
 
     // AI Analysis
     if (state.autoAnalysis || forceAnalysis) {
-      await runAIAnalysis(demoImg);
+      // If it's a real capture URL (blob), we need to handle it properly in runAIAnalysis
+      await runAIAnalysis(captureUrl);
     } else {
       state.isAnalyzing = false;
       ui.feedArea().classList.remove('scanning');

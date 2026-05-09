@@ -644,6 +644,14 @@
               </div>
 
               <div class="setting-item">
+                <label>Live Preview / लाइव स्ट्रीम</label>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="live-stream-toggle" />
+                  <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                </label>
+              </div>
+
+              <div class="setting-item">
                 <label>Auto-AI / ऑटो-AI</label>
                 <label class="toggle-switch">
                   <input type="checkbox" id="auto-analysis-toggle" checked />
@@ -654,6 +662,12 @@
               <div class="setting-item">
                 <label>Interval (sec) / अंतराल</label>
                 <input type="number" id="capture-interval-input" class="cam-input" value="120" min="30" max="600" />
+              </div>
+
+              <div class="setting-item">
+                <label>ESP32 IP / आईपी एड्रेस</label>
+                <input type="text" id="esp32-ip-input" class="cam-input" placeholder="e.g. 192.168.1.50" />
+                <span style="font-size: 0.6rem; color: var(--text-muted); margin-top: 4px;">Use http://... or local IP</span>
               </div>
             </div>
 
