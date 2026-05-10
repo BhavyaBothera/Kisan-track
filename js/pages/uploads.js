@@ -10,7 +10,7 @@ var UploadsModule = (function () {
   let dropzone, fileInput, browseBtn, filePreview,
       fileNameDisplay, fileSizeDisplay, processBtn,
       uploadProgress, progressBar, progressLabel, progressPct,
-      uploadResult;
+      uploadResult, updateSystemBtn, restartBtn, finalSuccess;
 
   let selectedFile = null;
 
@@ -112,6 +112,12 @@ var UploadsModule = (function () {
     document.getElementById('res-anomalies').textContent = data.anomalies.length;
     document.getElementById('res-animals').textContent = new Set(data.anomalies.map(a => a.id)).size;
 
+    const label = document.getElementById('update-target-label');
+    if (label) {
+        const categoryMap = { 'vitals': 'Vitals', 'inventory': 'Inventory', 'veterinary': 'Vet Logs', 'herd': 'Herd' };
+        label.textContent = categoryMap[data.category] || 'System';
+    }
+
     const tbody = document.getElementById('anomaly-table-body');
     if (tbody) {
         tbody.innerHTML = data.anomalies.map(a => `
@@ -149,6 +155,9 @@ var UploadsModule = (function () {
     progressLabel     = document.getElementById('progress-label-text');
     progressPct       = document.getElementById('progress-pct');
     uploadResult      = document.getElementById('upload-result');
+    updateSystemBtn   = document.getElementById('update-system-btn');
+    restartBtn        = document.getElementById('restart-btn');
+    finalSuccess      = document.getElementById('final-success');
 
     if (dropzone) {
       dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag-over'); });
@@ -167,6 +176,29 @@ var UploadsModule = (function () {
       if (fileInput.files[0]) handleFileSelect(fileInput.files[0]);
     });
     if (processBtn) processBtn.addEventListener('click', processFile);
+
+    if (updateSystemBtn) updateSystemBtn.addEventListener('click', updateSystem);
+    if (restartBtn) restartBtn.addEventListener('click', () => location.reload());
+  }
+
+  function updateSystem() {
+    const category = document.getElementById('upload-category').value;
+    const targetName = document.getElementById('final-target-name');
+    
+    if (targetName) {
+        const categoryMap = { 
+            'vitals': 'Live Vitals Monitoring', 
+            'inventory': 'Inventory & Feed Management', 
+            'veterinary': 'Veterinary Health Logs', 
+            'herd': 'Herd Profile' 
+        };
+        targetName.textContent = categoryMap[category] || 'Database';
+    }
+
+    if (uploadResult) uploadResult.style.display = 'none';
+    if (finalSuccess) finalSuccess.style.display = 'block';
+    
+    if (window.showToast) window.showToast('✓ Records merged into database successfully', 'success');
   }
 
   return { init };

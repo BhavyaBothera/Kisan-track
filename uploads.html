@@ -276,6 +276,28 @@
                 </tbody>
               </table>
             </div>
+
+            <!-- New Update Action -->
+            <div class="result-actions" style="margin-top: 24px; text-align: right; border-top: 1px solid var(--border); padding-top: 20px;">
+              <button class="btn btn-secondary" id="restart-btn" style="margin-right: 10px;">
+                <i class="fa-solid fa-rotate-left"></i> Start Over
+              </button>
+              <button class="btn btn-primary" id="update-system-btn">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Update <span id="update-target-label">System</span> / डेटा अपडेट करें
+              </button>
+            </div>
+          </div>
+
+          <!-- Final Success State -->
+          <div class="final-success" id="final-success" style="display:none; text-align:center; padding:40px; animation: fadeIn 0.5s ease-out;">
+            <div style="font-size:4rem; color:var(--accent-green); margin-bottom:20px;">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <h2 style="font-family:var(--font-heading); color:var(--text-primary); margin-bottom:10px;">Database Updated Successfully!</h2>
+            <p style="color:var(--text-muted); margin-bottom:30px;">Your records have been merged into the <span id="final-target-name" style="color:var(--accent-green); font-weight:700;">Inventory</span> module.</p>
+            <button class="btn btn-primary" onclick="location.reload()">
+              <i class="fa-solid fa-house"></i> Return to Hub
+            </button>
           </div>
 
         </div>
