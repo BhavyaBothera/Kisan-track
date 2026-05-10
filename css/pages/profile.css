@@ -1,5 +1,188 @@
-/* ============================================
-   KisanTrack — profile.css
-   Purpose: Styles for profile.css
-   Used by: profile.html
-   ============================================ */
+/* 1. PROFILE HEADER */
+.profile-avatar-block {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 40px;
+    text-align: center;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+}
+
+.profile-avatar-block::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+    opacity: 0.15;
+    z-index: 0;
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    background: var(--accent-green);
+    color: white;
+    font-size: 3rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    border: 6px solid var(--bg-card);
+    box-shadow: var(--shadow-md);
+    position: relative;
+    z-index: 1;
+}
+
+.profile-full-name {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    position: relative;
+    z-index: 1;
+}
+
+.profile-farm-label {
+    font-size: 1rem;
+    color: var(--accent-green);
+    font-weight: 600;
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+}
+
+.profile-avatar-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+}
+
+/* 2. INFO CARDS GRID */
+.profile-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+    .profile-cards-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.profile-info-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.profile-card-title {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.profile-card-title i {
+    color: var(--accent-blue);
+}
+
+/* 3. PROFILE FIELDS */
+.profile-field {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.profile-field:last-child {
+    border-bottom: none;
+}
+
+.profile-field-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+}
+
+.profile-field-label i {
+    width: 16px;
+}
+
+.profile-field-value {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-align: right;
+}
+
+.profile-field-value .form-input {
+    width: 200px;
+    text-align: right;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+}
+
+/* 4. STATS ROW */
+.profile-stats-row {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.profile-stat-chip {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    padding: 10px 20px;
+    border-radius: 100px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.profile-stat-chip i {
+    color: var(--accent-amber);
+}
+
+.profile-stat-chip strong {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+/* 5. EDIT MODE ACTIONS */
+.profile-edit-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.profile-loading {
+    padding: 100px;
+    text-align: center;
+    color: var(--text-dim);
+    font-style: italic;
+    font-size: 1.2rem;
+}
