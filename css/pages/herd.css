@@ -1,5 +1,156 @@
 /* ============================================
    KisanTrack — herd.css
-   Purpose: Styles for herd.css
-   Used by: herd.html
+   Purpose: Styles for Animal Profiles section
+   Used by: herd.html (Section Animals)
    ============================================ */
+
+.page-header {
+  margin-bottom: 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  animation: slideDown 0.5s ease-out;
+}
+
+.page-header h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  margin: 0 0 6px 0;
+}
+
+.subtitle {
+  color: var(--text-dim);
+  font-size: 0.95rem;
+}
+
+/* SEARCH & FILTER */
+.search-wrap {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.search-wrap i {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+}
+
+.search-input {
+  width: 100%;
+  background: var(--glass-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px 16px 12px 44px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  border-color: var(--accent-green);
+  box-shadow: 0 0 15px rgba(124, 181, 24, 0.1);
+  outline: none;
+}
+
+/* PROFILES GRID */
+.profiles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.profile-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--border-hover);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+}
+
+.profile-top {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.profile-emoji {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+.profile-meta {
+  flex: 1;
+}
+
+.profile-id {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.profile-breed {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.profile-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-lg);
+}
+
+.profile-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-label {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.detail-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* STATUS COLORS */
+.profile-card.status-healthy { border-left: 4px solid var(--accent-green); }
+.profile-card.status-warning { border-left: 4px solid var(--accent-amber); }
+.profile-card.status-critical { border-left: 4px solid var(--accent-red); }
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .profiles-grid {
+    grid-template-columns: 1fr;
+  }
+}

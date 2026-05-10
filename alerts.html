@@ -16,7 +16,7 @@
   <!-- Font Awesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-  
+
   <!-- App Stylesheets -->
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
@@ -25,7 +25,11 @@
   <link rel="stylesheet" href="css/pages/alerts.css" />
 
   <!-- FOUC Prevention -->
-  <style>html { visibility: hidden; }</style>
+  <style>
+    html {
+      visibility: hidden;
+    }
+  </style>
 </head>
 
 <body>
@@ -134,7 +138,7 @@
      MAIN CONTENT
 ═══════════════════════════════════════════════════════ -->
   <main class="main-content" id="main-content">
-    
+
     <!-- Global Top Bar -->
     <header class="top-bar">
       <div class="top-bar-left">
@@ -184,7 +188,7 @@
 
         <!-- Filter -->
         <div class="filter-bar" id="alert-filter-bar">
-          <button class="filter-btn active" data-filter="all" id="af-all">All / सभी</button>
+          <button class="filter-btn" data-filter="all" id="af-all">All / सभी</button>
           <button class="filter-btn" data-filter="Critical" id="af-critical">🔴 Critical</button>
           <button class="filter-btn" data-filter="Warning" id="af-warning">🟡 Warning</button>
           <button class="filter-btn" data-filter="resolved" id="af-resolved">✅ Resolved</button>

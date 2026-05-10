@@ -23,6 +23,7 @@
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/sidebar.css" />
   <link rel="stylesheet" href="css/pages/herd.css" />
+  <link rel="stylesheet" href="css/pages/vitals.css" />
 
   <!-- FOUC Prevention -->
   <style>
@@ -179,8 +180,7 @@
     ───────────────────────────────────────────────── -->
       <section class="tab-section active" id="section-animals" aria-label="Animal Profiles">
 
-        <div class="page-header"
-          style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+        <div class="page-header">
           <div>
             <h1><i class="fa-solid fa-paw" style="color:var(--accent-green);margin-right:10px;"></i>Animal Profiles /
               <span style="color:var(--text-muted);">पशु प्रोफ़ाइल</span>
@@ -231,7 +231,7 @@
         <div class="vitals-selector-bar">
           <label for="vitals-animal-select"><i class="fa-solid fa-paw"
               style="color:var(--accent-green);margin-right:4px;"></i> Select Animal / पशु चुनें:</label>
-          <select class="styled-select" id="vitals-animal-select" style="flex:1;max-width:300px;">
+          <select class="styled-select" id="vitals-animal-select">
             <!-- Populated by vitals.js -->
           </select>
           <div class="live-badge">
@@ -309,7 +309,7 @@
           <!-- Chart 1: Temperature -->
           <div class="live-chart-card">
             <div class="live-chart-header">
-              <h3 class="section-title" style="margin:0;">
+              <h3 class="section-title">
                 <i class="fa-solid fa-thermometer-half" style="color:#7CB518;"></i>
                 Body Temperature / शरीर का तापमान
               </h3>
@@ -326,7 +326,7 @@
           <!-- Chart 2: Heart Rate -->
           <div class="live-chart-card">
             <div class="live-chart-header">
-              <h3 class="section-title" style="margin:0;">
+              <h3 class="section-title">
                 <i class="fa-solid fa-heart-pulse" style="color:#E5A100;"></i>
                 Heart Rate / हृदय गति
               </h3>
@@ -343,7 +343,7 @@
           <!-- Chart 3: Activity -->
           <div class="live-chart-card">
             <div class="live-chart-header">
-              <h3 class="section-title" style="margin:0;">
+              <h3 class="section-title">
                 <i class="fa-solid fa-person-running" style="color:#3B82F6;"></i>
                 Activity Level / गतिविधि स्तर
               </h3>

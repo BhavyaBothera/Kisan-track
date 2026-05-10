@@ -250,6 +250,7 @@ const VitalsModule = (function () {
   }
 
   function onActivate() {
+    populateSelector();
     fetchHistoricalVitals();
     updateAISummary();
   }

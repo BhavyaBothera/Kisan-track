@@ -143,8 +143,46 @@ const HerdModule = (function () {
     });
   }
 
+  // ── Tab Switching ────────────────────────────────────────
+  function initTabs() {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    
+    if (tab === 'vitals') {
+      activateTab('vitals');
+    } else {
+      activateTab('animals');
+    }
+
+    // Handle back/forward navigation
+    window.addEventListener('popstate', () => {
+      const p = new URLSearchParams(window.location.search);
+      activateTab(p.get('tab') === 'vitals' ? 'vitals' : 'animals');
+    });
+  }
+
+  function activateTab(tabName) {
+    const sections = document.querySelectorAll('.tab-section');
+    sections.forEach(s => s.classList.remove('active'));
+
+    const target = document.getElementById(`section-${tabName}`);
+    if (target) target.classList.add('active');
+
+    // Notify modules
+    if (tabName === 'vitals' && window.VitalsModule) {
+      window.VitalsModule.onActivate();
+    }
+    
+    // Sync sidebar (in case it wasn't already)
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    const navId = tabName === 'vitals' ? 'nav-vitals' : 'nav-animals';
+    const navEl = document.getElementById(navId);
+    if (navEl) navEl.classList.add('active');
+  }
+
   // ── Public API ────────────────────────────────────────────
   function init() {
+    initTabs();
     renderProfiles();
     initFilters();
     initSearch();
