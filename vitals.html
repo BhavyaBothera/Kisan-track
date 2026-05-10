@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>KisanTrack | Dashboard</title>
+  <title>KisanTrack | Live Vitals Monitor</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -16,16 +16,19 @@
   <!-- Font Awesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-  
   <!-- App Stylesheets -->
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/sidebar.css" />
-  <link rel="stylesheet" href="css/pages/dashboard.css" />
+  <link rel="stylesheet" href="css/pages/vitals.css" />
 
   <!-- FOUC Prevention -->
-  <style>html { visibility: hidden; }</style>
+  <style>
+    html {
+      visibility: hidden;
+    }
+  </style>
 </head>
 
 <body>
@@ -50,7 +53,7 @@
     <nav class="sidebar-nav">
       <div class="nav-label">Core Matrix / मुख्य मैट्रिक्स</div>
 
-      <a href="dashboard.html" class="nav-link active" id="nav-dashboard">
+      <a href="dashboard.html" class="nav-link" id="nav-dashboard">
         <i class="fa-solid fa-gauge-high"></i>
         <div class="nav-text">Dashboard<span class="nav-hi">डैशबोर्ड</span></div>
       </a>
@@ -60,7 +63,7 @@
         <div class="nav-text">Animal Profiles<span class="nav-hi">पशु प्रोफ़ाइल</span></div>
       </a>
 
-      <a href="vitals.html" class="nav-link" id="nav-vitals">
+      <a href="vitals.html" class="nav-link active" id="nav-vitals">
         <i class="fa-solid fa-heartbeat"></i>
         <div class="nav-text">Live Vitals<span class="nav-hi">लाइव जीवन संकेत</span></div>
       </a>
@@ -134,16 +137,16 @@
      MAIN CONTENT
 ═══════════════════════════════════════════════════════ -->
   <main class="main-content" id="main-content">
-    
-    <!-- Global Top Bar -->
+    <!-- Top Bar -->
     <header class="top-bar">
       <div class="top-bar-left">
-        <h2 class="top-bar-title">Dashboard / <span class="hi">डैशबोर्ड</span></h2>
+        <h2 class="top-bar-title">Live Vitals Monitor / <span class="hi">लाइव जीवन संकेत</span></h2>
       </div>
       <div class="top-bar-right">
         <div class="user-profile-dropdown">
-          <button class="profile-dropdown-btn" id="topbar-profile-dropdown-btn">
-            <div class="user-avatar" id="auth-avatar">F</div>
+          <button class="profile-dropdown-btn" id="topbar-profile-dropdown-btn" aria-haspopup="true"
+            aria-expanded="false">
+            <div class="user-avatar" id="auth-avatar">K</div>
             <div class="user-info">
               <span class="user-name" id="auth-first-name">Farmer</span>
               <span class="user-role">Premium Plan</span>
@@ -168,85 +171,167 @@
     </header>
 
     <div class="content-area">
-      <section class="tab-section active" id="section-dashboard" aria-label="Dashboard Home">
+      <!-- ─────────────────────────────────────────────────
+         SECTION: LIVE VITALS MONITOR
+    ───────────────────────────────────────────────── -->
+      <section class="tab-section active" id="section-vitals" aria-label="Live Vitals Monitor">
 
-
-        <div class="page-header" style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px; margin-bottom: 40px;">
-          <h1 id="banner-greeting"><i class="fa-solid fa-gauge-high" style="color:var(--accent-green);margin-right:10px;"></i>Good Morning, Farmer 🌾</h1>
-          <p class="subtitle" id="banner-farm-info">Real-time health monitoring for your entire livestock</p>
+        <div class="page-header">
+          <h1><i class="fa-solid fa-heartbeat" style="color:var(--accent-green);margin-right:10px;"></i>Live Vitals /
+            <span style="color:var(--text-muted);">लाइव जीवन संकेत</span>
+          </h1>
+          <p class="subtitle">Real-time sensor readings with AI health analysis | AI स्वास्थ्य विश्लेषण सहित लाइव रीडिंग
+          </p>
         </div>
 
-        <!-- 🛡️ NEXUS TACTICAL KPI MODULES -->
-        <div class="nexus-grid">
-          <div class="nexus-card">
-            <span class="label">TOTAL SUBJECTS</span>
-            <div class="value" id="kpi-total-animals">0</div>
-            <div class="delta up"><i class="fa-solid fa-plus"></i> <span class="poppins">STABLE</span></div>
-          </div>
-          <div class="nexus-card">
-            <span class="label">OPTIMAL HEALTH</span>
-            <div class="value" id="kpi-healthy-animals" style="color:var(--accent-green)">0</div>
-            <div class="delta up"><i class="fa-solid fa-arrow-up"></i> <span class="poppins">98.2% ACCURACY</span></div>
-          </div>
-          <div class="nexus-card">
-            <span class="label">ACTIVE ANOMALIES</span>
-            <div class="value" id="kpi-active-alerts" style="color:var(--accent-amber)">0</div>
-            <div class="delta"><span class="nexus-pulse-dot"></span> <span class="poppins">REAL-TIME MONITORING</span></div>
-          </div>
-          <div class="nexus-card">
-            <span class="label">CRITICAL VECTORS</span>
-            <div class="value" id="kpi-critical-cases" style="color:var(--accent-red)">0</div>
-            <div class="delta down"><i class="fa-solid fa-shield-virus"></i> <span class="poppins">THREAT DETECTION ON</span></div>
+        <!-- Animal Selector -->
+        <div class="vitals-selector-bar">
+          <label for="vitals-animal-select"><i class="fa-solid fa-paw"
+              style="color:var(--accent-green);margin-right:4px;"></i> Select Animal / पशु चुनें:</label>
+          <select class="styled-select" id="vitals-animal-select">
+            <!-- Populated by vitals.js -->
+          </select>
+          <div class="live-badge">
+            <div class="live-dot"></div>
+            LIVE
           </div>
         </div>
 
-        <!-- 🧬 NEXUS BIOMETRIC CORE -->
-        <div class="nexus-bio-container">
-          <div class="nexus-bio-gauge">
-            <div class="nexus-stat-pill" style="position:absolute; top:15px; left:15px;">
-              <i class="fa-solid fa-wave-square"></i> SIGNAL STABLE
+        <!-- Gauges -->
+        <div class="gauges-row" id="gauges-row">
+          <!-- Gauge 1: Temperature -->
+          <div class="gauge-card">
+            <div class="gauge-title">
+              <i class="fa-solid fa-thermometer-half" style="color:var(--accent-green);"></i>
+              Body Temperature<span class="hi-label">शरीर का तापमान</span>
             </div>
-            <svg width="240" height="240" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="8" />
-              <circle id="bio-gauge-path" cx="50" cy="50" r="45" fill="none" stroke="var(--accent-green)" stroke-width="8" 
-                stroke-dasharray="283" stroke-dashoffset="283" stroke-linecap="round" 
-                transform="rotate(-90 50 50)" style="transition: stroke-dashoffset 1s ease-out;" />
-            </svg>
-            <div class="nexus-bio-score">
-              <span class="num" id="bio-score-val">0</span>
-              <span class="lab">HEALTH INDEX</span>
+            <div class="gauge-svg-wrap">
+              <svg viewBox="0 0 100 100">
+                <circle class="gauge-bg" cx="50" cy="50" r="40" stroke-dasharray="251.2" />
+                <circle class="gauge-fill green" id="gauge-temp-fill" cx="50" cy="50" r="40" stroke-dasharray="251.2"
+                  stroke-dashoffset="251.2" />
+              </svg>
+              <div class="gauge-label">
+                <div class="gauge-value" id="gauge-temp-val">--</div>
+                <div class="gauge-unit">°C</div>
+              </div>
             </div>
+            <div class="gauge-range">Safe: 38.0 – 39.5°C</div>
           </div>
 
-          <div class="nexus-card" style="flex:1;">
-            <div class="nexus-header" style="margin-bottom:15px; border-left-width:2px;">
-              <h4 style="font-size:0.9rem; margin:0;">TELEMETRY OVERVIEW</h4>
-              <span class="subtitle">System Latency: 42ms | Uplink: Active</span>
+          <!-- Gauge 2: Heart Rate -->
+          <div class="gauge-card">
+            <div class="gauge-title">
+              <i class="fa-solid fa-heart-pulse" style="color:var(--accent-amber);"></i>
+              Heart Rate<span class="hi-label">हृदय गति</span>
             </div>
-            <div class="chart-wrap" style="height:150px;">
-              <canvas id="main-telemetry-chart"></canvas>
+            <div class="gauge-svg-wrap">
+              <svg viewBox="0 0 100 100">
+                <circle class="gauge-bg" cx="50" cy="50" r="40" stroke-dasharray="251.2" />
+                <circle class="gauge-fill amber" id="gauge-hr-fill" cx="50" cy="50" r="40" stroke-dasharray="251.2"
+                  stroke-dashoffset="251.2" />
+              </svg>
+              <div class="gauge-label">
+                <div class="gauge-value" id="gauge-hr-val">--</div>
+                <div class="gauge-unit">bpm</div>
+              </div>
             </div>
+            <div class="gauge-range">Safe: 60 – 80 bpm</div>
+          </div>
+
+          <!-- Gauge 3: Activity -->
+          <div class="gauge-card">
+            <div class="gauge-title">
+              <i class="fa-solid fa-running" style="color:var(--accent-blue);"></i>
+              Activity Level<span class="hi-label">गतिविधि स्तर</span>
+            </div>
+            <div class="gauge-svg-wrap">
+              <svg viewBox="0 0 100 100">
+                <circle class="gauge-bg" cx="50" cy="50" r="40" stroke-dasharray="251.2" />
+                <circle class="gauge-fill blue" id="gauge-act-fill" cx="50" cy="50" r="40" stroke-dasharray="251.2"
+                  stroke-dashoffset="251.2" />
+              </svg>
+              <div class="gauge-label">
+                <div class="gauge-value" id="gauge-act-val">--</div>
+                <div class="gauge-unit">%</div>
+              </div>
+            </div>
+            <div class="gauge-range">Normal: 40 – 80%</div>
           </div>
         </div>
 
-        <!-- Herd Status Grid -->
-        <p class="section-title">
-          <i class="fa-solid fa-grip"></i> Herd Status / झुंड की स्थिति
-        </p>
-        <div class="herd-grid" id="herd-grid">
-          <!-- Populated by dashboard.js -->
-        </div>
+        <!-- Live Charts (3 separate) -->
+        <div class="live-charts-grid">
 
-        <!-- Alert Ticker -->
-        <div class="ticker-section" id="alert-ticker">
-          <span class="ticker-label">⚠ LIVE ALERTS</span>
-          <div class="ticker-wrap">
-            <div class="ticker-track" id="ticker-track">
-              <!-- Populated by dashboard.js -->
+          <!-- Chart 1: Temperature -->
+          <div class="live-chart-card">
+            <div class="live-chart-header">
+              <h3 class="section-title">
+                <i class="fa-solid fa-thermometer-half" style="color:#7CB518;"></i>
+                Body Temperature / शरीर का तापमान
+              </h3>
+              <div class="live-badge">
+                <div class="live-dot"></div>Every 60s
+              </div>
+            </div>
+            <div class="live-chart-range">Safe: 38.0 – 39.5°C &nbsp;·&nbsp; Unit: °C</div>
+            <div class="chart-wrap vitals-chart-wrap">
+              <canvas id="chart-temp"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 2: Heart Rate -->
+          <div class="live-chart-card">
+            <div class="live-chart-header">
+              <h3 class="section-title">
+                <i class="fa-solid fa-heart-pulse" style="color:#E5A100;"></i>
+                Heart Rate / हृदय गति
+              </h3>
+              <div class="live-badge">
+                <div class="live-dot"></div>Every 60s
+              </div>
+            </div>
+            <div class="live-chart-range">Safe: 60 – 80 bpm &nbsp;·&nbsp; Unit: bpm</div>
+            <div class="chart-wrap vitals-chart-wrap">
+              <canvas id="chart-hr"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 3: Activity -->
+          <div class="live-chart-card">
+            <div class="live-chart-header">
+              <h3 class="section-title">
+                <i class="fa-solid fa-person-running" style="color:#3B82F6;"></i>
+                Activity Level / गतिविधि स्तर
+              </h3>
+              <div class="live-badge">
+                <div class="live-dot"></div>Every 60s
+              </div>
+            </div>
+            <div class="live-chart-range">Normal: 40 – 80% &nbsp;·&nbsp; Unit: %</div>
+            <div class="chart-wrap vitals-chart-wrap">
+              <canvas id="chart-activity"></canvas>
+            </div>
+          </div>
+
+        </div><!-- /.live-charts-grid -->
+
+        <!-- AI Summary -->
+        <div class="ai-summary-card">
+          <div class="ai-summary-header">
+            <i class="fa-solid fa-robot"></i>
+            <h3>AI Health Summary / AI स्वास्थ्य सारांश</h3>
+          </div>
+          <p class="ai-summary-text" id="ai-summary-text">Select an animal to view the AI-generated health summary.</p>
+          <div class="confidence-bar-wrap">
+            <div class="confidence-label">
+              Detection Confidence / पहचान विश्वसनीयता <span id="confidence-pct">—</span>
+            </div>
+            <div class="confidence-bar">
+              <div class="confidence-bar-fill" id="confidence-fill" style="width:0%"></div>
             </div>
           </div>
         </div>
-
       </section>
 
     </div><!-- /.content-area -->
@@ -257,7 +342,7 @@
 ═══════════════════════════════════════════════════════ -->
   <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile Navigation">
     <div class="mobile-nav-inner">
-      <a href="dashboard.html" class="mobile-nav-item active" id="mnav-dashboard">
+      <a href="dashboard.html" class="mobile-nav-item" id="mnav-dashboard">
         <i class="fa-solid fa-gauge-high"></i>
         <span>Home</span>
       </a>
@@ -265,7 +350,7 @@
         <i class="fa-solid fa-paw"></i>
         <span>Herd</span>
       </a>
-      <a href="vitals.html" class="mobile-nav-item" id="mnav-vitals">
+      <a href="vitals.html" class="mobile-nav-item active" id="mnav-vitals">
         <i class="fa-solid fa-heartbeat"></i>
         <span>Vitals</span>
       </a>
@@ -283,69 +368,6 @@
       </a>
     </div>
   </nav>
-
-  <!-- ═══════════════════════════════════════════════════════
-     ANIMAL DETAIL MODAL (shared between sections)
-═══════════════════════════════════════════════════════ -->
-  <div class="modal-overlay" id="animal-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <div class="modal-box">
-      <div class="modal-header">
-        <div class="modal-header-left">
-          <div class="modal-emoji" id="modal-emoji">🐄</div>
-          <div>
-            <h2 class="modal-title" id="modal-title">Animal Detail</h2>
-            <p class="modal-subtitle" id="modal-subtitle">Loading...</p>
-          </div>
-        </div>
-        <button class="modal-close" id="modal-close" aria-label="Close modal">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-      <div class="modal-body">
-        <!-- Vitals -->
-        <div class="modal-vitals-grid">
-          <div class="modal-vital">
-            <div class="modal-vital-value" id="modal-temp">--</div>
-            <div class="modal-vital-label">Temp (°C) / तापमान</div>
-          </div>
-          <div class="modal-vital">
-            <div class="modal-vital-value" id="modal-hr">--</div>
-            <div class="modal-vital-label">Heart Rate / हृदय गति</div>
-          </div>
-          <div class="modal-vital">
-            <div class="modal-vital-value" id="modal-act">--</div>
-            <div class="modal-vital-label">Activity / गतिविधि</div>
-          </div>
-        </div>
-
-        <!-- 7-Day Chart -->
-        <h4 style="font-size:0.85rem;color:var(--text-muted);margin-bottom:10px;">
-          <i class="fa-solid fa-chart-line" style="color:var(--accent-green);margin-right:6px;"></i>
-          7-Day Health History / 7 दिन का इतिहास
-        </h4>
-        <div class="modal-chart-wrap">
-          <canvas id="modal-chart"></canvas>
-        </div>
-
-        <!-- Info grid -->
-        <div class="divider"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
-          <div class="modal-vital">
-            <div class="modal-vital-value" id="modal-breed" style="font-size:1rem;">--</div>
-            <div class="modal-vital-label">Breed / नस्ल</div>
-          </div>
-          <div class="modal-vital">
-            <div class="modal-vital-value" id="modal-age" style="font-size:1rem;">--</div>
-            <div class="modal-vital-label">Age / उम्र</div>
-          </div>
-          <div class="modal-vital">
-            <div class="modal-vital-value" id="modal-weight" style="font-size:1rem;">--</div>
-            <div class="modal-vital-label">Weight / वजन</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- ═══════════════════════════════════════════════════════
      TOAST NOTIFICATION
@@ -366,7 +388,7 @@
   <script src="js/core/utils.js"></script>
   <script src="js/core/auth.js"></script>
   <script src="js/core/firestore-store.js"></script>
-  <script src="js/pages/dashboard.js"></script>
+  <script src="js/pages/vitals.js"></script>
 </body>
 
 </html>

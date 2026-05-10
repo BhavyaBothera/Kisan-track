@@ -247,6 +247,8 @@ const VitalsModule = (function () {
     document.addEventListener('kisanTrack:stateUpdated', () => {
       populateSelector();
     });
+
+    onActivate();
   }
 
   function onActivate() {

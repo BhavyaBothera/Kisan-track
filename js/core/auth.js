@@ -108,6 +108,8 @@
     } 
     else if (path.includes('herd.html')) {
       if (window.HerdModule) window.HerdModule.init();
+    }
+    else if (path.includes('vitals.html')) {
       if (window.VitalsModule) window.VitalsModule.init();
     }
     else if (path.includes('alerts.html')) {
