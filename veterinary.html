@@ -66,9 +66,9 @@
         <div class="nav-text">Live Vitals<span class="nav-hi">लाइव जीवन संकेत</span></div>
       </a>
 
-      <a href="analytics.html" class="nav-link" id="nav-reports">
-        <i class="fa-solid fa-chart-column"></i>
-        <div class="nav-text">Livestock Analytics<span class="nav-hi">पशुधन विश्लेषण</span></div>
+      <a href="camera.html" class="nav-link" id="nav-camera">
+        <i class="fa-solid fa-camera"></i>
+        <div class="nav-text">AI Camera Monitor<span class="nav-hi">AI कैमरा मॉनिटर</span></div>
       </a>
 
       <div class="nav-label">Management / प्रबंधन</div>
@@ -77,6 +77,11 @@
         <i class="fa-solid fa-bell"></i>
         <div class="nav-text">Alerts Hub<span class="nav-hi">अलर्ट हब</span></div>
         <span id="alert-badge" class="badge-dot"></span>
+      </a>
+
+      <a href="analytics.html" class="nav-link" id="nav-reports">
+        <i class="fa-solid fa-chart-column"></i>
+        <div class="nav-text">Livestock Analytics<span class="nav-hi">पशुधन विश्लेषण</span></div>
       </a>
 
       <a href="inventory.html" class="nav-link" id="nav-inventory">
@@ -99,6 +104,11 @@
       <a href="profile.html" class="nav-link" id="nav-profile">
         <i class="fa-solid fa-circle-user"></i>
         <div class="nav-text">Farmer Profile<span class="nav-hi">किसान प्रोफ़ाइल</span></div>
+      </a>
+
+      <a href="#" class="nav-link" id="nav-settings">
+        <i class="fa-solid fa-gear"></i>
+        <div class="nav-text">Farm Settings<span class="nav-hi">खेत की सेटिंग्स</span></div>
       </a>
     </nav>
 
@@ -128,6 +138,16 @@
         <h2 class="top-bar-title">Medical Center / <span class="hi">चिकित्सा केंद्र</span></h2>
       </div>
       <div class="top-bar-right">
+        <div class="user-profile-dropdown" style="margin-right: 20px;">
+          <button class="profile-dropdown-btn" id="topbar-profile-dropdown-btn">
+            <div class="user-avatar" id="auth-avatar">F</div>
+            <div class="user-info">
+              <span class="user-name" id="auth-first-name">Farmer</span>
+              <span class="user-role">Premium Plan</span>
+            </div>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+        </div>
         <button class="btn btn-primary" id="btn-add-log">
           <i class="fa-solid fa-file-medical"></i> Log Visit / विजिट दर्ज करें
         </button>
