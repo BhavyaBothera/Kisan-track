@@ -1,4 +1,4 @@
-const InventoryModule = (function () {
+var InventoryModule = (function () {
     'use strict';
 
     let inventoryItems = [];
@@ -310,10 +310,6 @@ const InventoryModule = (function () {
     function closeModal() {
         const modal = document.getElementById('modal-overlay');
         if (modal) modal.classList.remove('open');
-    }
-
-    function editItem(id) {
-        openModal('Edit Item / आइटम संपादित करें');
     }
 
     return { init, quickUpdate, editItem, closeModal };
