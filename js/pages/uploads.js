@@ -201,14 +201,38 @@ var UploadsModule = (function () {
     if (window.showToast) window.showToast('✓ Records merged into database successfully', 'success');
   }
 
-  function returnToHub() {
+  function resetUploadView() {
     const main = document.getElementById('main-content');
-    if (main) main.classList.add('fade-out');
-    
-    setTimeout(() => {
-        window.location.href = 'dashboard.html';
-    }, 500);
+    if (main) {
+        main.classList.add('fade-out');
+        
+        setTimeout(() => {
+            // Reset UI states
+            if (finalSuccess) finalSuccess.style.display = 'none';
+            if (uploadResult) uploadResult.style.display = 'none';
+            if (uploadProgress) uploadProgress.classList.remove('visible');
+            if (filePreview) filePreview.classList.remove('visible');
+            
+            // Show initial container
+            const container = document.querySelector('.upload-container');
+            if (container) container.style.display = 'block';
+            
+            // Clear file
+            selectedFile = null;
+            if (fileInput) fileInput.value = '';
+
+            // Remove animation class for next time
+            main.classList.remove('fade-out');
+            main.style.opacity = '0';
+            
+            // Fade back in smoothly
+            setTimeout(() => {
+                main.style.transition = 'opacity 0.5s ease-in';
+                main.style.opacity = '1';
+            }, 50);
+        }, 500);
+    }
   }
 
-  return { init, returnToHub };
+  return { init, resetUploadView };
 })();
