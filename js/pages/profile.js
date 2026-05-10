@@ -1,6 +1,6 @@
 // ============================================
 // KisanTrack — profile.js
-// Purpose: Farmer Profile Management (Consistent UI)
+// Purpose: Farmer Profile Management (Pixel-Perfect)
 // ============================================
 var ProfileModule = (function () {
   'use strict';
@@ -29,14 +29,19 @@ var ProfileModule = (function () {
     if (!root) return;
 
     if (!farmerData) {
-      root.innerHTML = '<div class="profile-loading"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading Profile...</div>';
+      root.innerHTML = `
+        <div class="profile-loading">
+            <i class="fa-solid fa-circle-notch fa-spin"></i>
+            <p style="margin-top:15px;">Loading Farmer Profile... / किसान प्रोफ़ाइल लोड हो रहा है...</p>
+        </div>
+      `;
       return;
     }
 
     const f = farmerData;
     const initials = f.fullName ? (f.fullName.split(' ')[0][0] + (f.fullName.split(' ')[1] ? f.fullName.split(' ')[1][0] : '')).toUpperCase() : 'F';
 
-    // Update Stats (KPIs)
+    // 1. Update KPI Values (Standard Classes: .kpi-val)
     const state = (window.FirestoreStore && typeof window.FirestoreStore.getState === 'function') 
         ? window.FirestoreStore.getState() 
         : { animals: [], alerts: [] };
@@ -46,7 +51,7 @@ var ProfileModule = (function () {
     if (sAnimals) sAnimals.textContent = state.animals.length;
     if (sAlerts) sAlerts.textContent = state.alerts.filter(a => !a.resolved).length;
 
-    // Render HTML
+    // 2. Render Profile Sections
     root.innerHTML = `
       <div class="profile-avatar-row">
         <div class="profile-avatar-circle">${initials}</div>
@@ -62,17 +67,17 @@ var ProfileModule = (function () {
       </div>
 
       <div class="profile-main-grid">
-        <!-- Personal Card -->
+        <!-- Personal Information Card -->
         <div class="profile-info-card">
             <div class="profile-card-header">
-                <h3 class="profile-card-title"><i class="fa-solid fa-user"></i> Personal Information</h3>
+                <h3 class="profile-card-title"><i class="fa-solid fa-id-card"></i> Personal Information</h3>
             </div>
             <div class="profile-card-body">
                 ${CONFIG.personal.map(field => fieldRow(field, f[field.key])).join('')}
             </div>
         </div>
 
-        <!-- Farm Card -->
+        <!-- Farm Details Card -->
         <div class="profile-info-card">
             <div class="profile-card-header">
                 <h3 class="profile-card-title"><i class="fa-solid fa-tractor"></i> Farm Details</h3>
@@ -86,16 +91,21 @@ var ProfileModule = (function () {
       ${isEditing ? `
         <div class="profile-actions-bar">
             <button class="btn btn-secondary" id="cancel-profile-btn">Cancel</button>
-            <button class="btn btn-primary" id="save-profile-btn">Save Changes</button>
+            <button class="btn btn-primary" id="save-profile-btn">Save All Changes</button>
         </div>
       ` : ''}
 
-      <div class="profile-info-card" style="margin-top:24px;">
-          <div class="profile-card-header">
-              <h3 class="profile-card-title"><i class="fa-solid fa-clock-rotate-left"></i> Account History</h3>
+      <div class="profile-info-card" style="margin-top:24px; background: rgba(124, 181, 24, 0.05);">
+          <div class="profile-card-header" style="border-bottom: 1px solid rgba(124, 181, 24, 0.1);">
+              <h3 class="profile-card-title" style="color: var(--accent-green);">
+                <i class="fa-solid fa-award"></i> Membership & Status
+              </h3>
           </div>
-          <div class="profile-card-body">
-              <p style="color:var(--text-dim); font-size:0.9rem;">Member since May 2024. Your account is currently in good standing.</p>
+          <div class="profile-card-body" style="padding-top:10px;">
+              <p style="color:var(--text-primary); font-size:0.92rem; font-weight: 500;">
+                <i class="fa-solid fa-circle-check" style="color:var(--accent-green); margin-right:8px;"></i>
+                Your account is verified and active. You are currently on the <strong>Premium Plan</strong>.
+              </p>
           </div>
       </div>
     `;
@@ -139,7 +149,7 @@ var ProfileModule = (function () {
       farmerData = { ...farmerData, ...updates };
       isEditing = false;
       render();
-      if (window.showToast) window.showToast('✓ Profile updated!');
+      if (window.showToast) window.showToast('✓ Profile saved successfully', 'success');
     } catch (err) {
       console.error('Profile Save Error:', err);
     }
@@ -151,8 +161,7 @@ var ProfileModule = (function () {
         if (doc.exists) { farmerData = doc.data(); render(); }
       });
     }
-    // Auto-init fallback
-    setTimeout(() => { if (!farmerData && window.location.pathname.includes('profile.html')) init(); }, 1000);
+    setTimeout(() => { if (!farmerData && window.location.pathname.includes('profile.html')) init(); }, 1200);
     document.addEventListener('kisanTrack:stateUpdated', render);
   }
 

@@ -126,7 +126,7 @@
     <!-- Global Top Bar -->
     <header class="top-bar">
       <div class="top-bar-left">
-        <h2 class="top-bar-title">Account / <span class="hi">खाता</span></h2>
+        <h2 class="top-bar-title">Farmer Profile / <span class="hi">किसान प्रोफ़ाइल</span></h2>
       </div>
       <div class="top-bar-right">
         <div class="user-profile-dropdown">
@@ -150,30 +150,52 @@
           <p class="subtitle">Manage your personal and farm information | अपनी व्यक्तिगत और खेत की जानकारी प्रबंधित करें</p>
         </div>
 
-        <!-- KPI Summary Row -->
-        <div class="kpi-row">
+        <!-- KPI Grid (Standard Pattern) -->
+        <div class="kpi-grid">
             <div class="kpi-card">
                 <div class="kpi-icon"><i class="fa-solid fa-paw"></i></div>
                 <div class="kpi-body">
-                    <div class="kpi-label">Registered Animals</div>
-                    <div class="kpi-value" id="stat-total-animals">--</div>
+                    <div class="kpi-val" id="stat-total-animals">--</div>
+                    <div class="kpi-lab">
+                        <span>Animals Registered</span>
+                        <span class="hi">पंजीकृत पशु</span>
+                    </div>
                 </div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-icon" style="color:var(--accent-amber);background:rgba(229, 161, 0, 0.1);"><i class="fa-solid fa-bell"></i></div>
+                <div class="kpi-icon"><i class="fa-solid fa-bell"></i></div>
                 <div class="kpi-body">
-                    <div class="kpi-label">Active Alerts</div>
-                    <div class="kpi-value" id="stat-active-alerts">--</div>
+                    <div class="kpi-val" id="stat-active-alerts">--</div>
+                    <div class="kpi-lab">
+                        <span>Active Alerts</span>
+                        <span class="hi">सक्रिय अलर्ट</span>
+                    </div>
                 </div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-icon" style="color:var(--accent-blue);background:rgba(59, 130, 246, 0.1);"><i class="fa-solid fa-award"></i></div>
+                <div class="kpi-icon"><i class="fa-solid fa-award"></i></div>
                 <div class="kpi-body">
-                    <div class="kpi-label">Membership</div>
-                    <div class="kpi-value" style="font-size: 1.1rem;">Premium</div>
+                    <div class="kpi-val" style="font-size: 1.5rem;">Premium</div>
+                    <div class="kpi-lab">
+                        <span>Membership Level</span>
+                        <span class="hi">सदस्यता स्तर</span>
+                    </div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <div class="kpi-body">
+                    <div class="kpi-val" style="font-size: 1.5rem;">Active</div>
+                    <div class="kpi-lab">
+                        <span>Account Status</span>
+                        <span class="hi">खाता स्थिति</span>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Section Title (Standard Pattern) -->
+        <h3 class="section-title"><i class="fa-solid fa-user-pen"></i> Account Information / खाता जानकारी</h3>
 
         <div class="profile-content-wrap">
             <div id="profile-section-root">
@@ -185,24 +207,6 @@
     </div>
   </main>
 
-  <!-- Mobile Nav -->
-  <nav class="mobile-nav" id="mobile-nav">
-    <div class="mobile-nav-inner">
-      <a href="dashboard.html" class="mobile-nav-item">
-        <i class="fa-solid fa-gauge-high"></i>
-        <span>Home</span>
-      </a>
-      <a href="herd.html" class="mobile-nav-item">
-        <i class="fa-solid fa-paw"></i>
-        <span>Herd</span>
-      </a>
-      <a href="profile.html" class="mobile-nav-item active">
-        <i class="fa-solid fa-circle-user"></i>
-        <span>Profile</span>
-      </a>
-    </div>
-  </nav>
-
   <div class="toast" id="app-toast">
     <i class="fa-solid fa-circle-check toast-icon"></i>
     <span class="toast-msg" id="toast-msg">Success</span>
@@ -213,6 +217,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="js/core/firebase-config.js"></script>
+  <script src="js/core/utils.js"></script>
   <script src="js/core/auth.js"></script>
   <script src="js/core/firestore-store.js"></script>
   <script src="js/pages/profile.js"></script>
