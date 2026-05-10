@@ -117,14 +117,11 @@
     <!-- Top Bar -->
     <header class="top-bar">
       <div class="top-bar-left">
-        <div class="search-box">
-          <i class="fa-solid fa-search"></i>
-          <input type="text" placeholder="Search animals or alerts... | खोजें..." id="global-search" />
-        </div>
+        <h2 class="top-bar-title">Herd Overview / <span class="hi">झुंड अवलोकन</span></h2>
       </div>
       <div class="top-bar-right">
         <div class="user-profile-dropdown">
-          <button class="profile-dropdown-btn" id="topbar-profile-dropdown-btn" aria-label="User Profile Menu">
+          <button class="profile-dropdown-btn" id="topbar-profile-dropdown-btn" aria-haspopup="true" aria-expanded="false">
             <div class="user-avatar" id="auth-avatar">K</div>
             <div class="user-info">
               <span class="user-name" id="auth-first-name">Farmer</span>
@@ -138,12 +135,12 @@
               <strong id="auth-first-name-hi">Farmer</strong>
             </div>
             <div class="dropdown-divider"></div>
-            <a href="profile.html" class="dropdown-item" id="btn-go-profile">
+            <a href="profile.html" class="dropdown-item">
               <i class="fa-solid fa-user-circle"></i> View Profile
             </a>
-            <a href="#" class="dropdown-item" id="btn-sign-out">
+            <div class="dropdown-item" id="btn-sign-out">
               <i class="fa-solid fa-right-from-bracket"></i> Sign Out
-            </a>
+            </div>
           </div>
         </div>
       </div>

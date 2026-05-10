@@ -81,9 +81,25 @@
     }
   });
 
-  /**
-   * Automatically initializes the correct module for the current page
-   */
+  // --- 2. Global Dropdown Logic ---
+  document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('profile-dropdown-menu');
+    const btn = document.getElementById('topbar-profile-dropdown-btn');
+    
+    if (btn && btn.contains(e.target)) {
+      e.preventDefault();
+      const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', !isExpanded);
+      dropdown.classList.toggle('show');
+    } else if (dropdown && dropdown.classList.contains('show')) {
+      if (!dropdown.contains(e.target)) {
+        dropdown.classList.remove('show');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+      }
+    }
+  });
+
+  // --- 3. Page Module Initialization ---
   function initPageModules() {
     const path = window.location.pathname;
     
@@ -109,7 +125,7 @@
     }
   }
 
-  // --- 2. Shared Listeners ---
+  // --- 4. Shared Listeners ---
   document.addEventListener('DOMContentLoaded', () => {
     // Sign out functionality
     const btnSignOut = document.getElementById('btn-sign-out');
