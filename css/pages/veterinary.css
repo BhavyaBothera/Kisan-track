@@ -3,6 +3,23 @@
    Purpose: Styles for Medical Logs & Timeline
    ============================================ */
 
+/* 0. PAGE HEADER EXTENSIONS */
+.page-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+}
+
+.page-header-flex .header-text {
+    flex: 1;
+}
+
+.page-header-flex .header-actions {
+    display: flex;
+    align-items: center;
+}
+
 /* 1. KPI GRID */
 .vet-kpi-grid {
     display: grid;

@@ -138,7 +138,7 @@
         <h2 class="top-bar-title">Medical Center / <span class="hi">चिकित्सा केंद्र</span></h2>
       </div>
       <div class="top-bar-right">
-        <div class="user-profile-dropdown" style="margin-right: 20px;">
+        <div class="user-profile-dropdown">
           <button class="profile-dropdown-btn" id="topbar-profile-dropdown-btn">
             <div class="user-avatar" id="auth-avatar">F</div>
             <div class="user-info">
@@ -161,19 +161,23 @@
             </div>
           </div>
         </div>
-        <button class="btn btn-primary" id="btn-add-log">
-          <i class="fa-solid fa-file-medical"></i> Log Visit / विजिट दर्ज करें
-        </button>
       </div>
     </header>
 
     <div class="content-area">
       <!-- Page Header -->
-      <div class="page-header">
-        <h1><i class="fa-solid fa-stethoscope" style="color:var(--accent-blue);margin-right:10px;"></i>Veterinary Logs /
-          <span style="color:var(--text-muted);">पशु चिकित्सा लॉग</span>
-        </h1>
-        <p class="subtitle">Track vaccinations, medical history, and expert consultations | पशु स्वास्थ्य इतिहास और टीकाकरण की निगरानी करें</p>
+      <div class="page-header page-header-flex">
+        <div class="header-text">
+          <h1><i class="fa-solid fa-stethoscope" style="color:var(--accent-blue);margin-right:10px;"></i>Veterinary Logs /
+            <span style="color:var(--text-muted);">पशु चिकित्सा लॉग</span>
+          </h1>
+          <p class="subtitle">Track vaccinations, medical history, and expert consultations | पशु स्वास्थ्य इतिहास और टीकाकरण की निगरानी करें</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-primary" id="btn-add-log">
+            <i class="fa-solid fa-file-medical"></i> Log Visit / विजिट दर्ज करें
+          </button>
+        </div>
       </div>
 
       <!-- KPI Summary -->
