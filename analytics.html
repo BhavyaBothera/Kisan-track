@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>KisanTrack | Alerts & Reports</title>
+  <title>KisanTrack | Livestock Analytics</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -16,13 +16,12 @@
   <!-- Font Awesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-
   <!-- App Stylesheets -->
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/sidebar.css" />
-  <link rel="stylesheet" href="css/pages/alerts.css" />
+  <link rel="stylesheet" href="css/pages/analytics.css" />
 
   <!-- FOUC Prevention -->
   <style>
@@ -76,13 +75,13 @@
 
       <div class="nav-label">Management / प्रबंधन</div>
 
-      <a href="alerts.html" class="nav-link active" id="nav-alerts">
+      <a href="alerts.html" class="nav-link" id="nav-alerts">
         <i class="fa-solid fa-bell"></i>
         <div class="nav-text">Alerts Hub<span class="nav-hi">अलर्ट हब</span></div>
         <span id="alert-badge" class="badge-dot"></span>
       </a>
 
-      <a href="analytics.html" class="nav-link" id="nav-reports">
+      <a href="analytics.html" class="nav-link active" id="nav-reports">
         <i class="fa-solid fa-chart-column"></i>
         <div class="nav-text">Livestock Analytics<span class="nav-hi">पशुधन विश्लेषण</span></div>
       </a>
@@ -138,16 +137,16 @@
      MAIN CONTENT
 ═══════════════════════════════════════════════════════ -->
   <main class="main-content" id="main-content">
-
-    <!-- Global Top Bar -->
+    <!-- Top Bar -->
     <header class="top-bar">
       <div class="top-bar-left">
-        <h2 class="top-bar-title">Alerts & Reports / <span class="hi">अलर्ट और रिपोर्ट</span></h2>
+        <h2 class="top-bar-title">Livestock Analytics / <span class="hi">पशुधन विश्लेषण</span></h2>
       </div>
       <div class="top-bar-right">
         <div class="user-profile-dropdown">
-          <button class="profile-dropdown-btn" id="topbar-profile-dropdown-btn">
-            <div class="user-avatar" id="auth-avatar">F</div>
+          <button class="profile-dropdown-btn" id="topbar-profile-dropdown-btn" aria-haspopup="true"
+            aria-expanded="false">
+            <div class="user-avatar" id="auth-avatar">K</div>
             <div class="user-info">
               <span class="user-name" id="auth-first-name">Farmer</span>
               <span class="user-role">Premium Plan</span>
@@ -172,33 +171,86 @@
     </header>
 
     <div class="content-area">
-      <section class="tab-section active" id="section-alerts" aria-label="Alerts and Notifications">
-
+      <!-- ─────────────────────────────────────────────────
+         SECTION: LIVESTOCK ANALYTICS
+    ───────────────────────────────────────────────── -->
+      <section class="tab-section active" id="section-analytics" aria-label="Livestock Analytics">
 
         <div class="page-header">
-          <h1><i class="fa-solid fa-bell" style="color:var(--accent-amber);margin-right:10px;"></i>Alerts / <span
-              style="color:var(--text-muted);">अलर्ट</span></h1>
-          <p class="subtitle">All health alerts and notifications | सभी स्वास्थ्य चेतावनियाँ</p>
+          <h1><i class="fa-solid fa-chart-line" style="color:var(--accent-green);margin-right:10px;"></i>Deep Analytics /
+            <span style="color:var(--text-muted);">गहन विश्लेषण</span>
+          </h1>
+          <p class="subtitle">Historical health patterns and predictive herd insights | ऐतिहासिक पैटर्न और भविष्य की अंतर्दृष्टि</p>
         </div>
 
-        <!-- Summary Stats -->
-        <div class="alert-stats-row" id="alert-stats-row">
-          <!-- Populated by alerts.js -->
+        <!-- Controls Bar -->
+        <div class="analytics-controls">
+          <label for="report-date-range"><i class="fa-solid fa-calendar" style="color:var(--accent-green);margin-right:4px;"></i> Time Range / समय सीमा:</label>
+          <select class="styled-select" id="report-date-range">
+            <option value="7">Last 7 Days / पिछले 7 दिन</option>
+            <option value="14" selected>Last 14 Days / पिछले 14 दिन</option>
+            <option value="30">Last 30 Days / पिछले 30 दिन</option>
+            <option value="90">Last 90 Days / पिछले 90 दिन</option>
+          </select>
+          
+          <button class="export-btn" id="btn-export-csv">
+            <i class="fa-solid fa-file-csv"></i> Export Data / डेटा निर्यात करें
+          </button>
         </div>
 
-        <!-- Filter -->
-        <div class="filter-bar" id="alert-filter-bar">
-          <button class="filter-btn" data-filter="all" id="af-all">All / सभी</button>
-          <button class="filter-btn" data-filter="Critical" id="af-critical">🔴 Critical</button>
-          <button class="filter-btn" data-filter="Warning" id="af-warning">🟡 Warning</button>
-          <button class="filter-btn" data-filter="resolved" id="af-resolved">✅ Resolved</button>
+        <!-- Charts Grid -->
+        <div class="analytics-grid">
+          <!-- Chart 1: Alert Trends -->
+          <div class="analytics-card">
+            <div class="analytics-card-header">
+              <h3 class="analytics-card-title"><i class="fa-solid fa-bell"></i> Alert Frequency / अलर्ट की आवृत्ति</h3>
+            </div>
+            <div class="chart-container">
+              <canvas id="chart-alert-trends"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 2: Average Vitals -->
+          <div class="analytics-card">
+            <div class="analytics-card-header">
+              <h3 class="analytics-card-title"><i class="fa-solid fa-heart-pulse"></i> Herd Avg Vitals / औसत जीवन संकेत</h3>
+            </div>
+            <div class="chart-container">
+              <canvas id="chart-vital-averages"></canvas>
+            </div>
+          </div>
         </div>
 
-        <!-- Alert Feed -->
-        <div class="alert-feed" id="alert-feed">
-          <!-- Populated by alerts.js -->
+        <!-- Event Log Table -->
+        <div class="analytics-table-wrap">
+          <div class="table-header">
+            <h3><i class="fa-solid fa-list-check"></i> Herd Event Log / झुंड घटना लॉग</h3>
+            <div class="table-actions">
+              <!-- Search or additional filters can go here -->
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table class="analytics-table" id="herd-event-table">
+              <thead>
+                <tr>
+                  <th>Date / समय</th>
+                  <th>Animal / पशु</th>
+                  <th>Event Type / घटना प्रकार</th>
+                  <th>Status / स्थिति</th>
+                  <th>Action Taken / की गई कार्रवाई</th>
+                </tr>
+              </thead>
+              <tbody id="event-log-body">
+                <!-- Populated by analytics.js -->
+                <tr>
+                  <td colspan="5" style="text-align:center; padding:40px; color:var(--text-dim);">
+                    <i class="fa-solid fa-circle-notch fa-spin"></i> Loading historical data...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </section>
 
       </section>
 
@@ -218,17 +270,17 @@
         <i class="fa-solid fa-paw"></i>
         <span>Herd</span>
       </a>
-      <a href="analytics.html" class="mobile-nav-item" id="mnav-analytics">
+      <a href="vitals.html" class="mobile-nav-item" id="mnav-vitals">
+        <i class="fa-solid fa-heartbeat"></i>
+        <span>Vitals</span>
+      </a>
+      <a href="analytics.html" class="mobile-nav-item active" id="mnav-analytics">
         <i class="fa-solid fa-chart-line"></i>
         <span>Analytics</span>
       </a>
-      <a href="alerts.html" class="mobile-nav-item active" id="mnav-alerts">
+      <a href="alerts.html" class="mobile-nav-item" id="mnav-alerts">
         <i class="fa-solid fa-bell"></i>
         <span>Alerts</span>
-      </a>
-      <a href="camera.html" class="mobile-nav-item" id="mnav-camera">
-        <i class="fa-solid fa-camera"></i>
-        <span>Camera</span>
       </a>
       <a href="profile.html" class="mobile-nav-item" id="mnav-profile">
         <i class="fa-solid fa-circle-user"></i>
@@ -237,26 +289,17 @@
     </div>
   </nav>
 
-  <!-- ═══════════════════════════════════════════════════════
-     TOAST NOTIFICATION
-═══════════════════════════════════════════════════════ -->
-  <div class="toast" id="app-toast" role="alert" aria-live="polite">
-    <i class="fa-solid fa-circle-check toast-icon"></i>
-    <span class="toast-msg" id="toast-msg">Action completed successfully.</span>
-  </div>
-
   <!-- External Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
   <script src="js/core/firebase-config.js"></script>
   <script src="js/core/utils.js"></script>
   <script src="js/core/auth.js"></script>
   <script src="js/core/firestore-store.js"></script>
-  <script src="js/pages/alerts.js"></script>
+  <script src="js/pages/analytics.js"></script>
 </body>
 
 </html>

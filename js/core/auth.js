@@ -116,6 +116,9 @@
       if (window.AlertsModule) window.AlertsModule.init();
       if (window.ReportsModule) window.ReportsModule.init();
     }
+    else if (path.includes('analytics.html')) {
+      if (window.AnalyticsModule) window.AnalyticsModule.init();
+    }
     else if (path.includes('camera.html')) {
       if (window.CameraModule) window.CameraModule.init();
     }
