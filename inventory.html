@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>KisanTrack | Inventory & Feed Management</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- App Stylesheets -->
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/sidebar.css" />
+  <link rel="stylesheet" href="css/pages/inventory.css" />
+
+  <!-- FOUC Prevention -->
+  <style>
+    html {
+      visibility: hidden;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main Navigation">
+    <div class="sidebar-brand">
+      <div class="brand-icon">🌾</div>
+      <div class="brand-text">
+        <span class="brand-name">KisanTrack</span>
+        <span class="brand-sub">Animal Health Monitor</span>
+      </div>
+    </div>
+
+    <div class="sidebar-status">
+      <div class="status-dot"></div>
+      <span class="status-text">System Active / सक्रिय</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-label">Core Matrix / मुख्य मैट्रिक्स</div>
+
+      <a href="dashboard.html" class="nav-link" id="nav-dashboard">
+        <i class="fa-solid fa-gauge-high"></i>
+        <div class="nav-text">Dashboard<span class="nav-hi">डैशबोर्ड</span></div>
+      </a>
+
+      <a href="herd.html" class="nav-link" id="nav-animals">
+        <i class="fa-solid fa-paw"></i>
+        <div class="nav-text">Animal Profiles<span class="nav-hi">पशु प्रोफ़ाइल</span></div>
+      </a>
+
+      <a href="vitals.html" class="nav-link" id="nav-vitals">
+        <i class="fa-solid fa-heartbeat"></i>
+        <div class="nav-text">Live Vitals<span class="nav-hi">लाइव जीवन संकेत</span></div>
+      </a>
+
+      <a href="analytics.html" class="nav-link" id="nav-reports">
+        <i class="fa-solid fa-chart-column"></i>
+        <div class="nav-text">Livestock Analytics<span class="nav-hi">पशुधन विश्लेषण</span></div>
+      </a>
+
+      <div class="nav-label">Management / प्रबंधन</div>
+
+      <a href="alerts.html" class="nav-link" id="nav-alerts">
+        <i class="fa-solid fa-bell"></i>
+        <div class="nav-text">Alerts Hub<span class="nav-hi">अलर्ट हब</span></div>
+        <span id="alert-badge" class="badge-dot"></span>
+      </a>
+
+      <a href="inventory.html" class="nav-link active" id="nav-inventory">
+        <i class="fa-solid fa-boxes-stacked"></i>
+        <div class="nav-text">Inventory & Feed<span class="nav-hi">सूची और चारा</span></div>
+      </a>
+
+      <a href="#" class="nav-link" id="nav-veterinary">
+        <i class="fa-solid fa-stethoscope"></i>
+        <div class="nav-text">Veterinary Logs<span class="nav-hi">पशु चिकित्सा लॉग</span></div>
+      </a>
+
+      <a href="uploads.html" class="nav-link" id="nav-upload">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        <div class="nav-text">Data Upload<span class="nav-hi">डेटा अपलोड</span></div>
+      </a>
+
+      <div class="nav-label">Account / खाता</div>
+
+      <a href="profile.html" class="nav-link" id="nav-profile">
+        <i class="fa-solid fa-circle-user"></i>
+        <div class="nav-text">Farmer Profile<span class="nav-hi">किसान प्रोफ़ाइल</span></div>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Hamburger (mobile) -->
+  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+    <i class="fa-solid fa-bars"></i>
+  </button>
+
+  <div class="sidebar-overlay" id="sidebar-overlay-bg"></div>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="main-content">
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <h2 class="top-bar-title">Inventory Hub / <span class="hi">इन्वेंटरी हब</span></h2>
+      </div>
+      <div class="top-bar-right">
+        <button class="btn btn-primary" id="btn-add-item">
+          <i class="fa-solid fa-plus"></i> Add Item / आइटम जोड़ें
+        </button>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <!-- Page Header -->
+      <div class="page-header">
+        <h1><i class="fa-solid fa-boxes-stacked" style="color:var(--accent-green);margin-right:10px;"></i>Inventory & Feed /
+          <span style="color:var(--text-muted);">सूची और चारा</span>
+        </h1>
+        <p class="subtitle">Manage farm resources, feed stock, and medicine inventory | खेत के संसाधनों और स्टॉक का प्रबंधन करें</p>
+      </div>
+
+      <!-- KPI Summary -->
+      <div class="inventory-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 24px;">
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="fa-solid fa-layer-group"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-label">Total Items / कुल आइटम</div>
+            <div class="kpi-value" id="stat-total-items">--</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon" style="color:var(--accent-amber);background:rgba(229, 161, 0, 0.1);"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-label">Low Stock / कम स्टॉक</div>
+            <div class="kpi-value" id="stat-low-stock">--</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon" style="color:var(--accent-blue);background:rgba(59, 130, 246, 0.1);"><i class="fa-solid fa-truck-ramp-box"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-label">Next Delivery / अगली डिलीवरी</div>
+            <div class="kpi-value" style="font-size: 1.1rem;">12 May</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon" style="color:var(--accent-green);background:rgba(124, 181, 24, 0.1);"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-label">Est. Monthly Cost / मासिक खर्च</div>
+            <div class="kpi-value" style="font-size: 1.1rem;">₹ 42,500</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analytics Section -->
+      <div class="usage-analytics-row">
+        <div class="analytics-card">
+            <div class="analytics-header">
+                <h3 class="section-title" style="margin: 0;"><i class="fa-solid fa-chart-line"></i> Feed Consumption / चारा खपत</h3>
+                <div class="chart-legend">
+                    <div class="legend-item"><span class="legend-dot" style="background:#7CB518;"></span> Weekly Usage</div>
+                </div>
+            </div>
+            <div style="height: 250px;">
+                <canvas id="consumptionChart"></canvas>
+            </div>
+        </div>
+        <div class="analytics-card">
+            <h3 class="section-title" style="margin-top: 0;"><i class="fa-solid fa-tags"></i> Stock Alert / स्टॉक अलर्ट</h3>
+            <div class="alert-list" style="display:flex; flex-direction:column; gap:12px;">
+                <div class="status-chip chip-low" style="display:flex; align-items:center; justify-content:space-between;">
+                    <span>Grain Mix / अनाज</span>
+                    <span>350kg left</span>
+                </div>
+                <div class="status-chip chip-out" style="display:flex; align-items:center; justify-content:space-between;">
+                    <span>Antibiotics / एंटीबायोटिक्स</span>
+                    <span>2 packs left</span>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <!-- Inventory Grid -->
+      <h3 class="section-title"><i class="fa-solid fa-list-check"></i> Stock Details / स्टॉक विवरण</h3>
+      <div class="inventory-grid" id="inventory-grid">
+        <!-- Populated by inventory.js -->
+      </div>
+
+    </div><!-- /.content-area -->
+  </main>
+
+  <!-- MOBILE BOTTOM NAVIGATION -->
+  <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile Navigation">
+    <div class="mobile-nav-inner">
+      <a href="dashboard.html" class="mobile-nav-item" id="mnav-dashboard">
+        <i class="fa-solid fa-gauge-high"></i>
+        <span>Home</span>
+      </a>
+      <a href="herd.html" class="mobile-nav-item" id="mnav-animals">
+        <i class="fa-solid fa-paw"></i>
+        <span>Herd</span>
+      </a>
+      <a href="vitals.html" class="mobile-nav-item" id="mnav-vitals">
+        <i class="fa-solid fa-heartbeat"></i>
+        <span>Vitals</span>
+      </a>
+      <a href="inventory.html" class="mobile-nav-item active" id="mnav-inventory">
+        <i class="fa-solid fa-boxes-stacked"></i>
+        <span>Stock</span>
+      </a>
+      <a href="alerts.html" class="mobile-nav-item" id="mnav-alerts">
+        <i class="fa-solid fa-bell"></i>
+        <span>Alerts</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <div class="modal-emoji">📦</div>
+          <div>
+            <h3 class="modal-title" id="modal-title">Inventory Item</h3>
+            <p class="modal-subtitle">Update your farm resource details</p>
+          </div>
+        </div>
+        <button class="modal-close" id="modal-close-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" style="padding: 24px;">
+        <form id="inventory-form">
+          <div class="form-group-row">
+            <div>
+              <label class="form-label">Item Name (EN)</label>
+              <input type="text" class="form-input" placeholder="e.g. Alfalfa Hay">
+            </div>
+            <div>
+              <label class="form-label">Item Name (HI)</label>
+              <input type="text" class="form-input" placeholder="जैसे: अल्फल्फा घास">
+            </div>
+          </div>
+          <div class="form-group-row">
+            <div>
+              <label class="form-label">Current Stock</label>
+              <input type="number" class="form-input" placeholder="e.g. 500">
+            </div>
+            <div>
+              <label class="form-label">Total Capacity</label>
+              <input type="number" class="form-input" placeholder="e.g. 2000">
+            </div>
+          </div>
+          <div style="margin-top: 24px; text-align: right;">
+            <button type="button" class="btn btn-secondary" onclick="closeModal()" style="margin-right: 10px;">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="app-toast">
+    <i class="fa-solid fa-circle-check toast-icon"></i>
+    <span class="toast-msg" id="toast-msg">Action completed.</span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script src="js/core/utils.js"></script>
+  <script src="js/pages/inventory.js"></script>
+</body>
+
+</html>
