@@ -152,6 +152,25 @@
     if (btnSignOut) btnSignOut.addEventListener('click', handleSignOut);
     if (btnSidebarSignOut) btnSidebarSignOut.addEventListener('click', handleSignOut);
 
+    // Hamburger Menu Logic
+    const hamburger = document.getElementById('hamburger');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    if (hamburger && sidebar && overlay) {
+      hamburger.addEventListener('click', () => {
+        const isOpen = sidebar.classList.toggle('open');
+        overlay.classList.toggle('active', isOpen);
+        hamburger.setAttribute('aria-expanded', isOpen);
+      });
+
+      overlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+        hamburger.setAttribute('aria-expanded', 'false');
+      });
+    }
+
     // Sidebar Active State Sync
     syncActiveNav();
   });

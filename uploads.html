@@ -34,8 +34,6 @@
      SIDEBAR
 ═══════════════════════════════════════════════════════ -->
   <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main Navigation">
-
-    <!-- Brand -->
     <div class="sidebar-brand">
       <div class="brand-icon">🌾</div>
       <div class="brand-text">
@@ -44,69 +42,82 @@
       </div>
     </div>
 
-    <!-- System Status -->
     <div class="sidebar-status">
-      <div class="status-dot" id="status-dot"></div>
-      <span class="status-text" id="status-text">System Online / ऑनलाइन</span>
+      <div class="status-dot"></div>
+      <span class="status-text">System Active / सक्रिय</span>
     </div>
 
-    <!-- Navigation -->
     <nav class="sidebar-nav">
-      <div class="nav-label">Main Menu / मुख्य मेन्यू</div>
+      <div class="nav-label">Core Matrix / मुख्य मैट्रिक्स</div>
 
       <a href="dashboard.html" class="nav-link" id="nav-dashboard">
         <i class="fa-solid fa-gauge-high"></i>
-        <span class="nav-text">Dashboard<span class="nav-hi">डैशबोर्ड</span></span>
+        <div class="nav-text">Dashboard<span class="nav-hi">डैशबोर्ड</span></div>
       </a>
 
       <a href="herd.html" class="nav-link" id="nav-animals">
         <i class="fa-solid fa-paw"></i>
-        <span class="nav-text">Animal Profiles<span class="nav-hi">पशु प्रोफ़ाइल</span></span>
+        <div class="nav-text">Animal Profiles<span class="nav-hi">पशु प्रोफ़ाइल</span></div>
       </a>
 
       <a href="herd.html?tab=vitals" class="nav-link" id="nav-vitals">
         <i class="fa-solid fa-heartbeat"></i>
-        <span class="nav-text">Live Vitals<span class="nav-hi">लाइव जीवन संकेत</span></span>
+        <div class="nav-text">Live Vitals<span class="nav-hi">लाइव जीवन संकेत</span></div>
       </a>
 
       <a href="camera.html" class="nav-link" id="nav-camera">
         <i class="fa-solid fa-camera"></i>
-        <span class="nav-text">Camera Monitor<span class="nav-hi">कैमरा मॉनिटर</span></span>
+        <div class="nav-text">AI Camera Monitor<span class="nav-hi">AI कैमरा मॉनिटर</span></div>
       </a>
+
+      <div class="nav-label">Management / प्रबंधन</div>
 
       <a href="alerts.html" class="nav-link" id="nav-alerts">
         <i class="fa-solid fa-bell"></i>
-        <span class="nav-text">Alerts<span class="nav-hi">अलर्ट</span></span>
-        <span id="alert-badge"
-          style="background:var(--accent-red);color:#fff;font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:100px;margin-left:auto;">0</span>
+        <div class="nav-text">Alerts Hub<span class="nav-hi">अलर्ट हब</span></div>
+        <span id="alert-badge" class="badge-dot"></span>
       </a>
 
       <a href="alerts.html?tab=reports" class="nav-link" id="nav-reports">
         <i class="fa-solid fa-chart-column"></i>
-        <span class="nav-text">Reports<span class="nav-hi">रिपोर्ट</span></span>
+        <div class="nav-text">Livestock Analytics<span class="nav-hi">पशुधन विश्लेषण</span></div>
+      </a>
+
+      <a href="#" class="nav-link" id="nav-inventory">
+        <i class="fa-solid fa-boxes-stacked"></i>
+        <div class="nav-text">Inventory & Feed<span class="nav-hi">सूची और चारा</span></div>
+      </a>
+
+      <a href="#" class="nav-link" id="nav-veterinary">
+        <i class="fa-solid fa-stethoscope"></i>
+        <div class="nav-text">Veterinary Logs<span class="nav-hi">पशु चिकित्सा लॉग</span></div>
       </a>
 
       <a href="uploads.html" class="nav-link active" id="nav-upload">
-        <i class="fa-solid fa-upload"></i>
-        <span class="nav-text">Upload Sensor Log<span class="nav-hi">सेंसर डेटा अपलोड</span></span>
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        <div class="nav-text">Data Upload<span class="nav-hi">डेटा अपलोड</span></div>
       </a>
 
-      <div class="nav-label" style="margin-top:8px;">Account / खाता</div>
+      <div class="nav-label">Account / खाता</div>
 
       <a href="profile.html" class="nav-link" id="nav-profile">
         <i class="fa-solid fa-circle-user"></i>
-        <span class="nav-text">Farmer Profile<span class="nav-hi">किसान प्रोफ़ाइल</span></span>
+        <div class="nav-text">Farmer Profile<span class="nav-hi">किसान प्रोफ़ाइल</span></div>
+      </a>
+
+      <a href="#" class="nav-link" id="nav-settings">
+        <i class="fa-solid fa-gear"></i>
+        <div class="nav-text">Farm Settings<span class="nav-hi">खेत की सेटिंग्स</span></div>
       </a>
     </nav>
 
-    <!-- Footer -->
     <div class="sidebar-footer">
       <div class="last-sync">
         <i class="fa-solid fa-rotate"></i>
-        Last sync: <strong id="last-sync-time">2 min ago</strong>
+        Synced: <strong id="last-sync-time">Just now</strong>
       </div>
       <div class="farm-info">
-        <i class="fa-solid fa-location-dot" style="color:var(--text-dim)"></i>
+        <i class="fa-solid fa-location-dot"></i>
         <span id="farm-location">Anandpur, Gujarat</span>
       </div>
     </div>
@@ -117,19 +128,48 @@
     <i class="fa-solid fa-bars"></i>
   </button>
 
-  <!-- Sidebar overlay (mobile) -->
   <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
   <!-- ═══════════════════════════════════════════════════════
      MAIN CONTENT
 ═══════════════════════════════════════════════════════ -->
   <main class="main-content" id="main-content">
-    <div class="content-area">
+    
+    <!-- Global Top Bar -->
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <h2 class="top-bar-title">Data Upload / <span class="hi">डेटा अपलोड</span></h2>
+      </div>
+      <div class="top-bar-right">
+        <div class="user-profile-dropdown">
+          <button class="profile-dropdown-btn" id="topbar-profile-dropdown-btn">
+            <div class="user-avatar" id="auth-avatar">F</div>
+            <div class="user-info">
+              <span class="user-name" id="auth-first-name">Farmer</span>
+              <span class="user-role">Premium Plan</span>
+            </div>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="profile-dropdown-menu" id="profile-dropdown-menu">
+            <div class="dropdown-header">
+              <p>Signed in as</p>
+              <strong id="auth-first-name-hi">Farmer</strong>
+            </div>
+            <div class="dropdown-divider"></div>
+            <a href="profile.html" class="dropdown-item">
+              <i class="fa-solid fa-user-circle"></i> View Profile
+            </a>
+            <div class="dropdown-item" id="btn-sign-out">
+              <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
 
-      <!-- ─────────────────────────────────────────────────
-         SECTION 6: UPLOAD SENSOR LOG
-    ───────────────────────────────────────────────── -->
+    <div class="content-area">
       <section class="active tab-section" id="section-upload" aria-label="Upload Sensor Log">
+
 
         <div class="page-header">
           <h1><i class="fa-solid fa-upload" style="color:var(--accent-green);margin-right:10px;"></i>Upload Sensor Log /
@@ -240,11 +280,7 @@
       </a>
       <a href="herd.html" class="mobile-nav-item" id="mnav-animals">
         <i class="fa-solid fa-paw"></i>
-        <span>Animals</span>
-      </a>
-      <a href="herd.html?tab=vitals" class="mobile-nav-item" id="mnav-vitals">
-        <i class="fa-solid fa-heartbeat"></i>
-        <span>Vitals</span>
+        <span>Herd</span>
       </a>
       <a href="alerts.html" class="mobile-nav-item" id="mnav-alerts">
         <i class="fa-solid fa-bell"></i>
