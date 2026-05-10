@@ -15,6 +15,10 @@ def update_html_files():
             new_content = content.replace(target_string, replacement_string)
             new_content = new_content.replace(analytics_target, analytics_replacement)
             
+            vet_target = 'href="#" class="nav-link" id="nav-veterinary"'
+            vet_replacement = 'href="veterinary.html" class="nav-link" id="nav-veterinary"'
+            new_content = new_content.replace(vet_target, vet_replacement)
+            
             if new_content != content:
                 with open(filename, 'w', encoding='utf-8') as f:
                     f.write(new_content)

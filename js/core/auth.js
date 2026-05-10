@@ -131,6 +131,9 @@
     else if (path.includes('inventory.html')) {
       if (window.InventoryModule) window.InventoryModule.init();
     }
+    else if (path.includes('veterinary.html')) {
+      if (window.VeterinaryModule) window.VeterinaryModule.init();
+    }
   }
 
   // --- 4. Shared Listeners ---
@@ -193,6 +196,7 @@
       'uploads.html':   'nav-upload',
       'profile.html':   'nav-profile',
       'inventory.html': 'nav-inventory',
+      'veterinary.html': 'nav-veterinary',
     };
 
     // Also map mobile nav
@@ -203,6 +207,7 @@
       'camera.html':    'mnav-camera',
       'profile.html':   'mnav-profile',
       'inventory.html': 'mnav-inventory',
+      'veterinary.html': 'mnav-veterinary',
     };
 
     Object.keys(navMap).forEach(file => {
