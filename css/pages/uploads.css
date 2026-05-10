@@ -1,5 +1,250 @@
-/* ============================================
-   KisanTrack — uploads.css
-   Purpose: Styles for uploads.css
-   Used by: uploads.html
-   ============================================ */
+/* 1. UPLOAD CONTAINER */
+.upload-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 40px;
+    box-shadow: var(--shadow-lg);
+}
+
+/* 2. DROPZONE */
+.dropzone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-lg);
+    padding: 48px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    background: rgba(255, 255, 255, 0.02);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.dropzone i {
+    font-size: 3.5rem;
+    color: var(--accent-green);
+    margin-bottom: 8px;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.dropzone:hover {
+    border-color: var(--accent-green);
+    background: rgba(124, 181, 24, 0.05);
+}
+
+.dropzone:hover i {
+    transform: translateY(-8px);
+}
+
+.dropzone.drag-over {
+    border-color: var(--accent-green);
+    background: rgba(124, 181, 24, 0.1);
+    transform: scale(1.02);
+}
+
+.dropzone h3 {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.dropzone p {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+}
+
+.formats {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.format-tag {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+}
+
+/* 3. FILE PREVIEW */
+.file-preview {
+    display: none;
+    align-items: center;
+    gap: 16px;
+    margin-top: 24px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.file-preview.visible {
+    display: flex;
+}
+
+.file-icon {
+    font-size: 1.8rem;
+    color: var(--accent-green);
+}
+
+.file-info {
+    flex: 1;
+}
+
+.file-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.file-size {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+}
+
+/* 4. PROGRESS BAR */
+.upload-progress {
+    display: none;
+    margin-top: 24px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.upload-progress.visible {
+    display: block;
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    margin-bottom: 10px;
+    color: var(--text-muted);
+}
+
+.progress-bar-outer {
+    height: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 100px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+.progress-bar-inner {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent-green), #a3e635);
+    border-radius: 100px;
+    transition: width 0.3s ease-out;
+    box-shadow: 0 0 10px rgba(124, 181, 24, 0.3);
+}
+
+/* 5. UPLOAD RESULT */
+.upload-result {
+    display: none;
+    margin-top: 32px;
+    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.upload-result.visible {
+    display: block;
+}
+
+.result-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--accent-green);
+    margin-bottom: 24px;
+}
+
+.result-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.result-stat {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    text-align: center;
+    border: 1px solid var(--border);
+}
+
+.result-stat-num {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.result-stat-label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* 6. DATA TABLE */
+.table-scroll {
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.data-table th {
+    background: rgba(255, 255, 255, 0.05);
+    text-align: left;
+    padding: 12px 16px;
+    color: var(--text-muted);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+}
+
+.data-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+}
+
+.data-table tr:last-child td {
+    border-bottom: none;
+}
+
+.severity-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.sev-high { background: rgba(192, 57, 43, 0.15); color: var(--accent-red); }
+.sev-medium { background: rgba(229, 161, 0, 0.15); color: var(--accent-amber); }
+.sev-low { background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); }
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}

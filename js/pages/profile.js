@@ -5,19 +5,19 @@
 // Dependencies: Firebase, FirestoreStore
 // Last Updated: 2026-05-09
 // ============================================
-const ProfileModule = (function () {
+var ProfileModule = (function () {
   'use strict';
 
-  let isEditing = false;
-  let farmerData = null;
+  var isEditing = false;
+  var farmerData = null;
 
-  const EDITABLE_FIELDS = [
+  var EDITABLE_FIELDS = [
     'fullName', 'farmName', 'village', 'district', 'state',
     'farmSizeAcres', 'yearsOfFarming', 'primaryAnimal', 'sensorSystemId'
   ];
 
   function render() {
-    const root = document.getElementById('profile-section-root');
+    var root = document.getElementById('profile-section-root');
     if (!root) return;
 
     if (!farmerData) {

@@ -197,6 +197,7 @@
       'profile.html':   'nav-profile',
       'inventory.html': 'nav-inventory',
       'veterinary.html': 'nav-veterinary',
+      'analytics.html': 'nav-reports',
     };
 
     // Also map mobile nav
@@ -208,6 +209,7 @@
       'profile.html':   'mnav-profile',
       'inventory.html': 'mnav-inventory',
       'veterinary.html': 'mnav-veterinary',
+      'analytics.html': 'mnav-analytics',
     };
 
     Object.keys(navMap).forEach(file => {
