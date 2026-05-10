@@ -3,7 +3,24 @@
    Purpose: Styles for Inventory & Feed Management
    ============================================ */
 
-/* 1. TOP BAR & SEARCH EXTENSIONS */
+/* 1. PAGE HEADER EXTENSIONS */
+.page-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+}
+
+.page-header-flex .header-text {
+    flex: 1;
+}
+
+.page-header-flex .header-actions {
+    display: flex;
+    align-items: center;
+}
+
+/* 2. TOP BAR & SEARCH EXTENSIONS */
 .inventory-controls {
     display: flex;
     justify-content: space-between;
@@ -18,7 +35,7 @@
     min-width: 280px;
 }
 
-/* 2. INVENTORY CARDS GRID */
+/* 3. INVENTORY CARDS GRID */
 .inventory-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -139,7 +156,7 @@
     color: var(--text-dim);
 }
 
-/* 3. CONSUMPTION CHART SECTION */
+/* 4. CONSUMPTION CHART SECTION */
 .usage-analytics-row {
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -186,7 +203,7 @@
     border-radius: 50%;
 }
 
-/* 4. MODAL EXTENSIONS */
+/* 5. MODAL EXTENSIONS */
 .form-group-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -224,7 +241,7 @@
     box-shadow: 0 0 0 3px var(--glow-green);
 }
 
-/* 5. STATUS CHIPS */
+/* 6. STATUS CHIPS */
 .status-chip {
     padding: 4px 12px;
     border-radius: 100px;
@@ -237,7 +254,7 @@
 .chip-low { background: rgba(229, 161, 0, 0.15); color: var(--accent-amber); }
 .chip-out { background: rgba(192, 57, 43, 0.15); color: var(--accent-red); }
 
-/* 6. ADVANCED CONTROLS */
+/* 7. ADVANCED CONTROLS */
 .filter-bar {
     display: flex;
     gap: 10px;
@@ -299,7 +316,7 @@
     box-shadow: 0 0 0 3px var(--glow-green);
 }
 
-/* 7. QUICK ACTIONS */
+/* 8. QUICK ACTIONS */
 .quick-actions {
     display: flex;
     gap: 8px;
@@ -328,7 +345,7 @@
 .action-btn.minus:hover { color: var(--accent-red); border-color: var(--accent-red); }
 .action-btn.plus:hover { color: var(--accent-green); border-color: var(--accent-green); }
 
-/* 8. TRANSACTION LOG */
+/* 9. TRANSACTION LOG */
 .transaction-list {
     display: flex;
     flex-direction: column;
@@ -387,7 +404,7 @@
     font-style: italic;
 }
 
-/* 9. EXPIRY TAGS */
+/* 10. EXPIRY TAGS */
 .expiry-tag {
     font-size: 0.65rem;
     font-weight: 700;
