@@ -128,6 +128,9 @@
     else if (path.includes('profile.html')) {
       if (window.ProfileModule) window.ProfileModule.init();
     }
+    else if (path.includes('inventory.html')) {
+      if (window.InventoryModule) window.InventoryModule.init();
+    }
   }
 
   // --- 4. Shared Listeners ---
@@ -189,6 +192,7 @@
       'camera.html':    'nav-camera',
       'uploads.html':   'nav-upload',
       'profile.html':   'nav-profile',
+      'inventory.html': 'nav-inventory',
     };
 
     // Also map mobile nav
@@ -198,6 +202,7 @@
       'alerts.html':    'mnav-alerts',
       'camera.html':    'mnav-camera',
       'profile.html':   'mnav-profile',
+      'inventory.html': 'mnav-inventory',
     };
 
     Object.keys(navMap).forEach(file => {
