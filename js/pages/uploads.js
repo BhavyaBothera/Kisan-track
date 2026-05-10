@@ -201,5 +201,14 @@ var UploadsModule = (function () {
     if (window.showToast) window.showToast('✓ Records merged into database successfully', 'success');
   }
 
-  return { init };
+  function returnToHub() {
+    const main = document.getElementById('main-content');
+    if (main) main.classList.add('fade-out');
+    
+    setTimeout(() => {
+        window.location.href = 'dashboard.html';
+    }, 500);
+  }
+
+  return { init, returnToHub };
 })();
