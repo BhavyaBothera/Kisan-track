@@ -126,10 +126,12 @@
     <div class="content-area">
       <!-- Page Header -->
       <div class="page-header">
-        <h1><i class="fa-solid fa-boxes-stacked" style="color:var(--accent-green);margin-right:10px;"></i>Inventory & Feed /
+        <h1><i class="fa-solid fa-boxes-stacked" style="color:var(--accent-green);margin-right:10px;"></i>Inventory &
+          Feed /
           <span style="color:var(--text-muted);">सूची और चारा</span>
         </h1>
-        <p class="subtitle">Manage farm resources, feed stock, and medicine inventory | खेत के संसाधनों और स्टॉक का प्रबंधन करें</p>
+        <p class="subtitle">Manage farm resources, feed stock, and medicine inventory | खेत के संसाधनों और स्टॉक का
+          प्रबंधन करें</p>
       </div>
 
       <!-- KPI Summary -->
@@ -142,21 +144,24 @@
           </div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-icon" style="color:var(--accent-amber);background:rgba(229, 161, 0, 0.1);"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <div class="kpi-icon" style="color:var(--accent-amber);background:rgba(229, 161, 0, 0.1);"><i
+              class="fa-solid fa-triangle-exclamation"></i></div>
           <div class="kpi-body">
             <div class="kpi-label">Low Stock / कम स्टॉक</div>
             <div class="kpi-value" id="stat-low-stock">--</div>
           </div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-icon" style="color:var(--accent-blue);background:rgba(59, 130, 246, 0.1);"><i class="fa-solid fa-truck-ramp-box"></i></div>
+          <div class="kpi-icon" style="color:var(--accent-blue);background:rgba(59, 130, 246, 0.1);"><i
+              class="fa-solid fa-truck-ramp-box"></i></div>
           <div class="kpi-body">
             <div class="kpi-label">Next Delivery / अगली डिलीवरी</div>
             <div class="kpi-value" style="font-size: 1.1rem;">12 May</div>
           </div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-icon" style="color:var(--accent-green);background:rgba(124, 181, 24, 0.1);"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+          <div class="kpi-icon" style="color:var(--accent-green);background:rgba(124, 181, 24, 0.1);"><i
+              class="fa-solid fa-indian-rupee-sign"></i></div>
           <div class="kpi-body">
             <div class="kpi-label">Est. Monthly Cost / मासिक खर्च</div>
             <div class="kpi-value" style="font-size: 1.1rem;">₹ 42,500</div>
@@ -167,7 +172,7 @@
       <!-- Advanced Controls -->
       <div class="inventory-controls">
         <div class="filter-bar" id="inventory-filter-bar">
-          <button class="filter-btn active" data-filter="all">All / सभी</button>
+          <button class="filter-btn" data-filter="all">All / सभी</button>
           <button class="filter-btn" data-filter="Feed">Feed / चारा</button>
           <button class="filter-btn" data-filter="Medicine">Medicine / दवा</button>
           <button class="filter-btn" data-filter="Supplies">Supplies / आपूर्ति</button>
@@ -181,22 +186,24 @@
       <!-- Analytics & Logs Section -->
       <div class="usage-analytics-row">
         <div class="analytics-card">
-            <div class="analytics-header">
-                <h3 class="section-title" style="margin: 0;"><i class="fa-solid fa-chart-line"></i> Feed Consumption / चारा खपत</h3>
-                <div class="chart-legend">
-                    <div class="legend-item"><span class="legend-dot" style="background:#7CB518;"></span> Weekly Usage</div>
-                </div>
+          <div class="analytics-header">
+            <h3 class="section-title" style="margin: 0;"><i class="fa-solid fa-chart-line"></i> Feed Consumption / चारा
+              खपत</h3>
+            <div class="chart-legend">
+              <div class="legend-item"><span class="legend-dot" style="background:#7CB518;"></span> Weekly Usage</div>
             </div>
-            <div style="height: 250px;">
-                <canvas id="consumptionChart"></canvas>
-            </div>
+          </div>
+          <div style="height: 250px;">
+            <canvas id="consumptionChart"></canvas>
+          </div>
         </div>
         <div class="analytics-card">
-            <h3 class="section-title" style="margin-top: 0;"><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity / हाल की गतिविधि</h3>
-            <div class="transaction-list" id="transaction-log">
-                <!-- Populated by inventory.js -->
-                <div class="empty-state">No recent activity</div>
-            </div>
+          <h3 class="section-title" style="margin-top: 0;"><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity
+            / हाल की गतिविधि</h3>
+          <div class="transaction-list" id="transaction-log">
+            <!-- Populated by inventory.js -->
+            <div class="empty-state">No recent activity</div>
+          </div>
         </div>
       </div>
 
@@ -250,28 +257,44 @@
       </div>
       <div class="modal-body" style="padding: 24px;">
         <form id="inventory-form">
+          <input type="hidden" id="form-item-id">
           <div class="form-group-row">
             <div>
               <label class="form-label">Item Name (EN)</label>
-              <input type="text" class="form-input" placeholder="e.g. Alfalfa Hay">
+              <input type="text" id="form-item-name" class="form-input" placeholder="e.g. Alfalfa Hay" required>
             </div>
             <div>
               <label class="form-label">Item Name (HI)</label>
-              <input type="text" class="form-input" placeholder="जैसे: अल्फल्फा घास">
+              <input type="text" id="form-item-name-hi" class="form-input" placeholder="जैसे: अल्फल्फा घास" required>
+            </div>
+          </div>
+          <div class="form-group-row">
+            <div>
+              <label class="form-label">Category / श्रेणी</label>
+              <select id="form-item-category" class="form-input" required>
+                <option value="Feed">Feed / चारा</option>
+                <option value="Medicine">Medicine / दवा</option>
+                <option value="Supplies">Supplies / आपूर्ति</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Unit / इकाई (e.g. kg, vials)</label>
+              <input type="text" id="form-item-unit" class="form-input" placeholder="e.g. kg" required>
             </div>
           </div>
           <div class="form-group-row">
             <div>
               <label class="form-label">Current Stock</label>
-              <input type="number" class="form-input" placeholder="e.g. 500">
+              <input type="number" id="form-item-current" class="form-input" placeholder="e.g. 500" required>
             </div>
             <div>
               <label class="form-label">Total Capacity</label>
-              <input type="number" class="form-input" placeholder="e.g. 2000">
+              <input type="number" id="form-item-total" class="form-input" placeholder="e.g. 2000" required>
             </div>
           </div>
           <div style="margin-top: 24px; text-align: right;">
-            <button type="button" class="btn btn-secondary" onclick="closeModal()" style="margin-right: 10px;">Cancel</button>
+            <button type="button" class="btn btn-secondary" onclick="InventoryModule.closeModal()"
+              style="margin-right: 10px;">Cancel</button>
             <button type="submit" class="btn btn-primary">Save Changes</button>
           </div>
         </form>

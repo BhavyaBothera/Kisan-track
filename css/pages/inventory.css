@@ -238,6 +238,37 @@
 .chip-out { background: rgba(192, 57, 43, 0.15); color: var(--accent-red); }
 
 /* 6. ADVANCED CONTROLS */
+.filter-bar {
+    display: flex;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 6px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.filter-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.filter-btn.active {
+    background: var(--accent-green);
+    color: var(--bg-main);
+}
+
 .search-box-wrap {
     position: relative;
     max-width: 400px;

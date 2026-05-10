@@ -43,11 +43,84 @@ const InventoryModule = (function () {
             });
         });
 
+        // Form Submission
+        const form = document.getElementById('inventory-form');
+        if (form) {
+            form.addEventListener('submit', handleFormSubmit);
+        }
+
         // Modal Listeners
         const addItemBtn = document.getElementById('btn-add-item');
         const closeModalBtn = document.getElementById('modal-close-btn');
-        if (addItemBtn) addItemBtn.addEventListener('click', () => openModal('Add New Item / नया आइटम जोड़ें'));
+        if (addItemBtn) addItemBtn.addEventListener('click', () => {
+            resetForm();
+            openModal('Add New Item / नया आइटम जोड़ें');
+        });
         if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+    }
+
+    /**
+     * Handle Form Submission (Add or Update)
+     */
+    function handleFormSubmit(e) {
+        e.preventDefault();
+        
+        const id = document.getElementById('form-item-id').value;
+        const name = document.getElementById('form-item-name').value;
+        const nameHi = document.getElementById('form-item-name-hi').value;
+        const category = document.getElementById('form-item-category').value;
+        const unit = document.getElementById('form-item-unit').value;
+        const current = parseInt(document.getElementById('form-item-current').value);
+        const total = parseInt(document.getElementById('form-item-total').value);
+
+        const pct = (current / total) * 100;
+        const status = pct < 10 ? 'critical' : (pct < 25 ? 'low' : 'in-stock');
+
+        if (id) {
+            // Update existing
+            const item = inventoryItems.find(i => i.id === id);
+            if (item) {
+                const diff = current - item.current;
+                Object.assign(item, { name, nameHi, category, unit, current, total, status });
+                if (diff !== 0) logTransaction(item, diff);
+                if (window.showToast) window.showToast(`Updated ${name} successfully!`, 'success');
+            }
+        } else {
+            // Add new
+            const newItem = {
+                id: 'NEW-' + Date.now(),
+                name, nameHi, category, unit, current, total, status,
+                lastRefill: new Date().toISOString().split('T')[0]
+            };
+            inventoryItems.push(newItem);
+            logTransaction(newItem, current);
+            if (window.showToast) window.showToast(`Added ${name} to inventory!`, 'success');
+        }
+
+        closeModal();
+        renderInventory();
+        updateKPIs();
+    }
+
+    function resetForm() {
+        const form = document.getElementById('inventory-form');
+        if (form) form.reset();
+        document.getElementById('form-item-id').value = '';
+    }
+
+    function editItem(id) {
+        const item = inventoryItems.find(i => i.id === id);
+        if (!item) return;
+
+        document.getElementById('form-item-id').value = item.id;
+        document.getElementById('form-item-name').value = item.name;
+        document.getElementById('form-item-name-hi').value = item.nameHi;
+        document.getElementById('form-item-category').value = item.category;
+        document.getElementById('form-item-unit').value = item.unit;
+        document.getElementById('form-item-current').value = item.current;
+        document.getElementById('form-item-total').value = item.total;
+
+        openModal('Edit Item / आइटम संपादित करें');
     }
 
     /**
