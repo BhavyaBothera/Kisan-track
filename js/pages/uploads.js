@@ -28,6 +28,7 @@ var UploadsModule = (function () {
     const icon = filePreview ? filePreview.querySelector('.file-icon i') : null;
     if (icon) {
       if (file.name.endsWith('.json')) icon.className = 'fa-solid fa-file-code';
+      else if (file.name.endsWith('.xlsx')) icon.className = 'fa-solid fa-file-excel';
       else icon.className = 'fa-solid fa-file-csv';
     }
 
@@ -74,6 +75,14 @@ var UploadsModule = (function () {
   }
 
   async function finalizeUpload() {
+    const category = document.getElementById('upload-category').value;
+    const categoryLabel = {
+        'vitals': 'Live Vitals / लाइव जीवन संकेत',
+        'inventory': 'Inventory / इन्वेंटरी',
+        'veterinary': 'Veterinary / पशु चिकित्सा',
+        'herd': 'Herd Profiles / पशु प्रोफ़ाइल'
+    }[category];
+
     const records = 100 + Math.floor(Math.random() * 400);
     const anomalies = [
         { id: 'C002', param: 'Temperature', value: '41.2°C', sev: 'High' },
@@ -86,12 +95,13 @@ var UploadsModule = (function () {
       fileSize: selectedFile.size,
       recordsParsed: records,
       anomalies: anomalies,
+      category: category,
       timestamp: new Date().toLocaleString(),
       status: 'Success'
     };
 
     showResults(summary);
-    if (window.showToast) window.showToast('✓ Records parsed and analyzed successfully');
+    if (window.showToast) window.showToast(`✓ Records parsed and uploaded to ${categoryLabel}`);
   }
 
   function showResults(data) {
@@ -116,11 +126,11 @@ var UploadsModule = (function () {
   }
 
   function handleFileSelect(file) {
-    const allowed = ['.csv', '.json'];
+    const allowed = ['.csv', '.json', '.xlsx'];
     const ext = '.' + file.name.split('.').pop().toLowerCase();
 
     if (!allowed.includes(ext)) {
-      if (window.showToast) window.showToast('⚠ Please select a CSV or JSON file.', 'warning');
+      if (window.showToast) window.showToast('⚠ Please select a CSV, JSON, or XLSX file.', 'warning');
       return;
     }
     showFilePreview(file);

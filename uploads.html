@@ -180,6 +180,20 @@
         </div>
 
         <div class="upload-container">
+          <!-- Data Category Selector -->
+          <div class="upload-options" style="margin-bottom: 24px;">
+            <label class="form-label" style="display:block; margin-bottom:8px; font-weight:600; color:var(--text-primary);">
+              <i class="fa-solid fa-list-check" style="margin-right:8px; color:var(--accent-blue);"></i>
+              Select Data Category / डेटा श्रेणी चुनें
+            </label>
+            <select id="upload-category" class="form-input" style="width:100%; max-width:400px; background:var(--bg-card); border-color:var(--border);">
+              <option value="vitals">Live Vitals Data / लाइव जीवन संकेत डेटा</option>
+              <option value="inventory">Inventory & Feed Logs / इन्वेंटरी और चारा लॉग</option>
+              <option value="veterinary">Veterinary Records / पशु चिकित्सा रिकॉर्ड</option>
+              <option value="herd">Herd Profiles / पशु प्रोफ़ाइल</option>
+            </select>
+            <p style="font-size:0.75rem; color:var(--text-dim); margin-top:6px;">Select which module this data belongs to | चुनें कि यह डेटा किस मॉड्यूल का है</p>
+          </div>
 
           <!-- Drop Zone -->
           <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Drop file here or click to browse">
@@ -189,13 +203,14 @@
             <div class="formats">
               <span class="format-tag">CSV</span>
               <span class="format-tag">JSON</span>
+              <span class="format-tag">XLSX</span>
               <span class="format-tag">Max 50MB</span>
             </div>
           </div>
 
           <!-- Browse Button -->
           <div class="upload-actions">
-            <input type="file" id="file-input" accept=".csv,.json" style="display:none;" aria-label="Select file" />
+            <input type="file" id="file-input" accept=".csv,.json,.xlsx" style="display:none;" aria-label="Select file" />
             <button class="btn btn-secondary" id="browse-btn" style="margin-top:14px;">
               <i class="fa-solid fa-folder-open"></i> Browse Files / फ़ाइल चुनें
             </button>
