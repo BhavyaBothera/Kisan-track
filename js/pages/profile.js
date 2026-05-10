@@ -1,97 +1,137 @@
-/**
- * KisanTrack — profile.js
- * Comprehensive Profile Management System
- * Features: Tab switching, multi-section edits, Firestore sync
- */
+// ============================================
+// KisanTrack — profile.js
+// Purpose: Farmer Profile Management (Consistent UI)
+// ============================================
 var ProfileModule = (function () {
   'use strict';
 
-  let isEditing = false;
-  let farmerData = null;
+  var isEditing = false;
+  var farmerData = null;
 
-  const CONFIG = {
-    personal: ['fullName', 'yearsOfFarming', 'village', 'district', 'state'],
-    farm: ['farmName', 'farmSizeAcres', 'primaryAnimal', 'sensorSystemId']
+  var CONFIG = {
+    personal: [
+        { key: 'fullName', label: 'Full Name', icon: 'fa-signature' },
+        { key: 'yearsOfFarming', label: 'Experience (Years)', icon: 'fa-calendar-check', type: 'number' },
+        { key: 'village', label: 'Village', icon: 'fa-house-user' },
+        { key: 'district', label: 'District', icon: 'fa-map-location-dot' },
+        { key: 'state', label: 'State', icon: 'fa-flag' }
+    ],
+    farm: [
+        { key: 'farmName', label: 'Farm Name', icon: 'fa-seedling' },
+        { key: 'farmSizeAcres', label: 'Total Area (Acres)', icon: 'fa-vector-square', type: 'number' },
+        { key: 'primaryAnimal', label: 'Primary Livestock', icon: 'fa-cow' },
+        { key: 'sensorSystemId', label: 'Sensor System ID', icon: 'fa-microchip' }
+    ]
   };
 
   function render() {
-    if (!farmerData) return;
+    var root = document.getElementById('profile-section-root');
+    if (!root) return;
+
+    if (!farmerData) {
+      root.innerHTML = '<div class="profile-loading"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading Profile...</div>';
+      return;
+    }
 
     const f = farmerData;
     const initials = f.fullName ? (f.fullName.split(' ')[0][0] + (f.fullName.split(' ')[1] ? f.fullName.split(' ')[1][0] : '')).toUpperCase() : 'F';
 
-    // 1. Update Hero
-    const heroName = document.getElementById('hero-name');
-    if (heroName) heroName.textContent = f.fullName || 'Farmer Name';
-    const heroAvatar = document.getElementById('profile-avatar-display');
-    if (heroAvatar) heroAvatar.textContent = initials;
+    // Update Stats (KPIs)
+    const state = (window.FirestoreStore && typeof window.FirestoreStore.getState === 'function') 
+        ? window.FirestoreStore.getState() 
+        : { animals: [], alerts: [] };
+    
+    const sAnimals = document.getElementById('stat-total-animals');
+    const sAlerts = document.getElementById('stat-active-alerts');
+    if (sAnimals) sAnimals.textContent = state.animals.length;
+    if (sAlerts) sAlerts.textContent = state.alerts.filter(a => !a.resolved).length;
 
-    // 2. Render Personal Tab Fields
-    const personalRoot = document.getElementById('personal-fields-root');
-    if (personalRoot) {
-      personalRoot.innerHTML = CONFIG.personal.map(key => 
-        fieldRow(capitalize(key), key, f[key], key === 'yearsOfFarming' ? 'number' : 'text')
-      ).join('');
-    }
+    // Render HTML
+    root.innerHTML = `
+      <div class="profile-avatar-row">
+        <div class="profile-avatar-circle">${initials}</div>
+        <div class="profile-name-block">
+            <h2>${f.fullName || 'Farmer Name'}</h2>
+            <p><i class="fa-solid fa-location-dot"></i> ${f.village || 'Village'}, ${f.state || 'State'}</p>
+        </div>
+        <div style="margin-left:auto;">
+            <button class="btn btn-secondary" id="edit-profile-btn" style="${isEditing ? 'display:none;' : ''}">
+                <i class="fa-solid fa-user-pen"></i> Edit Profile
+            </button>
+        </div>
+      </div>
 
-    // 3. Render Farm Tab Fields
-    const farmRoot = document.getElementById('farm-fields-root');
-    if (farmRoot) {
-      farmRoot.innerHTML = CONFIG.farm.map(key => 
-        fieldRow(capitalize(key), key, f[key], key === 'farmSizeAcres' ? 'number' : 'text')
-      ).join('');
-    }
+      <div class="profile-main-grid">
+        <!-- Personal Card -->
+        <div class="profile-info-card">
+            <div class="profile-card-header">
+                <h3 class="profile-card-title"><i class="fa-solid fa-user"></i> Personal Information</h3>
+            </div>
+            <div class="profile-card-body">
+                ${CONFIG.personal.map(field => fieldRow(field, f[field.key])).join('')}
+            </div>
+        </div>
 
-    // 4. Update Stats
-    const state = (window.FirestoreStore && typeof window.FirestoreStore.getState === 'function') ? window.FirestoreStore.getState() : { animals: [], alerts: [] };
-    document.getElementById('stat-total-animals').textContent = state.animals.length;
-    document.getElementById('stat-active-alerts').textContent = state.alerts.filter(a => !a.resolved).length;
+        <!-- Farm Card -->
+        <div class="profile-info-card">
+            <div class="profile-card-header">
+                <h3 class="profile-card-title"><i class="fa-solid fa-tractor"></i> Farm Details</h3>
+            </div>
+            <div class="profile-card-body">
+                ${CONFIG.farm.map(field => fieldRow(field, f[field.key])).join('')}
+            </div>
+        </div>
+      </div>
 
-    // 5. Toggle Edit UI
-    const controls = document.getElementById('edit-controls');
-    if (controls) controls.style.display = isEditing ? 'flex' : 'none';
+      ${isEditing ? `
+        <div class="profile-actions-bar">
+            <button class="btn btn-secondary" id="cancel-profile-btn">Cancel</button>
+            <button class="btn btn-primary" id="save-profile-btn">Save Changes</button>
+        </div>
+      ` : ''}
+
+      <div class="profile-info-card" style="margin-top:24px;">
+          <div class="profile-card-header">
+              <h3 class="profile-card-title"><i class="fa-solid fa-clock-rotate-left"></i> Account History</h3>
+          </div>
+          <div class="profile-card-body">
+              <p style="color:var(--text-dim); font-size:0.9rem;">Member since May 2024. Your account is currently in good standing.</p>
+          </div>
+      </div>
+    `;
+
+    attachHandlers();
   }
 
-  function fieldRow(label, key, val, type) {
-    const displayLabel = label.replace(/([A-Z])/g, ' $1').trim();
+  function fieldRow(field, val) {
     return `
       <div class="profile-field-row">
-        <span class="field-label">${displayLabel}</span>
-        ${isEditing ? 
-          `<input type="${type}" id="pfi-${key}" class="field-input" value="${val || ''}">` : 
-          `<span class="field-value">${val || '—'}</span>`
-        }
+        <div class="field-label"><i class="fa-solid ${field.icon}"></i> <span>${field.label}</span></div>
+        <div class="field-value">
+          ${isEditing ? 
+            `<input type="${field.type || 'text'}" id="pfi-${field.key}" class="form-input" value="${val || ''}">` : 
+            `<span>${val || '—'}</span>`
+          }
+        </div>
       </div>
     `;
   }
 
-  function capitalize(s) {
-    return s.charAt(0).toUpperCase() + s.slice(1);
+  function attachHandlers() {
+    const eb = document.getElementById('edit-profile-btn');
+    if (eb) eb.onclick = () => { isEditing = true; render(); };
+    const cb = document.getElementById('cancel-profile-btn');
+    if (cb) cb.onclick = () => { isEditing = false; render(); };
+    const sb = document.getElementById('save-profile-btn');
+    if (sb) sb.onclick = saveProfile;
   }
 
-  function setupTabs() {
-    const btns = document.querySelectorAll('.tab-btn');
-    btns.forEach(btn => {
-      btn.onclick = () => {
-        btns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        
-        const target = btn.dataset.tab;
-        document.querySelectorAll('.tab-pane').forEach(p => {
-          p.classList.remove('active');
-          if (p.id === `pane-${target}`) p.classList.add('active');
-        });
-      };
-    });
-  }
-
-  async function saveAll() {
+  async function saveProfile() {
     if (!auth.currentUser) return;
-    
     const updates = {};
-    [...CONFIG.personal, ...CONFIG.farm].forEach(key => {
-      const el = document.getElementById(`pfi-${key}`);
-      if (el) updates[key] = el.type === 'number' ? (parseFloat(el.value) || 0) : el.value;
+    [...CONFIG.personal, ...CONFIG.farm].forEach(field => {
+      const el = document.getElementById(`pfi-${field.key}`);
+      if (el) updates[field.key] = el.type === 'number' ? (parseFloat(el.value) || 0) : el.value;
     });
 
     try {
@@ -99,32 +139,21 @@ var ProfileModule = (function () {
       farmerData = { ...farmerData, ...updates };
       isEditing = false;
       render();
-      if (window.showToast) window.showToast('✓ Profile updated successfully');
+      if (window.showToast) window.showToast('✓ Profile updated!');
     } catch (err) {
       console.error('Profile Save Error:', err);
     }
   }
 
   function init() {
-    setupTabs();
-    
-    // Auth Listener Connection
     if (auth.currentUser) {
       db.collection('farmers').doc(auth.currentUser.uid).onSnapshot(doc => {
-        if (doc.exists) {
-          farmerData = doc.data();
-          render();
-        }
+        if (doc.exists) { farmerData = doc.data(); render(); }
       });
     }
-
-    // Handlers
-    document.getElementById('global-edit-btn').onclick = () => { isEditing = true; render(); };
-    document.getElementById('cancel-all-btn').onclick = () => { isEditing = false; render(); };
-    document.getElementById('save-all-btn').onclick = saveAll;
-
     // Auto-init fallback
-    setTimeout(() => { if (!farmerData) init(); }, 1000);
+    setTimeout(() => { if (!farmerData && window.location.pathname.includes('profile.html')) init(); }, 1000);
+    document.addEventListener('kisanTrack:stateUpdated', render);
   }
 
   return { init };
