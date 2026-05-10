@@ -1,10 +1,8 @@
-/**
- * ============================================================
- * KisanTrack — Sidebar & Mobile Navigation
- * Left sidebar, hamburger, bottom mobile tab bar
- * ============================================================
- */
-
+/* ============================================
+   KisanTrack — sidebar.css
+   Purpose: Styles for sidebar.css
+   Used by: Multiple pages
+   ============================================ */
 /* ── Sidebar Container ───────────────────────────────────── */
 .sidebar {
   position: fixed;

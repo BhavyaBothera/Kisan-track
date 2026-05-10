@@ -1,11 +1,8 @@
-/**
- * ============================================================
- * KisanTrack — Components
- * KPI cards, herd grid, animal cards, alert cards, modals,
- * gauges, ticker, upload zone, charts wrapper, data table
- * ============================================================
- */
-
+/* ============================================
+   KisanTrack — components.css
+   Purpose: Styles for components.css
+   Used by: Multiple pages
+   ============================================ */
 /* ══════════════════════════════════════════════════════════
    1. KPI STAT CARDS
 ══════════════════════════════════════════════════════════ */
@@ -1657,283 +1654,212 @@
   line-height: 1.2;
 }
 
-/* ── Nexus Visual Diagnostic Suite ─────────────────────── */
-.nexus-suite {
-  background: #050505;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  position: relative;
-  border: 1px solid rgba(157, 255, 0, 0.15);
-  box-shadow: 0 20px 60px rgba(0,0,0,1);
+/* ── Integrated Command Center Redesign (Final) ─────────── */
+.nexus-camera-workspace {
+  display: flex;
+  gap: 24px;
   margin-bottom: 40px;
-  user-select: none;
+  align-items: flex-start;
 }
 
-.nexus-viewport {
-  width: 100%;
-  height: 800px;
-  position: relative;
+.camera-main-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.camera-side-column {
+  width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── Tactical Card Headers ─────────────────────────── */
+.card-header-tactical {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  background: rgba(157, 255, 0, 0.05);
+  border-bottom: 1px solid var(--border);
+  font-family: monospace;
+  font-size: 0.7rem;
+  font-weight: 900;
+  color: var(--accent-green);
+  letter-spacing: 0.1em;
+}
+
+.status-indicator-group {
+  display: flex;
+  gap: 12px;
+}
+.status-pill {
+  font-size: 0.6rem;
+  padding: 4px 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+/* ── Feed Viewport Stage ──────────────────────────── */
+.feed-viewport-stage {
   background: #000;
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+  aspect-ratio: 16/9;
+  position: relative;
+}
+.feed-canvas-wrap {
+  width: 100%; height: 100%;
+  position: relative;
+}
+.feed-canvas-wrap img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
+.feed-canvas-wrap canvas { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
+
+.feed-error-state {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: #0a0a0a;
 }
-
-.nexus-feed {
-  width: 100%;
-  height: 100%;
+.noise-overlay {
   position: absolute;
-  top: 0; left: 0;
-  overflow: hidden;
-  transition: all 0.5s ease;
+  inset: 0;
+  opacity: 0.02;
+  background-image: url('https://media.giphy.com/media/oEI9uWUicG_BK/giphy.gif');
+  background-size: 150px;
 }
+.error-msg { text-align: center; color: #333; font-family: monospace; z-index: 2; letter-spacing: 0.15em; }
+.error-msg i { font-size: 2.5rem; margin-bottom: 15px; display: block; }
 
-.nexus-feed img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0.8;
-}
-
-#detection-canvas-overlay {
+/* Feed HUD Overlays */
+.feed-hud-top-right, .feed-hud-bottom-left, .feed-hud-bottom-right {
   position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  z-index: 2;
-  pointer-events: none;
+  z-index: 20;
+  padding: 6px 12px;
+  background: rgba(0,0,0,0.6);
+  font-family: monospace;
+  font-size: 0.6rem;
+  color: #fff;
+  letter-spacing: 0.1em;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 4px;
 }
+.feed-hud-top-right { top: 15px; right: 15px; }
+.feed-hud-bottom-left { bottom: 15px; left: 15px; }
+.feed-hud-bottom-right { bottom: 15px; right: 15px; color: var(--accent-amber); }
 
-/* Visual Modes (Filters) */
-.nexus-feed.mode-night {
-  filter: sepia(1) hue-rotate(100deg) brightness(1.5) contrast(1.2) saturate(2);
-}
-.nexus-feed.mode-thermal {
-  filter: grayscale(1) brightness(1.2) contrast(1.5) hue-rotate(180deg) saturate(3);
-  background: linear-gradient(45deg, #0000ff, #ff0000);
-  background-blend-mode: overlay;
-}
-
-/* HUD Layers */
-.hud-module {
-  position: absolute;
-  z-index: 10;
-  background: rgba(15, 15, 15, 0.75);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.hud-module-header {
-  font-size: 0.65rem;
-  font-weight: 900;
-  color: var(--accent-green);
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  margin-bottom: 12px;
+/* ── Archive Filmstrip ────────────────────────────── */
+.tactical-filmstrip {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  padding-bottom: 8px;
-}
-
-/* TOP HUD */
-.hud-top {
-  top: 20px;
-  left: 20px;
-  right: 20px;
-  display: flex;
-  gap: 30px;
-  padding: 10px 24px;
-  background: rgba(10, 10, 10, 0.6);
-  border-radius: 50px;
-}
-
-.hud-group {
-  display: flex;
-  align-items: center;
   gap: 12px;
+  padding: 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+.tactical-filmstrip::-webkit-scrollbar { display: none; }
 
-.hud-label { font-size: 0.55rem; color: var(--text-muted); font-weight: 800; }
-.hud-val { font-size: 0.85rem; color: #fff; font-family: monospace; font-weight: 700; }
-.hud-val.highlight { color: var(--accent-green); text-shadow: 0 0 10px var(--glow-green); }
+/* ── Intelligence & Control Modules ───────────────── */
+.card-body-scrollable {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 20px;
+}
+.empty-state-card {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-dim);
+  font-size: 0.75rem;
+}
+.empty-state-card i { font-size: 2rem; color: var(--accent-green); margin-bottom: 15px; display: block; opacity: 0.5; }
 
-.hud-bar-wrap { width: 60px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; }
-.hud-bar { height: 100%; background: var(--accent-green); border-radius: 2px; box-shadow: 0 0 8px var(--glow-green); }
-
-.hud-clock { margin-left: auto; font-size: 1.1rem !important; }
-
-/* LEFT HUD: Diagnostics */
-.hud-left {
-  top: 100px;
-  left: 20px;
-  width: 320px;
-  max-height: 500px;
+.control-grid-layout {
+  padding: 20px;
   display: flex;
   flex-direction: column;
+  gap: 18px;
 }
-
-.hud-module-body { flex: 1; overflow-y: auto; padding-right: 4px; }
-.nexus-empty-report { text-align: center; color: var(--text-dim); padding: 40px 20px; font-size: 0.8rem; }
-
-/* RIGHT HUD: Controls */
-.hud-right {
-  top: 100px;
-  right: 20px;
-  width: 280px;
-}
-
-.tactical-group { margin-bottom: 20px; }
-.tactical-group label { display: block; font-size: 0.55rem; color: var(--text-muted); font-weight: 800; margin-bottom: 8px; }
-
-.btn-tactical {
-  width: 100%;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border);
+.ctrl-row label {
+  display: block;
+  font-size: 0.55rem;
+  font-weight: 900;
   color: var(--text-muted);
-  padding: 8px;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.btn-tactical.active {
-  background: rgba(157, 255, 0, 0.1);
-  border-color: var(--accent-green);
-  color: var(--accent-green);
-  box-shadow: 0 0 15px var(--glow-green);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  letter-spacing: 0.1em;
 }
 
-.visual-modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.mode-btn {
+.btn-power-toggle {
+  width: 100%;
+  padding: 10px;
   background: rgba(255,255,255,0.03);
   border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-weight: 900;
+  border-radius: 6px;
+}
+.btn-power-toggle.active {
+  background: rgba(124, 181, 24, 0.1);
+  color: var(--accent-green);
+  border-color: var(--accent-green);
+}
+
+.mode-toggle-group {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.mode-toggle-group .mode-btn {
+  padding: 8px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
   color: var(--text-dim);
-  padding: 6px;
-  border-radius: 4px;
   font-size: 0.6rem;
   font-weight: 900;
-  cursor: pointer;
+  border-radius: 4px;
 }
-.mode-btn.active { background: var(--accent-green); color: #000; border-color: var(--accent-green); }
+.mode-toggle-group .mode-btn.active { background: var(--accent-green); color: #000; border-color: var(--accent-green); }
 
-.nexus-select, .nexus-input {
+.nexus-select-field, .nexus-input-field {
   width: 100%;
   background: rgba(0,0,0,0.4);
   border: 1px solid var(--border);
-  color: #fff;
   padding: 10px;
+  color: #fff;
   border-radius: 6px;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
 }
 
-.tactical-actions { margin-top: 24px; display: flex; flex-direction: column; gap: 10px; }
-.btn-nexus-primary {
+.hub-action-stack { padding: 0 20px 20px; display: flex; flex-direction: column; gap: 10px; }
+.btn-hub-action-primary {
   background: var(--accent-green);
   color: #000;
   border: none;
-  padding: 14px;
+  padding: 16px;
   border-radius: 8px;
   font-weight: 900;
-  font-size: 0.85rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  box-shadow: 0 5px 20px var(--glow-green);
+  font-size: 0.8rem;
+  box-shadow: 0 5px 15px rgba(124, 181, 24, 0.2);
 }
-.btn-nexus-secondary {
+.hub-action-row { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.btn-hub-action-secondary {
   background: rgba(255,255,255,0.05);
   color: #fff;
   border: 1px solid rgba(255,255,255,0.1);
   padding: 12px;
   border-radius: 8px;
   font-weight: 700;
-  cursor: pointer;
 }
 
-/* BOTTOM HUD: History */
-.hud-bottom {
-  bottom: 20px;
-  left: 20px;
-  right: 20px;
-  background: rgba(5, 5, 5, 0.8);
-  height: 140px;
-  display: flex;
-  flex-direction: column;
-}
-
-.tactical-reel {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  flex: 1;
-  padding-top: 10px;
-  scrollbar-width: none;
-}
-.tactical-reel::-webkit-scrollbar { display: none; }
-
-.reel-item {
-  flex: 0 0 160px;
-  background: #111;
-  border-radius: 6px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.1);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.reel-item:hover { border-color: var(--accent-green); transform: translateY(-4px); }
-.reel-img { width: 100%; height: 80px; object-fit: cover; }
-.reel-meta { padding: 4px 8px; display: flex; justify-content: space-between; font-size: 0.55rem; color: var(--text-dim); }
-
-/* Animations & Effects */
-.nexus-scan-line {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 2px;
-  background: var(--accent-green);
-  box-shadow: 0 0 20px var(--accent-green);
-  z-index: 5;
-  opacity: 0.3;
-  animation: nexus-scan 4s linear infinite;
-}
-
-@keyframes nexus-scan {
-  0% { top: 0; }
-  100% { top: 100%; }
-}
-
-.nexus-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  color: var(--accent-green);
-  font-family: monospace;
-}
-
-.nexus-loader {
-  width: 40px; height: 40px;
-  border: 3px solid rgba(157, 255, 0, 0.2);
-  border-top-color: var(--accent-green);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* Mobile */
+/* ── Responsive ─────────────────────────────────── */
 @media (max-width: 1200px) {
-  .hud-right { position: relative; top: 0; right: 0; width: 100%; margin-top: 20px; }
-  .hud-left { position: relative; top: 0; left: 0; width: 100%; margin-top: 20px; }
-  .nexus-viewport { height: auto; min-height: 600px; flex-direction: column; padding: 100px 20px 180px; }
+  .nexus-camera-workspace { flex-direction: column; }
+  .camera-side-column { width: 100%; }
 }
 
 .profile-farm-label {

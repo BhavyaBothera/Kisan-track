@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>KisanTrack | Dashboard</title>
+  <title>KisanTrack | Sensor Upload</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/sidebar.css" />
-  <link rel="stylesheet" href="css/pages/dashboard.css" />
+  <link rel="stylesheet" href="css/pages/uploads.css" />
 
   <!-- FOUC Prevention -->
   <style>html { visibility: hidden; }</style>
@@ -54,7 +54,7 @@
     <nav class="sidebar-nav">
       <div class="nav-label">Main Menu / मुख्य मेन्यू</div>
 
-      <a href="dashboard.html" class="nav-link active" id="nav-dashboard">
+      <a href="dashboard.html" class="nav-link" id="nav-dashboard">
         <i class="fa-solid fa-gauge-high"></i>
         <span class="nav-text">Dashboard<span class="nav-hi">डैशबोर्ड</span></span>
       </a>
@@ -86,7 +86,7 @@
         <span class="nav-text">Reports<span class="nav-hi">रिपोर्ट</span></span>
       </a>
 
-      <a href="uploads.html" class="nav-link" id="nav-upload">
+      <a href="uploads.html" class="nav-link active" id="nav-upload">
         <i class="fa-solid fa-upload"></i>
         <span class="nav-text">Upload Sensor Log<span class="nav-hi">सेंसर डेटा अपलोड</span></span>
       </a>
@@ -127,86 +127,103 @@
     <div class="content-area">
 
       <!-- ─────────────────────────────────────────────────
-         SECTION 1: DASHBOARD HOME
+         SECTION 6: UPLOAD SENSOR LOG
     ───────────────────────────────────────────────── -->
-      <section class="tab-section active" id="section-dashboard" aria-label="Dashboard Home">
+      <section class="active tab-section" id="section-upload" aria-label="Upload Sensor Log">
 
-        <div class="page-header" style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px; margin-bottom: 40px;">
-          <h1 id="banner-greeting"><i class="fa-solid fa-gauge-high" style="color:var(--accent-green);margin-right:10px;"></i>Good Morning, Farmer 🌾</h1>
-          <p class="subtitle" id="banner-farm-info">Real-time health monitoring for your entire livestock</p>
+        <div class="page-header">
+          <h1><i class="fa-solid fa-upload" style="color:var(--accent-green);margin-right:10px;"></i>Upload Sensor Log /
+            <span style="color:var(--text-muted);">सेंसर डेटा अपलोड</span>
+          </h1>
+          <p class="subtitle">Upload CSV or JSON sensor logs for analysis | विश्लेषण के लिए CSV या JSON फ़ाइल अपलोड करें
+          </p>
         </div>
 
-        <!-- 🛡️ NEXUS TACTICAL KPI MODULES -->
-        <div class="nexus-grid">
-          <div class="nexus-card">
-            <span class="label">TOTAL SUBJECTS</span>
-            <div class="value" id="kpi-total-animals">0</div>
-            <div class="delta up"><i class="fa-solid fa-plus"></i> <span class="poppins">STABLE</span></div>
-          </div>
-          <div class="nexus-card">
-            <span class="label">OPTIMAL HEALTH</span>
-            <div class="value" id="kpi-healthy-animals" style="color:var(--accent-green)">0</div>
-            <div class="delta up"><i class="fa-solid fa-arrow-up"></i> <span class="poppins">98.2% ACCURACY</span></div>
-          </div>
-          <div class="nexus-card">
-            <span class="label">ACTIVE ANOMALIES</span>
-            <div class="value" id="kpi-active-alerts" style="color:var(--accent-amber)">0</div>
-            <div class="delta"><span class="nexus-pulse-dot"></span> <span class="poppins">REAL-TIME MONITORING</span></div>
-          </div>
-          <div class="nexus-card">
-            <span class="label">CRITICAL VECTORS</span>
-            <div class="value" id="kpi-critical-cases" style="color:var(--accent-red)">0</div>
-            <div class="delta down"><i class="fa-solid fa-shield-virus"></i> <span class="poppins">THREAT DETECTION ON</span></div>
-          </div>
-        </div>
+        <div class="upload-container">
 
-        <!-- 🧬 NEXUS BIOMETRIC CORE -->
-        <div class="nexus-bio-container">
-          <div class="nexus-bio-gauge">
-            <div class="nexus-stat-pill" style="position:absolute; top:15px; left:15px;">
-              <i class="fa-solid fa-wave-square"></i> SIGNAL STABLE
-            </div>
-            <svg width="240" height="240" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="8" />
-              <circle id="bio-gauge-path" cx="50" cy="50" r="45" fill="none" stroke="var(--accent-green)" stroke-width="8" 
-                stroke-dasharray="283" stroke-dashoffset="283" stroke-linecap="round" 
-                transform="rotate(-90 50 50)" style="transition: stroke-dashoffset 1s ease-out;" />
-            </svg>
-            <div class="nexus-bio-score">
-              <span class="num" id="bio-score-val">0</span>
-              <span class="lab">HEALTH INDEX</span>
+          <!-- Drop Zone -->
+          <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Drop file here or click to browse">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <h3>Drop your file here / फ़ाइल यहाँ छोड़ें</h3>
+            <p>or click "Browse Files" to select</p>
+            <div class="formats">
+              <span class="format-tag">CSV</span>
+              <span class="format-tag">JSON</span>
+              <span class="format-tag">Max 50MB</span>
             </div>
           </div>
 
-          <div class="nexus-card" style="flex:1;">
-            <div class="nexus-header" style="margin-bottom:15px; border-left-width:2px;">
-              <h4 style="font-size:0.9rem; margin:0;">TELEMETRY OVERVIEW</h4>
-              <span class="subtitle">System Latency: 42ms | Uplink: Active</span>
+          <!-- Browse Button -->
+          <div class="upload-actions">
+            <input type="file" id="file-input" accept=".csv,.json" style="display:none;" aria-label="Select file" />
+            <button class="btn btn-secondary" id="browse-btn" style="margin-top:14px;">
+              <i class="fa-solid fa-folder-open"></i> Browse Files / फ़ाइल चुनें
+            </button>
+          </div>
+
+          <!-- File Preview -->
+          <div class="file-preview" id="file-preview">
+            <div class="file-icon"><i class="fa-solid fa-file-csv"></i></div>
+            <div class="file-info">
+              <div class="file-name" id="file-name-display">filename.csv</div>
+              <div class="file-size" id="file-size-display">0 KB</div>
             </div>
-            <div class="chart-wrap" style="height:150px;">
-              <canvas id="main-telemetry-chart"></canvas>
+            <button class="btn btn-primary btn-sm" id="process-btn">
+              <i class="fa-solid fa-microchip"></i> Process File
+            </button>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="upload-progress" id="upload-progress">
+            <div class="progress-label">
+              <span id="progress-label-text">Analyzing data... / डेटा विश्लेषण हो रहा है...</span>
+              <span id="progress-pct">0%</span>
+            </div>
+            <div class="progress-bar-outer">
+              <div class="progress-bar-inner" id="progress-bar-fill"></div>
             </div>
           </div>
-        </div>
 
-        <!-- Herd Status Grid -->
-        <p class="section-title">
-          <i class="fa-solid fa-grip"></i> Herd Status / झुंड की स्थिति
-        </p>
-        <div class="herd-grid" id="herd-grid">
-          <!-- Populated by dashboard.js -->
-        </div>
-
-        <!-- Alert Ticker -->
-        <div class="ticker-section" id="alert-ticker">
-          <span class="ticker-label">⚠ LIVE ALERTS</span>
-          <div class="ticker-wrap">
-            <div class="ticker-track" id="ticker-track">
-              <!-- Populated by dashboard.js -->
+          <!-- Result Card -->
+          <div class="upload-result" id="upload-result">
+            <div class="result-header">
+              <i class="fa-solid fa-circle-check"></i> Analysis Complete / विश्लेषण पूर्ण
+            </div>
+            <div class="result-stats">
+              <div class="result-stat">
+                <div class="result-stat-num" id="res-parsed">0</div>
+                <div class="result-stat-label">Records Parsed / रिकॉर्ड पढ़े</div>
+              </div>
+              <div class="result-stat">
+                <div class="result-stat-num" id="res-anomalies" style="color:var(--accent-amber)">0</div>
+                <div class="result-stat-label">Anomalies Found / असामान्यताएं</div>
+              </div>
+              <div class="result-stat">
+                <div class="result-stat-num" id="res-animals" style="color:var(--accent-red)">0</div>
+                <div class="result-stat-label">Animals Affected / प्रभावित पशु</div>
+              </div>
+            </div>
+            <h4 style="font-family:var(--font-heading);font-size:0.88rem;color:var(--text-muted);margin-bottom:10px;">
+              <i class="fa-solid fa-triangle-exclamation" style="color:var(--accent-amber);margin-right:6px;"></i>
+              Detected Anomalies / पाई गई असामान्यताएं
+            </h4>
+            <div class="table-scroll">
+              <table class="data-table" id="anomaly-table">
+                <thead>
+                  <tr>
+                    <th>Animal ID</th>
+                    <th>Parameter</th>
+                    <th>Reading</th>
+                    <th>Severity</th>
+                  </tr>
+                </thead>
+                <tbody id="anomaly-table-body">
+                </tbody>
+              </table>
             </div>
           </div>
-        </div>
 
+        </div>
       </section>
 
     </div><!-- /.content-area -->
@@ -217,7 +234,7 @@
 ═══════════════════════════════════════════════════════ -->
   <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile Navigation">
     <div class="mobile-nav-inner">
-      <a href="dashboard.html" class="mobile-nav-item active" id="mnav-dashboard">
+      <a href="dashboard.html" class="mobile-nav-item" id="mnav-dashboard">
         <i class="fa-solid fa-gauge-high"></i>
         <span>Home</span>
       </a>
@@ -245,69 +262,6 @@
   </nav>
 
   <!-- ═══════════════════════════════════════════════════════
-     ANIMAL DETAIL MODAL (shared between sections)
-═══════════════════════════════════════════════════════ -->
-  <div class="modal-overlay" id="animal-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <div class="modal-box">
-      <div class="modal-header">
-        <div class="modal-header-left">
-          <div class="modal-emoji" id="modal-emoji">🐄</div>
-          <div>
-            <h2 class="modal-title" id="modal-title">Animal Detail</h2>
-            <p class="modal-subtitle" id="modal-subtitle">Loading...</p>
-          </div>
-        </div>
-        <button class="modal-close" id="modal-close" aria-label="Close modal">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-      <div class="modal-body">
-        <!-- Vitals -->
-        <div class="modal-vitals-grid">
-          <div class="modal-vital">
-            <div class="modal-vital-value" id="modal-temp">--</div>
-            <div class="modal-vital-label">Temp (°C) / तापमान</div>
-          </div>
-          <div class="modal-vital">
-            <div class="modal-vital-value" id="modal-hr">--</div>
-            <div class="modal-vital-label">Heart Rate / हृदय गति</div>
-          </div>
-          <div class="modal-vital">
-            <div class="modal-vital-value" id="modal-act">--</div>
-            <div class="modal-vital-label">Activity / गतिविधि</div>
-          </div>
-        </div>
-
-        <!-- 7-Day Chart -->
-        <h4 style="font-size:0.85rem;color:var(--text-muted);margin-bottom:10px;">
-          <i class="fa-solid fa-chart-line" style="color:var(--accent-green);margin-right:6px;"></i>
-          7-Day Health History / 7 दिन का इतिहास
-        </h4>
-        <div class="modal-chart-wrap">
-          <canvas id="modal-chart"></canvas>
-        </div>
-
-        <!-- Info grid -->
-        <div class="divider"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
-          <div class="modal-vital">
-            <div class="modal-vital-value" id="modal-breed" style="font-size:1rem;">--</div>
-            <div class="modal-vital-label">Breed / नस्ल</div>
-          </div>
-          <div class="modal-vital">
-            <div class="modal-vital-value" id="modal-age" style="font-size:1rem;">--</div>
-            <div class="modal-vital-label">Age / उम्र</div>
-          </div>
-          <div class="modal-vital">
-            <div class="modal-vital-value" id="modal-weight" style="font-size:1rem;">--</div>
-            <div class="modal-vital-label">Weight / वजन</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════════
      TOAST NOTIFICATION
 ═══════════════════════════════════════════════════════ -->
   <div class="toast" id="app-toast" role="alert" aria-live="polite">
@@ -316,7 +270,6 @@
   </div>
 
   <!-- External Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -326,7 +279,7 @@
   <script src="js/core/utils.js"></script>
   <script src="js/core/auth.js"></script>
   <script src="js/core/firestore-store.js"></script>
-  <script src="js/pages/dashboard.js"></script>
+  <script src="js/pages/uploads.js"></script>
 </body>
 
 </html>

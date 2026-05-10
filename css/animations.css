@@ -1,10 +1,8 @@
-/**
- * ============================================================
- * KisanTrack — Animations
- * All @keyframes and animation utility classes
- * ============================================================
- */
-
+/* ============================================
+   KisanTrack — animations.css
+   Purpose: Styles for animations.css
+   Used by: Multiple pages
+   ============================================ */
 /* ── Online Status Pulse ──────────────────────────────────── */
 @keyframes pulse-green {
   0%, 100% {

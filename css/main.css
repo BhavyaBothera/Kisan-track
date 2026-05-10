@@ -1,10 +1,8 @@
-/**
- * ============================================================
- * KisanTrack — Main Stylesheet
- * CSS custom properties, reset, base typography, layout grid
- * ============================================================
- */
-
+/* ============================================
+   KisanTrack — main.css
+   Purpose: Styles for main.css
+   Used by: Multiple pages
+   ============================================ */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600&display=swap');
 
 /* ── CSS Custom Properties ───────────────────────────────── */
@@ -16,9 +14,9 @@
   --bg-input: #222215;
   --bg-sidebar: #161610;
 
-  --accent-green: #7CB518;
-  --accent-amber: #E5A100;
-  --accent-red: #C0392B;
+  --accent-green: var(--accent-green);
+  --accent-amber: var(--accent-amber);
+  --accent-red: var(--accent-red);
   --accent-blue: #3B82F6;
   --accent-info: #22c55e;
 
