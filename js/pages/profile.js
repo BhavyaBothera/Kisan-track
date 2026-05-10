@@ -1,134 +1,95 @@
-// ============================================
-// KisanTrack — profile.js
-// Purpose: Farmer Profile Management
-// Page: profile.html
-// Dependencies: Firebase, FirestoreStore
-// ============================================
+/**
+ * KisanTrack — profile.js
+ * Comprehensive Profile Management System
+ * Features: Tab switching, multi-section edits, Firestore sync
+ */
 var ProfileModule = (function () {
   'use strict';
 
-  var isEditing = false;
-  var farmerData = null;
+  let isEditing = false;
+  let farmerData = null;
 
-  var EDITABLE_FIELDS = [
-    'fullName', 'farmName', 'village', 'district', 'state',
-    'farmSizeAcres', 'yearsOfFarming', 'primaryAnimal', 'sensorSystemId'
-  ];
+  const CONFIG = {
+    personal: ['fullName', 'yearsOfFarming', 'village', 'district', 'state'],
+    farm: ['farmName', 'farmSizeAcres', 'primaryAnimal', 'sensorSystemId']
+  };
 
   function render() {
-    var root = document.getElementById('profile-section-root');
-    if (!root) return;
+    if (!farmerData) return;
 
-    if (!farmerData) {
-      root.innerHTML = `
-        <div class="profile-loading" style="padding: 100px; text-align: center; color: var(--text-dim);">
-          <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2rem; margin-bottom: 15px; color: var(--accent-green);"></i>
-          <p>Loading your profile... / आपका प्रोफ़ाइल लोड हो रहा है...</p>
-        </div>
-      `;
-      return;
+    const f = farmerData;
+    const initials = f.fullName ? (f.fullName.split(' ')[0][0] + (f.fullName.split(' ')[1] ? f.fullName.split(' ')[1][0] : '')).toUpperCase() : 'F';
+
+    // 1. Update Hero
+    const heroName = document.getElementById('hero-name');
+    if (heroName) heroName.textContent = f.fullName || 'Farmer Name';
+    const heroAvatar = document.getElementById('profile-avatar-display');
+    if (heroAvatar) heroAvatar.textContent = initials;
+
+    // 2. Render Personal Tab Fields
+    const personalRoot = document.getElementById('personal-fields-root');
+    if (personalRoot) {
+      personalRoot.innerHTML = CONFIG.personal.map(key => 
+        fieldRow(capitalize(key), key, f[key], key === 'yearsOfFarming' ? 'number' : 'text')
+      ).join('');
     }
 
-    try {
-        const state = (window.FirestoreStore && typeof window.FirestoreStore.getState === 'function') 
-            ? window.FirestoreStore.getState() 
-            : { animals: [], alerts: [] };
-            
-        const totalAnimals = state.animals ? state.animals.length : 0;
-        const activeAlerts = state.alerts ? state.alerts.filter(a => !a.resolved).length : 0;
-        
-        const f = farmerData;
-        const initials = f.fullName ? (f.fullName.split(' ')[0][0] + (f.fullName.split(' ')[1] ? f.fullName.split(' ')[1][0] : '')).toUpperCase() : 'F';
-
-        // Update Header Elements
-        const hName = document.getElementById('render-full-name');
-        const hFarm = document.getElementById('render-farm-name');
-        const hAvatar = document.getElementById('profile-avatar-render');
-        
-        if (hName) hName.textContent = f.fullName || 'Farmer Name';
-        if (hFarm) hFarm.textContent = `${f.farmName || 'My Farm'} • ${f.village || 'Village'}`;
-        if (hAvatar) hAvatar.textContent = initials;
-
-        root.innerHTML = `
-          <div class="profile-cards-grid">
-            <!-- Personal Section -->
-            <div class="profile-info-card">
-              <h3 class="profile-card-title"><i class="fa-solid fa-user-circle"></i> Personal Information</h3>
-              ${profileField('fa-signature', 'Full Name', 'fullName', f.fullName)}
-              ${profileField('fa-calendar-check', 'Experience (Years)', 'yearsOfFarming', f.yearsOfFarming, 'number')}
-              ${profileField('fa-house-user', 'Village', 'village', f.village)}
-              ${profileField('fa-map-location-dot', 'District', 'district', f.district)}
-              ${profileField('fa-flag', 'State', 'state', f.state)}
-            </div>
-
-            <!-- Farm Section -->
-            <div class="profile-info-card">
-              <h3 class="profile-card-title"><i class="fa-solid fa-tractor"></i> Farm Details</h3>
-              ${profileField('fa-seedling', 'Farm Name', 'farmName', f.farmName)}
-              ${profileField('fa-vector-square', 'Total Area (Acres)', 'farmSizeAcres', f.farmSizeAcres, 'number')}
-              ${profileField('fa-cow', 'Primary Livestock', 'primaryAnimal', f.primaryAnimal)}
-              ${profileField('fa-microchip', 'Sensor System ID', 'sensorSystemId', f.sensorSystemId)}
-            </div>
-          </div>
-
-          <div class="profile-stats-row" style="margin-bottom: 24px;">
-            <div class="profile-stat-chip"><i class="fa-solid fa-paw"></i> <strong>${totalAnimals}</strong> Animals Registered</div>
-            <div class="profile-stat-chip"><i class="fa-solid fa-shield-virus"></i> <strong>${activeAlerts}</strong> Active Alerts</div>
-            <div class="profile-stat-chip"><i class="fa-solid fa-award"></i> Premium Member</div>
-          </div>
-
-          <div class="analytics-card" style="padding: 24px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);">
-            <h3 class="profile-card-title" style="margin-bottom:20px;"><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity / हाल की गतिविधि</h3>
-            <div class="activity-timeline">
-                <div class="timeline-item" style="display:flex; gap:15px; margin-bottom:15px;">
-                    <div style="color:var(--accent-green);"><i class="fa-solid fa-circle-check"></i></div>
-                    <div style="font-size:0.85rem; color:var(--text-muted);">Updated inventory records - <span style="color:var(--text-dim);">2 hours ago</span></div>
-                </div>
-                <div class="timeline-item" style="display:flex; gap:15px; margin-bottom:15px;">
-                    <div style="color:var(--accent-blue);"><i class="fa-solid fa-syringe"></i></div>
-                    <div style="font-size:0.85rem; color:var(--text-muted);">Logged vaccination for Animal C002 - <span style="color:var(--text-dim);">1 day ago</span></div>
-                </div>
-            </div>
-          </div>
-
-          <!-- Edit Actions (Floating or at bottom) -->
-          <div class="profile-edit-actions" id="profile-edit-actions" style="${isEditing ? 'display:flex; margin-top:20px; justify-content:flex-end;' : 'display:none;'}">
-            <button class="btn btn-secondary" id="cancel-profile-btn" style="margin-right:10px;">Cancel</button>
-            <button class="btn btn-primary" id="save-profile-btn">Save Changes</button>
-          </div>
-        `;
-        attachHandlers();
-    } catch (err) {
-        console.error('Profile Render Error:', err);
+    // 3. Render Farm Tab Fields
+    const farmRoot = document.getElementById('farm-fields-root');
+    if (farmRoot) {
+      farmRoot.innerHTML = CONFIG.farm.map(key => 
+        fieldRow(capitalize(key), key, f[key], key === 'farmSizeAcres' ? 'number' : 'text')
+      ).join('');
     }
+
+    // 4. Update Stats
+    const state = (window.FirestoreStore && typeof window.FirestoreStore.getState === 'function') ? window.FirestoreStore.getState() : { animals: [], alerts: [] };
+    document.getElementById('stat-total-animals').textContent = state.animals.length;
+    document.getElementById('stat-active-alerts').textContent = state.alerts.filter(a => !a.resolved).length;
+
+    // 5. Toggle Edit UI
+    const controls = document.getElementById('edit-controls');
+    if (controls) controls.style.display = isEditing ? 'flex' : 'none';
   }
 
-  function profileField(icon, label, key, val, type = 'text') {
+  function fieldRow(label, key, val, type) {
+    const displayLabel = label.replace(/([A-Z])/g, ' $1').trim();
     return `
-      <div class="profile-field">
-        <div class="profile-field-label"><i class="fa-solid ${icon}"></i> <span>${label}</span></div>
-        <div class="profile-field-value">
-          ${isEditing && key ? `<input type="${type}" id="pfi-${key}" class="form-input" value="${val || ''}">` : `<span>${val || '—'}</span>`}
-        </div>
+      <div class="profile-field-row">
+        <span class="field-label">${displayLabel}</span>
+        ${isEditing ? 
+          `<input type="${type}" id="pfi-${key}" class="field-input" value="${val || ''}">` : 
+          `<span class="field-value">${val || '—'}</span>`
+        }
       </div>
     `;
   }
 
-  function attachHandlers() {
-    const editTrigger = document.getElementById('edit-profile-trigger');
-    if (editTrigger) editTrigger.onclick = () => { isEditing = true; render(); };
-
-    const cb = document.getElementById('cancel-profile-btn');
-    if (cb) cb.onclick = () => { isEditing = false; render(); };
-    
-    const sb = document.getElementById('save-profile-btn');
-    if (sb) sb.onclick = saveProfile;
+  function capitalize(s) {
+    return s.charAt(0).toUpperCase() + s.slice(1);
   }
 
-  async function saveProfile() {
+  function setupTabs() {
+    const btns = document.querySelectorAll('.tab-btn');
+    btns.forEach(btn => {
+      btn.onclick = () => {
+        btns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        const target = btn.dataset.tab;
+        document.querySelectorAll('.tab-pane').forEach(p => {
+          p.classList.remove('active');
+          if (p.id === `pane-${target}`) p.classList.add('active');
+        });
+      };
+    });
+  }
+
+  async function saveAll() {
     if (!auth.currentUser) return;
+    
     const updates = {};
-    EDITABLE_FIELDS.forEach(key => {
+    [...CONFIG.personal, ...CONFIG.farm].forEach(key => {
       const el = document.getElementById(`pfi-${key}`);
       if (el) updates[key] = el.type === 'number' ? (parseFloat(el.value) || 0) : el.value;
     });
@@ -138,44 +99,33 @@ var ProfileModule = (function () {
       farmerData = { ...farmerData, ...updates };
       isEditing = false;
       render();
-      if (window.showToast) window.showToast('✓ Profile updated successfully!');
+      if (window.showToast) window.showToast('✓ Profile updated successfully');
     } catch (err) {
-      console.error('Profile: Save error:', err);
+      console.error('Profile Save Error:', err);
     }
   }
 
   function init() {
+    setupTabs();
+    
+    // Auth Listener Connection
     if (auth.currentUser) {
       db.collection('farmers').doc(auth.currentUser.uid).onSnapshot(doc => {
-        if (doc.exists) { 
-          farmerData = doc.data(); 
-          render(); 
-        } else {
-          const defaultData = {
-            fullName: auth.currentUser.displayName || 'New Farmer',
-            farmName: 'My Farm',
-            village: 'Village Name',
-            district: '',
-            state: '',
-            farmSizeAcres: 0,
-            yearsOfFarming: 0,
-            primaryAnimal: 'Cattle',
-            sensorSystemId: 'KS-' + Math.floor(Math.random()*10000)
-          };
-          db.collection('farmers').doc(auth.currentUser.uid).set(defaultData);
+        if (doc.exists) {
+          farmerData = doc.data();
+          render();
         }
       });
     }
-    
-    // Auto-init check
-    setTimeout(() => {
-        if (!farmerData && window.location.pathname.includes('profile.html')) {
-            init();
-        }
-    }, 1000);
-  }
 
-  document.addEventListener('kisanTrack:stateUpdated', render);
+    // Handlers
+    document.getElementById('global-edit-btn').onclick = () => { isEditing = true; render(); };
+    document.getElementById('cancel-all-btn').onclick = () => { isEditing = false; render(); };
+    document.getElementById('save-all-btn').onclick = saveAll;
+
+    // Auto-init fallback
+    setTimeout(() => { if (!farmerData) init(); }, 1000);
+  }
 
   return { init };
 })();
