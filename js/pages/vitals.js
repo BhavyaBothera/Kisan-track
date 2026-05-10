@@ -41,24 +41,28 @@ const VitalsModule = (function () {
 
     if (currentSelection && state.animals.some(a => a.id === currentSelection)) {
       select.value = currentSelection;
+      selectedAnimalId = currentSelection;
     } else if (state.animals.length > 0) {
       selectedAnimalId = state.animals[0].id;
       select.value = selectedAnimalId;
     }
   }
 
-  // --- Simulation: Generate Alert ---
+  // --- Simulation: Generate Reading ────────────────────────
   async function generateSimulatedReading() {
     const state = getState();
     if (!state || state.animals.length === 0) return;
 
-    // Pick a random animal to simulate a vital update
-    const idx = Math.floor(Math.random() * state.animals.length);
-    const animal = state.animals[idx];
+    // Prioritize selected animal for live demo feel
+    let animal = state.animals.find(a => a.id === selectedAnimalId);
+    if (!animal || Math.random() > 0.7) {
+        // Occasionally pick another animal to simulate fleet-wide activity
+        animal = state.animals[Math.floor(Math.random() * state.animals.length)];
+    }
 
-    const temp = +(38.5 + (Math.random() * 2.5)).toFixed(1);
-    const hr = Math.round(70 + (Math.random() - 0.5) * 15);
-    const act = Math.round(50 + (Math.random() - 0.5) * 30);
+    const temp = +(38.2 + (Math.random() * 1.8)).toFixed(1);
+    const hr = Math.round(65 + (Math.random() - 0.5) * 10);
+    const act = Math.round(45 + (Math.random() - 0.5) * 20);
 
     try {
       // 1. Log the vital reading
@@ -152,6 +156,9 @@ const VitalsModule = (function () {
     updateGauge(document.getElementById('gauge-temp-fill'), document.getElementById('gauge-temp-val'), temp, 36.5, 41.0);
     updateGauge(document.getElementById('gauge-hr-fill'), document.getElementById('gauge-hr-val'), hr, 40, 120);
     updateGauge(document.getElementById('gauge-act-fill'), document.getElementById('gauge-act-val'), act, 0, 100);
+
+    const syncEl = document.getElementById('last-sync-time');
+    if (syncEl) syncEl.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   }
 
   // ── Chart factory ─────────────────────────────────────────
@@ -197,9 +204,9 @@ const VitalsModule = (function () {
   }
 
   function updateCharts() {
-    if (chartTemp) { chartTemp.data.labels = liveReadings.labels; chartTemp.data.datasets[0].data = liveReadings.temp; chartTemp.update('none'); }
-    if (chartHR) { chartHR.data.labels = liveReadings.labels; chartHR.data.datasets[0].data = liveReadings.hr; chartHR.update('none'); }
-    if (chartActivity) { chartActivity.data.labels = liveReadings.labels; chartActivity.data.datasets[0].data = liveReadings.activity; chartActivity.update('none'); }
+    if (chartTemp) { chartTemp.data.labels = liveReadings.labels; chartTemp.data.datasets[0].data = liveReadings.temp; chartTemp.update(); }
+    if (chartHR) { chartHR.data.labels = liveReadings.labels; chartHR.data.datasets[0].data = liveReadings.hr; chartHR.update(); }
+    if (chartActivity) { chartActivity.data.labels = liveReadings.labels; chartActivity.data.datasets[0].data = liveReadings.activity; chartActivity.update(); }
   }
 
   // ── AI Summary ────────────────────────────────────────────
@@ -242,7 +249,7 @@ const VitalsModule = (function () {
     }
 
     if (liveInterval) clearInterval(liveInterval);
-    liveInterval = setInterval(generateSimulatedReading, 30000); // Generate every 30s for demo
+    liveInterval = setInterval(generateSimulatedReading, 10000); // Generate every 10s for demo
 
     document.addEventListener('kisanTrack:stateUpdated', () => {
       populateSelector();
