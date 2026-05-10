@@ -16,7 +16,6 @@
   <!-- Font Awesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-  
   <!-- App Stylesheets -->
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
@@ -170,15 +169,69 @@
     <div class="content-area">
       <section class="tab-section active" id="section-profile" aria-label="Farmer Profile">
 
-
-        <div class="page-header">
-          <h1><i class="fa-solid fa-circle-user" style="color:var(--accent-green);margin-right:10px;"></i>Farmer Profile
-            / <span style="color:var(--text-muted);">किसान प्रोफ़ाइल</span></h1>
-          <p class="subtitle">Your personal and farm information | आपकी व्यक्तिगत और खेत की जानकारी</p>
+        <div class="profile-header-premium">
+            <div class="profile-cover">
+                <div class="premium-badge"><i class="fa-solid fa-crown"></i> Premium Member</div>
+            </div>
+            <div class="profile-header-main">
+                <div class="profile-header-left">
+                    <div class="profile-avatar-large" id="profile-avatar-render">F</div>
+                    <div class="profile-header-info">
+                        <h1 id="render-full-name">Loading...</h1>
+                        <p id="render-farm-name">Farm Details Loading...</p>
+                    </div>
+                </div>
+                <div class="profile-header-right">
+                    <button class="btn btn-primary" id="edit-profile-trigger">
+                        <i class="fa-solid fa-user-pen"></i> Edit Profile
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <!-- Dynamic content rendered by profile.js -->
-        <div id="profile-section-root"></div>
+        <div class="profile-layout-grid">
+            <!-- Left Column: Core Info -->
+            <div class="profile-col-main">
+                <!-- Info Cards will be injected here by profile.js -->
+                <div id="profile-section-root"></div>
+            </div>
+
+            <!-- Right Column: Settings & Quick Actions -->
+            <div class="profile-col-side">
+                <div class="settings-card">
+                    <h3><i class="fa-solid fa-gears"></i> Account Settings</h3>
+                    <ul class="settings-list">
+                        <li>
+                            <div class="setting-info">
+                                <strong>Push Notifications</strong>
+                                <span>Get alerts for animal vitals</span>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider round"></span>
+                            </label>
+                        </li>
+                        <li>
+                            <div class="setting-info">
+                                <strong>Language / भाषा</strong>
+                                <span>Choose your interface language</span>
+                            </div>
+                            <select class="form-input-sm">
+                                <option>English</option>
+                                <option>Hindi / हिंदी</option>
+                            </select>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="settings-card danger-zone" style="margin-top:20px;">
+                    <h3><i class="fa-solid fa-shield-halved"></i> Security</h3>
+                    <button class="btn btn-outline-danger" style="width:100%; margin-top:10px;">
+                        <i class="fa-solid fa-key"></i> Reset Password
+                    </button>
+                </div>
+            </div>
+        </div>
 
       </section>
 
