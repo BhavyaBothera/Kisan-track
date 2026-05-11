@@ -168,10 +168,12 @@
       <!-- Page Header -->
       <div class="page-header page-header-flex">
         <div class="header-text">
-          <h1><i class="fa-solid fa-stethoscope" style="color:var(--accent-blue);margin-right:10px;"></i>Veterinary Logs /
+          <h1><i class="fa-solid fa-stethoscope" style="color:var(--accent-blue);margin-right:10px;"></i>Veterinary Logs
+            /
             <span style="color:var(--text-muted);">पशु चिकित्सा लॉग</span>
           </h1>
-          <p class="subtitle">Track vaccinations, medical history, and expert consultations | पशु स्वास्थ्य इतिहास और टीकाकरण की निगरानी करें</p>
+          <p class="subtitle">Track vaccinations, medical history, and expert consultations | पशु स्वास्थ्य इतिहास और
+            टीकाकरण की निगरानी करें</p>
         </div>
         <div class="header-actions">
           <button class="btn btn-primary" id="btn-add-log">
@@ -183,21 +185,24 @@
       <!-- KPI Summary -->
       <div class="vet-kpi-grid">
         <div class="kpi-card">
-          <div class="kpi-icon" style="color:var(--accent-blue);background:rgba(59, 130, 246, 0.1);"><i class="fa-solid fa-user-doctor"></i></div>
+          <div class="kpi-icon" style="color:var(--accent-blue);background:rgba(59, 130, 246, 0.1);"><i
+              class="fa-solid fa-user-doctor"></i></div>
           <div class="kpi-body">
             <div class="kpi-label">Total Visits / कुल विजिट</div>
             <div class="kpi-value" id="stat-total-visits">24</div>
           </div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-icon" style="color:var(--accent-green);background:rgba(124, 181, 24, 0.1);"><i class="fa-solid fa-syringe"></i></div>
+          <div class="kpi-icon" style="color:var(--accent-green);background:rgba(124, 181, 24, 0.1);"><i
+              class="fa-solid fa-syringe"></i></div>
           <div class="kpi-body">
             <div class="kpi-label">Vaccinations / टीकाकरण</div>
             <div class="kpi-value" id="stat-total-vaccines">18</div>
           </div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-icon" style="color:var(--accent-amber);background:rgba(229, 161, 0, 0.1);"><i class="fa-solid fa-clock"></i></div>
+          <div class="kpi-icon" style="color:var(--accent-amber);background:rgba(229, 161, 0, 0.1);"><i
+              class="fa-solid fa-clock"></i></div>
           <div class="kpi-body">
             <div class="kpi-label">Upcoming / आगामी</div>
             <div class="kpi-value" id="stat-upcoming">3</div>
@@ -209,7 +214,8 @@
         <!-- Log Timeline -->
         <div class="vet-timeline-section">
           <div class="section-header">
-            <h3 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Treatment Timeline / उपचार समयरेखा</h3>
+            <h3 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Treatment Timeline / उपचार समयरेखा
+            </h3>
             <div class="timeline-filters">
               <select id="filter-animal" class="form-input-sm">
                 <option value="all">All Animals</option>
@@ -232,7 +238,8 @@
         <!-- Vaccination Schedule Sidebar -->
         <div class="vet-schedule-section">
           <div class="analytics-card">
-            <h3 class="section-title" style="margin-top: 0;"><i class="fa-solid fa-calendar-check"></i> Vaccine Schedule</h3>
+            <h3 class="section-title" style="margin-top: 0;"><i class="fa-solid fa-calendar-check"></i> Vaccine Schedule
+            </h3>
             <div class="schedule-list" id="vaccine-schedule">
               <!-- Populated by veterinary.js -->
             </div>
@@ -250,14 +257,6 @@
         <i class="fa-solid fa-gauge-high"></i>
         <span>Home</span>
       </a>
-      <a href="herd.html" class="mobile-nav-item">
-        <i class="fa-solid fa-paw"></i>
-        <span>Herd</span>
-      </a>
-      <a href="vitals.html" class="mobile-nav-item">
-        <i class="fa-solid fa-heartbeat"></i>
-        <span>Vitals</span>
-      </a>
       <a href="veterinary.html" class="mobile-nav-item active">
         <i class="fa-solid fa-stethoscope"></i>
         <span>Vet</span>
@@ -265,6 +264,14 @@
       <a href="alerts.html" class="mobile-nav-item">
         <i class="fa-solid fa-bell"></i>
         <span>Alerts</span>
+      </a>
+      <a href="camera.html" class="mobile-nav-item" id="mnav-camera">
+        <i class="fa-solid fa-camera"></i>
+        <span>Camera</span>
+      </a>
+      <a href="profile.html" class="mobile-nav-item" id="mnav-profile">
+        <i class="fa-solid fa-circle-user"></i>
+        <span>Profile</span>
       </a>
     </div>
   </nav>
@@ -307,7 +314,8 @@
           </div>
           <div class="form-group" style="margin-bottom: 16px;">
             <label class="form-label">Treatment/Medication Given / दिया गया उपचार</label>
-            <textarea id="form-treatment" class="form-input" rows="3" placeholder="Describe medicines or actions taken..."></textarea>
+            <textarea id="form-treatment" class="form-input" rows="3"
+              placeholder="Describe medicines or actions taken..."></textarea>
           </div>
           <div class="form-group-row">
             <div>

@@ -16,7 +16,7 @@
   <!-- Font Awesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-  
+
   <!-- App Stylesheets -->
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
@@ -25,7 +25,11 @@
   <link rel="stylesheet" href="css/pages/camera.css" />
 
   <!-- FOUC Prevention -->
-  <style>html { visibility: hidden; }</style>
+  <style>
+    html {
+      visibility: hidden;
+    }
+  </style>
 </head>
 
 <body>
@@ -134,7 +138,7 @@
      MAIN CONTENT
 ═══════════════════════════════════════════════════════ -->
   <main class="main-content" id="main-content">
-    
+
     <!-- Global Top Bar -->
     <header class="top-bar">
       <div class="top-bar-left">
@@ -179,14 +183,14 @@
         </div>
 
         <div class="nexus-suite" id="nexus-suite">
-          
+
           <div class="nexus-viewport" id="cam-feed-area">
             <div id="feed-container" class="nexus-feed">
               <img id="live-image" src="" alt="Live Feed" style="display:none;" />
               <canvas id="detection-canvas-overlay"></canvas>
               <div class="nexus-scan-line"></div>
               <div class="nexus-glitch-overlay"></div>
-              
+
               <div id="feed-placeholder" class="nexus-placeholder">
                 <div class="nexus-loader"></div>
                 <p>INITIALIZING UPLINK... / अपलिंक प्रारंभ हो रहा है...</p>
@@ -197,7 +201,9 @@
             <div class="hud-module hud-top">
               <div class="hud-group">
                 <span class="hud-label">SIGNAL</span>
-                <div class="hud-bar-wrap"><div class="hud-bar" style="width: 92%"></div></div>
+                <div class="hud-bar-wrap">
+                  <div class="hud-bar" style="width: 92%"></div>
+                </div>
                 <span class="hud-val">92%</span>
               </div>
               <div class="hud-group hud-clock">
@@ -228,7 +234,7 @@
             <!-- Tactical Controls -->
             <div class="hud-module hud-right">
               <div class="hud-module-header">COMMAND CONTROL</div>
-              
+
               <div class="tactical-group">
                 <label>SYSTEM POWER</label>
                 <button class="btn-tactical active" id="cam-toggle-nexus">ONLINE</button>
@@ -276,8 +282,8 @@
           </button>
           <div class="guide-content" id="guide-content">
             <div class="disease-grid">
-               <!-- Guide cards... (omitted for brevity but kept in final write) -->
-               <div class="disease-card">
+              <!-- Guide cards... (omitted for brevity but kept in final write) -->
+              <div class="disease-card">
                 <div class="disease-name">Mange / खुजली रोग</div>
                 <div class="disease-hi">त्वचा संक्रमण</div>
                 <ul class="symptom-list">
@@ -310,14 +316,6 @@
       <a href="dashboard.html" class="mobile-nav-item" id="mnav-dashboard">
         <i class="fa-solid fa-gauge-high"></i>
         <span>Home</span>
-      </a>
-      <a href="herd.html" class="mobile-nav-item" id="mnav-animals">
-        <i class="fa-solid fa-paw"></i>
-        <span>Herd</span>
-      </a>
-      <a href="vitals.html" class="mobile-nav-item" id="mnav-vitals">
-        <i class="fa-solid fa-heartbeat"></i>
-        <span>Vitals</span>
       </a>
       <a href="analytics.html" class="mobile-nav-item" id="mnav-analytics">
         <i class="fa-solid fa-chart-line"></i>

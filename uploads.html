@@ -16,7 +16,7 @@
   <!-- Font Awesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-  
+
   <!-- App Stylesheets -->
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css" />
@@ -25,7 +25,11 @@
   <link rel="stylesheet" href="css/pages/uploads.css" />
 
   <!-- FOUC Prevention -->
-  <style>html { visibility: hidden; }</style>
+  <style>
+    html {
+      visibility: hidden;
+    }
+  </style>
 </head>
 
 <body>
@@ -134,7 +138,7 @@
      MAIN CONTENT
 ═══════════════════════════════════════════════════════ -->
   <main class="main-content" id="main-content">
-    
+
     <!-- Global Top Bar -->
     <header class="top-bar">
       <div class="top-bar-left">
@@ -182,17 +186,20 @@
         <div class="upload-container">
           <!-- Data Category Selector -->
           <div class="upload-options" style="margin-bottom: 24px;">
-            <label class="form-label" style="display:block; margin-bottom:8px; font-weight:600; color:var(--text-primary);">
+            <label class="form-label"
+              style="display:block; margin-bottom:8px; font-weight:600; color:var(--text-primary);">
               <i class="fa-solid fa-list-check" style="margin-right:8px; color:var(--accent-blue);"></i>
               Select Data Category / डेटा श्रेणी चुनें
             </label>
-            <select id="upload-category" class="form-input" style="width:100%; max-width:400px; background:var(--bg-card); border-color:var(--border);">
+            <select id="upload-category" class="form-input"
+              style="width:100%; max-width:400px; background:var(--bg-card); border-color:var(--border);">
               <option value="vitals">Live Vitals Data / लाइव जीवन संकेत डेटा</option>
               <option value="inventory">Inventory & Feed Logs / इन्वेंटरी और चारा लॉग</option>
               <option value="veterinary">Veterinary Records / पशु चिकित्सा रिकॉर्ड</option>
               <option value="herd">Herd Profiles / पशु प्रोफ़ाइल</option>
             </select>
-            <p style="font-size:0.75rem; color:var(--text-dim); margin-top:6px;">Select which module this data belongs to | चुनें कि यह डेटा किस मॉड्यूल का है</p>
+            <p style="font-size:0.75rem; color:var(--text-dim); margin-top:6px;">Select which module this data belongs
+              to | चुनें कि यह डेटा किस मॉड्यूल का है</p>
           </div>
 
           <!-- Drop Zone -->
@@ -210,7 +217,8 @@
 
           <!-- Browse Button -->
           <div class="upload-actions">
-            <input type="file" id="file-input" accept=".csv,.json,.xlsx" style="display:none;" aria-label="Select file" />
+            <input type="file" id="file-input" accept=".csv,.json,.xlsx" style="display:none;"
+              aria-label="Select file" />
             <button class="btn btn-secondary" id="browse-btn" style="margin-top:14px;">
               <i class="fa-solid fa-folder-open"></i> Browse Files / फ़ाइल चुनें
             </button>
@@ -278,23 +286,28 @@
             </div>
 
             <!-- New Update Action -->
-            <div class="result-actions" style="margin-top: 24px; text-align: right; border-top: 1px solid var(--border); padding-top: 20px;">
+            <div class="result-actions"
+              style="margin-top: 24px; text-align: right; border-top: 1px solid var(--border); padding-top: 20px;">
               <button class="btn btn-secondary" id="restart-btn" style="margin-right: 10px;">
                 <i class="fa-solid fa-rotate-left"></i> Start Over
               </button>
               <button class="btn btn-primary" id="update-system-btn">
-                <i class="fa-solid fa-cloud-arrow-up"></i> Update <span id="update-target-label">System</span> / डेटा अपडेट करें
+                <i class="fa-solid fa-cloud-arrow-up"></i> Update <span id="update-target-label">System</span> / डेटा
+                अपडेट करें
               </button>
             </div>
           </div>
 
           <!-- Final Success State -->
-          <div class="final-success" id="final-success" style="display:none; text-align:center; padding:40px; animation: fadeIn 0.5s ease-out;">
+          <div class="final-success" id="final-success"
+            style="display:none; text-align:center; padding:40px; animation: fadeIn 0.5s ease-out;">
             <div style="font-size:4rem; color:var(--accent-green); margin-bottom:20px;">
               <i class="fa-solid fa-circle-check"></i>
             </div>
-            <h2 style="font-family:var(--font-heading); color:var(--text-primary); margin-bottom:10px;">Database Updated Successfully!</h2>
-            <p style="color:var(--text-muted); margin-bottom:30px;">Your records have been merged into the <span id="final-target-name" style="color:var(--accent-green); font-weight:700;">Inventory</span> module.</p>
+            <h2 style="font-family:var(--font-heading); color:var(--text-primary); margin-bottom:10px;">Database Updated
+              Successfully!</h2>
+            <p style="color:var(--text-muted); margin-bottom:30px;">Your records have been merged into the <span
+                id="final-target-name" style="color:var(--accent-green); font-weight:700;">Inventory</span> module.</p>
             <button class="btn btn-primary" onclick="UploadsModule.resetUploadView()">
               <i class="fa-solid fa-plus-circle"></i> Upload More / और अपलोड करें
             </button>
@@ -315,17 +328,9 @@
         <i class="fa-solid fa-gauge-high"></i>
         <span>Home</span>
       </a>
-      <a href="herd.html" class="mobile-nav-item" id="mnav-animals">
+      <a href="uploads.html" class="mobile-nav-item" id="mnav-animals">
         <i class="fa-solid fa-paw"></i>
-        <span>Herd</span>
-      </a>
-      <a href="vitals.html" class="mobile-nav-item" id="mnav-vitals">
-        <i class="fa-solid fa-heartbeat"></i>
-        <span>Vitals</span>
-      </a>
-      <a href="analytics.html" class="mobile-nav-item" id="mnav-analytics">
-        <i class="fa-solid fa-chart-line"></i>
-        <span>Analytics</span>
+        <span>Uploads</span>
       </a>
       <a href="alerts.html" class="mobile-nav-item" id="mnav-alerts">
         <i class="fa-solid fa-bell"></i>
