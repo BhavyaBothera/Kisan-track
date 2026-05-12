@@ -221,15 +221,38 @@ const HerdModule = (function () {
 
   // ── Public API ────────────────────────────────────────────
   function init() {
+    console.log('HerdModule: Initializing...');
+    
     renderProfiles();
     initFilters();
     initSearch();
     initAddAnimal();
 
+    // Listen for state updates from FirestoreStore
     document.addEventListener('kisanTrack:stateUpdated', () => {
+      console.log('HerdModule: State updated, re-rendering...');
       renderProfiles();
+    });
+  }
+
+  // --- Auto-init Fallback ---
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('HerdModule: DOMContentLoaded fallback check');
+      // If auth.js didn't init us within 2 seconds, we try ourselves
+      setTimeout(() => {
+        const state = getState();
+        if (state && state.initializedUid && !document.querySelector('.profile-card')) {
+           init();
+        }
+      }, 2000);
     });
   }
 
   return { init };
 })();
+
+// Safety call if script is loaded after auth
+if (window.HerdModule && !window.HerdModule._initialized) {
+   // auth.js usually handles this, but let's be safe
+}

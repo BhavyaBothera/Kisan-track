@@ -4,6 +4,23 @@
    Used by: herd.html (Section Animals)
    ============================================ */
 
+/* ── 0. PAGE HEADER EXTENSIONS ────────────────────────────── */
+.page-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+}
+
+.page-header-flex .header-text {
+    flex: 1;
+}
+
+.page-header-flex .header-actions {
+    display: flex;
+    align-items: center;
+}
+
 .page-header {
   margin-bottom: 28px;
   display: flex;

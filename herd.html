@@ -179,17 +179,19 @@
     ───────────────────────────────────────────────── -->
       <section class="tab-section active" id="section-animals" aria-label="Animal Profiles">
 
-        <div class="page-header">
-          <div>
+        <div class="page-header page-header-flex">
+          <div class="header-text">
             <h1><i class="fa-solid fa-paw" style="color:var(--accent-green);margin-right:10px;"></i>Animal Profiles /
               <span style="color:var(--text-muted);">पशु प्रोफ़ाइल</span>
             </h1>
             <p class="subtitle">Full registry of monitored animals | निगरानी में सभी पशुओं की सूची</p>
           </div>
-          <button class="btn btn-primary" id="open-add-animal-btn" aria-label="Add New Animal">
-            <i class="fa-solid fa-plus"></i>
-            <span>+ Add Animal / + पशु जोड़ें</span>
-          </button>
+          <div class="header-actions">
+            <button class="btn btn-primary" id="open-add-animal-btn" aria-label="Add New Animal">
+              <i class="fa-solid fa-plus-circle"></i>
+              <span>Add Animal / पशु जोड़ें</span>
+            </button>
+          </div>
         </div>
 
         <!-- Filter bar -->
@@ -211,8 +213,6 @@
         <div class="profiles-grid" id="profiles-grid">
           <!-- Populated by animals.js -->
         </div>
-      </section>
-
       </section>
 
     </div><!-- /.content-area -->
