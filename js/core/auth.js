@@ -73,11 +73,27 @@
     } catch (err) {
       console.error('Auth: Initialization error', err);
     } finally {
-      // ALWAYS reveal the page eventually, unless redirecting
-      // We wait a tiny bit to allow modules to start rendering
+      // 1. Inject Global Loader if missing
+      if (!document.getElementById('global-loader')) {
+        const loader = document.createElement('div');
+        loader.id = 'global-loader';
+        loader.innerHTML = `
+          <div class="loader-spinner"></div>
+          <div class="loader-text">Initializing KisanTrack...</div>
+        `;
+        document.body.prepend(loader);
+      }
+
+      // 2. Reveal Page with Animation
       setTimeout(() => {
+        const loader = document.getElementById('global-loader');
+        const main = document.getElementById('main-content');
+        
+        if (loader) loader.classList.add('fade-out');
+        if (main) main.classList.add('page-reveal');
+        
         document.documentElement.style.visibility = 'visible';
-      }, 100);
+      }, 400);
     }
   });
 

@@ -28,6 +28,11 @@ var ProfileModule = (function () {
     var root = document.getElementById('profile-section-root');
     if (!root) return;
 
+    // Apply smooth entry animation
+    root.classList.remove('animate-fadein');
+    void root.offsetWidth; // Force reflow
+    root.classList.add('animate-fadein');
+
     if (!farmerData) {
       root.innerHTML = `
         <div class="profile-loading">

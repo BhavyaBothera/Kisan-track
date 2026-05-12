@@ -250,3 +250,61 @@
 .staggered-item:nth-child(2) { animation-delay: 0.2s; }
 .staggered-item:nth-child(3) { animation-delay: 0.3s; }
 .staggered-item:nth-child(4) { animation-delay: 0.4s; }
+
+/* ── Global Page Loader ───────────────────────────────────── */
+#global-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: var(--bg-main);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.6s;
+}
+
+#global-loader.fade-out {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.loader-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(124, 181, 24, 0.1);
+    border-top-color: var(--accent-green);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+    box-shadow: 0 0 15px var(--glow-green);
+}
+
+.loader-text {
+    font-family: var(--font-heading);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+}
+
+/* ── Smooth Page Reveal ───────────────────────────────────── */
+.page-reveal {
+    animation: pageReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes pageReveal {
+    from { 
+        opacity: 0; 
+        transform: translateY(15px);
+        filter: blur(10px);
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
