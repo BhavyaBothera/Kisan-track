@@ -143,11 +143,88 @@ const HerdModule = (function () {
     });
   }
 
+  // ── Add Animal Modal ──────────────────────────────────────
+  function initAddAnimal() {
+    const modal = document.getElementById('add-animal-modal');
+    const openBtn = document.getElementById('open-add-animal-btn');
+    const closeBtn = document.getElementById('add-animal-close');
+    const cancelBtn = document.getElementById('cancel-add-animal');
+    const form = document.getElementById('add-animal-form');
+
+    if (!modal || !openBtn || !form) return;
+
+    const openModal = () => {
+      form.reset();
+      clearErrors();
+      modal.classList.add('open');
+    };
+
+    const closeModal = () => {
+      modal.classList.remove('open');
+    };
+
+    const clearErrors = () => {
+      form.querySelectorAll('.form-error').forEach(err => err.classList.remove('visible'));
+    };
+
+    openBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+
+    // Handle Form Submission
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearErrors();
+
+      const data = {
+        animalId: document.getElementById('new-animal-id').value.trim(),
+        species: document.getElementById('new-species').value,
+        breed: document.getElementById('new-breed').value.trim(),
+        tagId: document.getElementById('new-tag-id').value.trim(),
+        age: parseInt(document.getElementById('new-age').value),
+        weight: parseFloat(document.getElementById('new-weight').value),
+        status: document.getElementById('new-status').value
+      };
+
+      // Simple Validation
+      let hasError = false;
+      if (!data.animalId) { document.getElementById('err-animal-id').classList.add('visible'); hasError = true; }
+      if (!data.species) { document.getElementById('err-species').classList.add('visible'); hasError = true; }
+      if (!data.breed) { document.getElementById('err-breed').classList.add('visible'); hasError = true; }
+      if (!data.tagId) { document.getElementById('err-tag-id').classList.add('visible'); hasError = true; }
+      if (isNaN(data.age)) { document.getElementById('err-age').classList.add('visible'); hasError = true; }
+      if (isNaN(data.weight)) { document.getElementById('err-weight').classList.add('visible'); hasError = true; }
+      if (!data.status) { document.getElementById('err-status').classList.add('visible'); hasError = true; }
+
+      if (hasError) return;
+
+      const submitBtn = document.getElementById('submit-add-animal');
+      const originalText = submitBtn.innerHTML;
+
+      try {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+
+        await window.FirestoreStore.addAnimal(data);
+        
+        if (window.showToast) window.showToast('Animal added successfully! / पशु सफलतापूर्वक जोड़ा गया!');
+        closeModal();
+      } catch (err) {
+        console.error('Herd: Add animal failed', err);
+        if (window.showToast) window.showToast('Error adding animal. Please try again.', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      }
+    });
+  }
+
   // ── Public API ────────────────────────────────────────────
   function init() {
     renderProfiles();
     initFilters();
     initSearch();
+    initAddAnimal();
 
     document.addEventListener('kisanTrack:stateUpdated', () => {
       renderProfiles();

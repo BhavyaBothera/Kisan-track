@@ -91,7 +91,7 @@
 .alert-card.resolved {
     opacity: 0.6;
     border-left: 4px solid var(--text-dim);
-    grayscale: 0.5;
+    filter: grayscale(0.5);
 }
 
 /* ── 5. EMPTY STATE ENGINE ─────────────────────────────────── */
