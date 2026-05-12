@@ -1,5 +1,262 @@
 /* ============================================
    KisanTrack — dashboard.css
-   Purpose: Styles for dashboard.css
+   Purpose: Premium Tactical Dashboard UI
    Used by: dashboard.html
    ============================================ */
+
+/* ── 1. NEXUS DASHBOARD CORE ──────────────────────────────── */
+.nexus-header {
+  border-left: 4px solid var(--accent-green);
+  padding-left: 20px;
+  margin-bottom: 30px;
+  position: relative;
+  animation: fadeIn 0.8s ease both;
+}
+
+.nexus-header h1 {
+  font-size: 2.2rem;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 0 20px var(--glow-green);
+  margin-bottom: 4px;
+}
+
+.nexus-header .subtitle {
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: var(--accent-green);
+  opacity: 0.7;
+}
+
+/* ── 2. TACTICAL KPI GRID ─────────────────────────────────── */
+.nexus-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.nexus-card {
+  background: rgba(25, 28, 20, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.nexus-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  border-top: 2px solid var(--accent-green);
+  border-left: 2px solid var(--accent-green);
+  opacity: 0.2;
+}
+
+.nexus-card:hover {
+  transform: translateY(-8px);
+  background: rgba(34, 38, 28, 0.6);
+  border-color: rgba(124, 181, 24, 0.4);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(124, 181, 24, 0.1);
+}
+
+.nexus-card .label {
+  font-size: 0.65rem;
+  font-weight: 900;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.nexus-card .value {
+  font-family: var(--font-heading);
+  font-size: 2.6rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.nexus-card .delta {
+  font-size: 0.7rem;
+  font-family: monospace;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+}
+
+.nexus-card .delta.up { color: var(--accent-green); }
+.nexus-card .delta.down { color: var(--accent-red); }
+
+/* ── 3. BIOMETRIC CORE & TELEMETRY ─────────────────────────── */
+.nexus-bio-container {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.nexus-bio-gauge {
+  background: radial-gradient(circle at center, rgba(124, 181, 24, 0.05) 0%, transparent 70%),
+              rgba(25, 28, 20, 0.4);
+  backdrop-filter: blur(12px);
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  padding: 40px;
+  text-align: center;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nexus-bio-gauge svg {
+  filter: drop-shadow(0 0 20px var(--glow-green));
+}
+
+.nexus-bio-score {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.nexus-bio-score .num {
+  font-size: 4rem;
+  font-weight: 900;
+  display: block;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 0 30px var(--glow-green);
+}
+
+.nexus-bio-score .lab {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accent-green);
+  font-weight: 800;
+  margin-top: 5px;
+}
+
+.nexus-stat-pill {
+  background: rgba(124, 181, 24, 0.1);
+  border: 1px solid rgba(124, 181, 24, 0.2);
+  border-radius: 50px;
+  padding: 6px 14px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--accent-green);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── 4. PULSE & SCAN ANIMATIONS ───────────────────────────── */
+@keyframes nexus-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; box-shadow: 0 0 5px var(--accent-green); }
+  50% { transform: scale(1.4); opacity: 1; box-shadow: 0 0 15px var(--accent-green); }
+}
+
+.nexus-pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent-green);
+  border-radius: 50%;
+  animation: nexus-pulse 2s infinite;
+}
+
+/* ── 5. VITALS HUD ────────────────────────────────────────── */
+.nexus-vitals-hud {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.nexus-gauge-card {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  padding: 30px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.nexus-gauge-card:hover {
+  border-color: var(--accent-green);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.nexus-gauge-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  font-family: monospace;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.nexus-gauge-svg {
+  position: relative;
+  width: 160px;
+  height: 160px;
+}
+
+.nexus-gauge-value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.nexus-gauge-value .num {
+  font-size: 2.5rem;
+  font-weight: 900;
+  display: block;
+  color: #fff;
+}
+
+.nexus-gauge-value .unit {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+/* ── 6. RESPONSIVE HUD ────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .nexus-grid { grid-template-columns: repeat(2, 1fr); }
+  .nexus-bio-container { grid-template-columns: 1fr; }
+  .nexus-vitals-hud { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+  .nexus-grid { grid-template-columns: 1fr; }
+  .nexus-header h1 { font-size: 1.6rem; }
+}
