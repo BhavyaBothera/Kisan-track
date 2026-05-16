@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -185,12 +185,18 @@
           <label for="vitals-animal-select"><i class="fa-solid fa-paw"
               style="color:var(--accent-green);margin-right:4px;"></i> Select Animal / पशु चुनें:</label>
           <select class="styled-select" id="vitals-animal-select">
-            <!-- Populated by vitals.js -->
+            <option value="">⏳ Loading animals...</option>
           </select>
           <div class="live-badge">
             <div class="live-dot"></div>
             LIVE
           </div>
+        </div>
+        <!-- Selected animal info strip -->
+        <div id="selected-animal-strip" style="display:none; background:rgba(124,181,24,0.08); border:1px solid rgba(124,181,24,0.2); border-radius:10px; padding:10px 16px; margin-bottom:20px; font-size:0.85rem; color:var(--text-muted); display:flex; align-items:center; gap:12px;">
+          <span id="strip-emoji" style="font-size:1.5rem;">🐄</span>
+          <span id="strip-label">Select an animal to begin monitoring</span>
+          <span id="strip-status" style="margin-left:auto;"></span>
         </div>
 
         <!-- Gauges -->
@@ -212,7 +218,7 @@
                 <div class="gauge-unit">°C</div>
               </div>
             </div>
-            <div class="gauge-range">Safe: 38.0 – 39.5°C</div>
+            <div class="gauge-range" id="gauge-temp-range">Safe: 38.0 – 39.5°C</div>
           </div>
 
           <!-- Gauge 2: Heart Rate -->
@@ -232,7 +238,7 @@
                 <div class="gauge-unit">bpm</div>
               </div>
             </div>
-            <div class="gauge-range">Safe: 60 – 80 bpm</div>
+            <div class="gauge-range" id="gauge-hr-range">Safe: 60 – 80 bpm</div>
           </div>
 
           <!-- Gauge 3: Activity -->
@@ -252,7 +258,7 @@
                 <div class="gauge-unit">%</div>
               </div>
             </div>
-            <div class="gauge-range">Normal: 40 – 80%</div>
+            <div class="gauge-range" id="gauge-act-range">Normal: 40 – 80%</div>
           </div>
         </div>
 
@@ -270,7 +276,7 @@
                 <div class="live-dot"></div>Every 60s
               </div>
             </div>
-            <div class="live-chart-range">Safe: 38.0 – 39.5°C &nbsp;·&nbsp; Unit: °C</div>
+            <div class="live-chart-range" id="chart-temp-range">Safe: 38.0 – 39.5°C &nbsp;·&nbsp; Unit: °C</div>
             <div class="chart-wrap vitals-chart-wrap">
               <canvas id="chart-temp"></canvas>
             </div>
@@ -287,7 +293,7 @@
                 <div class="live-dot"></div>Every 60s
               </div>
             </div>
-            <div class="live-chart-range">Safe: 60 – 80 bpm &nbsp;·&nbsp; Unit: bpm</div>
+            <div class="live-chart-range" id="chart-hr-range">Safe: 60 – 80 bpm &nbsp;·&nbsp; Unit: bpm</div>
             <div class="chart-wrap vitals-chart-wrap">
               <canvas id="chart-hr"></canvas>
             </div>
@@ -304,7 +310,7 @@
                 <div class="live-dot"></div>Every 60s
               </div>
             </div>
-            <div class="live-chart-range">Normal: 40 – 80% &nbsp;·&nbsp; Unit: %</div>
+            <div class="live-chart-range" id="chart-act-range">Normal: 40 – 80% &nbsp;·&nbsp; Unit: %</div>
             <div class="chart-wrap vitals-chart-wrap">
               <canvas id="chart-activity"></canvas>
             </div>
