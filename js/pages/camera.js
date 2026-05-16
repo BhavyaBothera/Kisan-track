@@ -60,17 +60,20 @@ window.CameraModule = (function () {
   function init() {
     bindEvents();
     startHUDCycle();
-    fetchAnimals();
-    fetchHistory();
-    
+    renderReel(); // Show empty state immediately
+
+    // Restore saved IP
     if (state.esp32Ip && ui.inpIp()) {
       ui.inpIp().value = state.esp32Ip;
     }
 
-    // Start stream if IP is present
-    if (state.esp32Ip) {
-      startStream();
-    }
+    // Wait for Firestore auth before fetching data
+    document.addEventListener('kisanTrack:stateUpdated', () => {
+      fetchAnimalsFromStore();
+      fetchHistory();
+      // Start stream if IP already saved
+      if (state.esp32Ip && state.powerOn) startStream();
+    }, { once: true }); // only fire once on first data load
   }
 
   function bindEvents() {
@@ -111,10 +114,35 @@ window.CameraModule = (function () {
 
     // Settings
     if (ui.inpIp()) {
-      ui.inpIp().onchange = (e) => {
-        state.esp32Ip = e.target.value.trim();
-        localStorage.setItem(IP_KEY, state.esp32Ip);
-        if (state.powerOn) startStream();
+      // Show connect button feedback when IP changes
+      ui.inpIp().addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        const ipPattern = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
+        const isValid = ipPattern.test(val) || val === '';
+        ui.inpIp().style.borderColor = val === '' ? '' : isValid ? 'var(--accent-green)' : 'var(--accent-red)';
+      });
+
+      ui.inpIp().addEventListener('change', (e) => {
+        const val = e.target.value.trim();
+        const ipPattern = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
+        if (val && !ipPattern.test(val)) {
+          showConnectionStatus('error', 'Invalid IP — use format 192.168.x.x');
+          return;
+        }
+        state.esp32Ip = val;
+        localStorage.setItem(IP_KEY, val);
+        if (state.powerOn && val) startStream();
+      });
+    }
+
+    // TRIGGER SCAN button also validates IP
+    if (ui.btnScan()) {
+      ui.btnScan().onclick = () => {
+        const ipVal = ui.inpIp() ? ui.inpIp().value.trim() : '';
+        if (!state.apiKey && !ipVal) {
+          // No IP and no API key — run in demo/simulated mode, that's fine
+        }
+        runDiagnostic();
       };
     }
 
@@ -130,22 +158,58 @@ window.CameraModule = (function () {
     if (reBtn) reBtn.onclick = () => runDiagnostic();
   }
 
+  // ── Connection status badge ───────────────────────────────
+  function showConnectionStatus(type, msg) {
+    let badge = document.getElementById('ip-status-badge');
+    if (!badge) {
+      badge = document.createElement('div');
+      badge.id = 'ip-status-badge';
+      badge.style.cssText = 'font-size:0.7rem;margin-top:4px;padding:3px 8px;border-radius:4px;transition:all 0.3s;';
+      ui.inpIp() && ui.inpIp().parentNode && ui.inpIp().parentNode.appendChild(badge);
+    }
+    badge.textContent = msg;
+    badge.style.background = type === 'ok' ? 'rgba(124,181,24,0.15)' : type === 'error' ? 'rgba(239,68,68,0.15)' : 'rgba(229,161,0,0.15)';
+    badge.style.color = type === 'ok' ? 'var(--accent-green)' : type === 'error' ? 'var(--accent-red)' : 'var(--accent-amber)';
+  }
+
   // ── Systems ───────────────────────────────────────────────
+
+  // ── HUD cycle: clock + countdown ticker ───────────────────
+  let _countdown = 120;
 
   function startHUDCycle() {
     if (timers.hud) clearInterval(timers.hud);
+    _countdown = 120;
+
     timers.hud = setInterval(() => {
       if (!state.powerOn) return;
-      
-      const clock = ui.clock();
-      if (clock) {
-        clock.textContent = new Date().toLocaleTimeString([], { hour12: false });
-      }
 
-      // Signal logic
+      // Live clock
+      const clock = ui.clock();
+      if (clock) clock.textContent = new Date().toLocaleTimeString([], { hour12: false });
+
+      // Signal strength drift
       state.signalStrength = Math.min(100, Math.max(85, state.signalStrength + (Math.random() * 4 - 2)));
       const sigBar = document.querySelector('.hud-top .hud-bar');
-      if (sigBar) sigBar.style.width = `${state.signalStrength}%`;
+      const sigVal = document.querySelector('.hud-top .hud-val');
+      if (sigBar) sigBar.style.width = `${Math.round(state.signalStrength)}%`;
+      if (sigVal) sigVal.textContent = `${Math.round(state.signalStrength)}%`;
+
+      // Countdown ticker
+      const cdEl = ui.countdown();
+      _countdown--;
+      if (_countdown <= 0) {
+        _countdown = 120;
+        if (cdEl) cdEl.textContent = '120';
+        // Auto-trigger a scan when countdown reaches 0
+        if (!state.isAnalyzing) runDiagnostic();
+      } else {
+        if (cdEl) {
+          cdEl.textContent = _countdown;
+          // Flash red when < 10s
+          cdEl.style.color = _countdown < 10 ? 'var(--accent-red)' : '';
+        }
+      }
     }, 1000);
   }
 
@@ -153,21 +217,29 @@ window.CameraModule = (function () {
     if (!state.powerOn || !state.esp32Ip) return;
     state.isStreaming = true;
     if (timers.stream) clearInterval(timers.stream);
-    
+
+    showConnectionStatus('connecting', '⏳ Connecting to ESP32-CAM...');
+    setPlaceholder('connecting');
+
     timers.stream = setInterval(async () => {
       if (!state.powerOn || !state.esp32Ip || state.isAnalyzing) return;
-      
+
       const ip = state.esp32Ip.startsWith('http') ? state.esp32Ip : `http://${state.esp32Ip}`;
       const img = ui.img();
       if (!img) return;
 
-      img.src = `${ip}/capture?t=${Date.now()}`;
+      const testUrl = `${ip}/capture?t=${Date.now()}`;
+      img.src = testUrl;
+
       img.onload = () => {
         if (ui.placeholder()) ui.placeholder().style.display = 'none';
         img.style.display = 'block';
+        showConnectionStatus('ok', '✓ ESP32-CAM connected');
       };
       img.onerror = () => {
-        // Fallback or silent ignore
+        img.style.display = 'none';
+        setPlaceholder('error');
+        showConnectionStatus('error', '✗ Cannot reach camera — check IP & network');
       };
     }, 2000);
   }
@@ -175,6 +247,28 @@ window.CameraModule = (function () {
   function stopStream() {
     state.isStreaming = false;
     if (timers.stream) clearInterval(timers.stream);
+    setPlaceholder('offline');
+  }
+
+  // ── Placeholder state manager ─────────────────────────────
+  function setPlaceholder(mode) {
+    const ph = ui.placeholder();
+    if (!ph) return;
+    ph.style.display = 'flex';
+
+    const msgs = {
+      default:     { icon: '📡', line1: 'INITIALIZING UPLINK...', line2: 'अपलिंक प्रारंभ हो रहा है...' },
+      connecting:  { icon: '🔄', line1: 'CONNECTING TO CAMERA...', line2: 'कैमरे से जुड़ रहा है...' },
+      error:       { icon: '⚠', line1: 'CAMERA OFFLINE', line2: 'कैमरा उपलब्ध नहीं — IP जाँचें' },
+      offline:     { icon: '🔌', line1: 'SYSTEM OFFLINE', line2: 'सिस्टम बंद है' },
+    };
+    const m = msgs[mode] || msgs.default;
+    ph.innerHTML = `
+      <div class="nexus-loader" style="${mode === 'error' || mode === 'offline' ? 'border-color:var(--accent-red);border-top-color:transparent;' : ''}"></div>
+      <p style="font-size:1.4rem;margin-bottom:4px;">${m.icon}</p>
+      <p><strong>${m.line1}</strong></p>
+      <p style="opacity:0.6;font-size:0.8rem;">${m.line2}</p>
+    `;
   }
 
   // ── Diagnostics ───────────────────────────────────────────
@@ -409,29 +503,48 @@ window.CameraModule = (function () {
   function renderReel() {
     const reel = ui.reel();
     if (!reel) return;
-    reel.innerHTML = state.history.map(item => `
-      <div class="reel-item" style="flex:0 0 140px; margin-right:10px; cursor:pointer;" onclick="window.CameraModule.loadCapture('${item.id}')">
-        <img src="${item.imageUrl}" style="width:100%; height:80px; object-fit:cover; border-radius:4px;">
-        <div style="font-size:0.6rem; color:var(--text-dim); margin-top:4px; display:flex; justify-content:space-between;">
-            <span>${item.animalId}</span>
-            <span style="color:${item.severity === 'HEALTHY' ? 'var(--accent-green)' : 'var(--accent-red)'}">${item.healthScore}/10</span>
-        </div>
-      </div>
-    `).join('');
+
+    if (!state.history || state.history.length === 0) {
+      reel.innerHTML = `
+        <div style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;color:var(--text-dim);font-size:0.8rem;padding:12px 0;">
+          <i class="fa-solid fa-camera" style="opacity:0.4;"></i>
+          <span>No scans yet — press <strong style="color:var(--accent-green);">TRIGGER SCAN</strong> or <strong style="color:var(--accent-green);">MANUAL UPLOAD</strong> to begin</span>
+        </div>`;
+      return;
+    }
+
+    reel.innerHTML = state.history.map(item => {
+      const scoreColor = item.severity === 'HEALTHY' ? 'var(--accent-green)' : item.severity === 'WARNING' ? 'var(--accent-amber)' : 'var(--accent-red)';
+      const imgSrc = item.imageUrl || '';
+      return `
+        <div class="reel-item" style="flex:0 0 140px;margin-right:10px;cursor:pointer;" onclick="window.CameraModule.loadCapture('${item.id}')">
+          <div style="width:100%;height:80px;border-radius:4px;overflow:hidden;background:rgba(255,255,255,0.05);">
+            ${imgSrc ? `<img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" />` : '<div style="height:100%;display:flex;align-items:center;justify-content:center;opacity:0.3;">📷</div>'}
+          </div>
+          <div style="font-size:0.6rem;color:var(--text-dim);margin-top:4px;display:flex;justify-content:space-between;">
+            <span>${item.animalId || 'HERD'}</span>
+            <span style="color:${scoreColor}">${item.healthScore !== undefined ? item.healthScore + '/10' : '—'}</span>
+          </div>
+        </div>`;
+    }).join('');
   }
 
-  async function fetchAnimals() {
-    const user = firebase.auth().currentUser;
-    if (!user) return;
-    try {
-      const snap = await firebase.firestore().collection(COLLECTION_ANIMALS).where('farmerId', '==', user.uid).get();
-      state.animalsList = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      const sel = ui.selAnimal();
-      if (sel) {
-        sel.innerHTML = '<option value="">SUBJECT SELECTION</option>' + 
-          state.animalsList.map(a => `<option value="${a.id}">${a.animalId} (${a.breed || a.species})</option>`).join('');
-      }
-    } catch (e) { console.error(e); }
+  function fetchAnimalsFromStore() {
+    const storeState = window.FirestoreStore ? window.FirestoreStore.getState() : null;
+    if (!storeState || storeState.animals.length === 0) return;
+
+    state.animalsList = storeState.animals;
+    const sel = ui.selAnimal();
+    if (!sel) return;
+
+    const emojiMap = { Cow: '🐄', Buffalo: '🐃', Goat: '🐐', Sheep: '🐑' };
+    sel.innerHTML = '<option value="">— SELECT SUBJECT —</option>' +
+      state.animalsList.map(a =>
+        `<option value="${a.id}">${emojiMap[a.species] || '🐄'} ${a.animalId} · ${a.breed || a.species} (${a.status})</option>`
+      ).join('');
+
+    // Also re-listen in case more animals are added
+    document.addEventListener('kisanTrack:stateUpdated', fetchAnimalsFromStore);
   }
 
   async function fetchHistory() {
@@ -444,7 +557,10 @@ window.CameraModule = (function () {
         .limit(20).get();
       state.history = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       renderReel();
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.warn('CameraModule: Could not load history (index may be building):', e.message);
+      renderReel(); // Still show empty state
+    }
   }
 
   async function triggerAlert(doc) {
