@@ -171,3 +171,61 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* BADGE PILLS (status) */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.badge-healthy  { background: rgba(124,181,24,0.15); color: var(--accent-green); }
+.badge-warning  { background: rgba(229,161,0,0.15);  color: var(--accent-amber); }
+.badge-critical { background: rgba(239,68,68,0.15);  color: var(--accent-red);   }
+
+/* SMALL BUTTON */
+.btn-sm {
+  padding: 7px 14px;
+  font-size: 0.78rem;
+  gap: 6px;
+}
+
+/* SKELETON SHIMMER */
+.skeleton-pulse {
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 0.08; }
+}
+
+/* FILTER TAB ACTIVE */
+.filter-bar .filter-btn.active {
+  background: var(--accent-green);
+  color: #000;
+  border-color: var(--accent-green);
+}
+
+/* PROFILE CARD CURSOR */
+.profile-card {
+  cursor: pointer;
+}
+
+/* MODAL OPEN STATE */
+.modal-overlay.open {
+  display: flex;
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* INPUT ERROR STATE */
+.form-input.input-error {
+  border-color: var(--accent-red);
+  box-shadow: 0 0 8px rgba(239,68,68,0.2);
+}
+.form-error.visible {
+  display: block;
+}

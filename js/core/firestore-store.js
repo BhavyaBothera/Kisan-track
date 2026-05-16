@@ -37,18 +37,21 @@ const FirestoreStore = (function () {
   // --- Mapping Helpers ---
   function mapAnimal(doc) {
     const data = doc.data();
+    const emojiMap = { Cow: '🐄', Buffalo: '🐃', Goat: '🐐', Sheep: '🐑' };
     return {
       id: doc.id,
       animalId: data.animalId || 'UNKNOWN',
       farmerId: data.farmerId,
       species: data.species || 'Cow',
       speciesKey: (data.species || 'Cow').toLowerCase() + 's',
-      emoji: data.species === 'Cow' ? '🐄' : data.species === 'Buffalo' ? '🐃' : '🐐',
+      emoji: emojiMap[data.species] || '🐄',
       breed: data.breed || 'Mixed',
       age: data.age || 0,
       weight: data.weight || 0,
       tagId: data.tagId || '—',
       status: data.status || 'Healthy',
+      dob: data.dob || null,
+      owner: data.owner || null,
       createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
     };
   }
@@ -202,11 +205,15 @@ const FirestoreStore = (function () {
     
     addAnimal: async (animalData) => {
       if (!STATE.initializedUid) throw new Error('Store not initialized');
-      return await db.collection('animals').add({
+      const payload = {
         ...animalData,
         farmerId: STATE.initializedUid,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
+      };
+      // Only store dob/owner if provided
+      if (!payload.dob) delete payload.dob;
+      if (!payload.owner) delete payload.owner;
+      return await db.collection('animals').add(payload);
     },
 
     resolveAlert: async (alertId) => {
