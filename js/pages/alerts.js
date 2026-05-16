@@ -13,15 +13,22 @@ const AlertsModule = (function () {
   // --- State Reference ---
   function getState() {
     return window.FirestoreStore ? window.FirestoreStore.getState() : null;
-  }
-
-  // ── Helpers ───────────────────────────────────────────────
+  }  // ── Helpers ───────────────────────────────────────────────
   function getSeverityClass(severity) {
     if (!severity) return 'info';
     return severity.toLowerCase();
   }
 
-  // ── Stats Row ─────────────────────────────────────────────
+  // Safely convert a Firestore Timestamp or JS Date to a displayable string
+  function formatTimestamp(ts) {
+    if (!ts) return 'Just now';
+    try {
+      const d = (typeof ts.toDate === 'function') ? ts.toDate() : new Date(ts);
+      return d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+    } catch { return 'Just now'; }
+  }
+
+  // ── Stats Row ───────────────────────────────────────────
   function renderStats() {
     const state = getState();
     const statsRow = document.getElementById('alert-stats-row');
@@ -29,6 +36,8 @@ const AlertsModule = (function () {
 
     const total    = state.alerts.length;
     const resolved = state.alerts.filter(a => a.resolved).length;
+    const critical = state.alerts.filter(a => a.severity === 'Critical' && !a.resolved).length;
+    const warning  = state.alerts.filter(a => a.severity === 'Warning'  && !a.resolved).length;
     const pending  = total - resolved;
 
     statsRow.innerHTML = `
@@ -37,6 +46,13 @@ const AlertsModule = (function () {
         <div>
           <div class="alert-stat-num">${total}</div>
           <div class="alert-stat-label">Total Alerts / कुल अलर्ट</div>
+        </div>
+      </div>
+      <div class="alert-stat-card">
+        <div class="alert-stat-icon red"><i class="fa-solid fa-circle-exclamation"></i></div>
+        <div>
+          <div class="alert-stat-num" style="color:var(--accent-red)">${critical}</div>
+          <div class="alert-stat-label">Critical / गंभीर</div>
         </div>
       </div>
       <div class="alert-stat-card">
@@ -55,11 +71,41 @@ const AlertsModule = (function () {
       </div>
     `;
 
+    // Sidebar alert badge
     const badge = document.getElementById('alert-badge');
     if (badge) {
       badge.textContent = pending;
       badge.style.display = pending > 0 ? 'inline' : 'none';
     }
+
+    // Update filter tab count badges
+    updateTabBadges(state.alerts);
+  }
+
+  // ── Tab count badges ────────────────────────────────────────
+  function updateTabBadges(alerts) {
+    const counts = {
+      all:      alerts.length,
+      Critical: alerts.filter(a => a.severity === 'Critical' && !a.resolved).length,
+      Warning:  alerts.filter(a => a.severity === 'Warning'  && !a.resolved).length,
+      resolved: alerts.filter(a => a.resolved).length,
+    };
+
+    const labelMap = {
+      all:      'All / सभी',
+      Critical: '🔴 Critical',
+      Warning:  '🟡 Warning',
+      resolved: '✅ Resolved',
+    };
+
+    Object.entries(counts).forEach(([filter, count]) => {
+      const btn = document.querySelector(`[data-filter="${filter}"]`);
+      if (!btn) return;
+      const badge = count > 0
+        ? ` <span style="background:rgba(255,255,255,0.12);color:inherit;border-radius:12px;padding:1px 7px;font-size:0.72rem;font-weight:700;margin-left:4px;">${count}</span>`
+        : '';
+      btn.innerHTML = labelMap[filter] + badge;
+    });
   }
 
   // ── Alert Feed ────────────────────────────────────────────
@@ -71,7 +117,7 @@ const AlertsModule = (function () {
       if (currentFilter === 'all')      return true;
       if (currentFilter === 'resolved') return a.resolved;
       return a.severity === currentFilter && !a.resolved;
-    }).sort((a, b) => a.resolved - b.resolved);
+    }).sort((a, b) => (a.resolved ? 1 : -1) - (b.resolved ? 1 : -1));
   }
 
   function renderFeed() {
@@ -89,11 +135,26 @@ const AlertsModule = (function () {
     const alerts = getFilteredAlerts();
 
     if (!alerts.length) {
-      feed.innerHTML = `
-        <div class="empty-state">
-          <i class="fa-solid fa-bell-slash"></i>
-          <p>No alerts match this filter.<br>इस फ़िल्टर से कोई अलर्ट नहीं।</p>
-        </div>`;
+      // Distinguish between filtered-empty vs truly-empty
+      const state = getState();
+      const totalAlerts = state ? state.alerts.length : 0;
+      if (totalAlerts === 0) {
+        feed.innerHTML = `
+          <div class="empty-state" style="padding:56px 24px;">
+            <div style="font-size:3rem;margin-bottom:16px;">✅</div>
+            <h3 style="color:var(--accent-green);margin-bottom:8px;">All Clear!</h3>
+            <p style="color:var(--text-dim);font-size:0.9rem;">
+              No health alerts for your herd.<br>
+              <span style="opacity:0.7;">आपके पशुओं का स्वास्थ्य ठीक है! 🐄</span>
+            </p>
+          </div>`;
+      } else {
+        feed.innerHTML = `
+          <div class="empty-state">
+            <i class="fa-solid fa-filter"></i>
+            <p>No alerts match this filter.<br>इस फ़िल्टर से कोई अलर्ट नहीं।</p>
+          </div>`;
+      }
       return;
     }
 
@@ -124,21 +185,21 @@ const AlertsModule = (function () {
               <span class="alert-animal-id">${species} #${a.animalId}</span>
             </div>
             <span class="badge badge-${a.resolved ? 'resolved' : sc}">
-              ${a.resolved ? '✓ Resolved' : a.severity}
+              ${a.resolved ? '✓ Resolved' : a.severity || 'Alert'}
             </span>
           </div>
           <div class="alert-reading">
             <i class="fa-solid fa-${sc === 'critical' ? 'circle-exclamation' : sc === 'warning' ? 'triangle-exclamation' : 'circle-info'}"></i>
-            ${a.parameter}: <strong>${a.reading}</strong>
+            ${a.parameter || 'Parameter'}: <strong>${a.readingValue || a.reading || '—'}</strong>
           </div>
-          <p class="alert-note">${a.alertType || a.parameter}</p>
+          <p class="alert-note">${a.alertType || a.parameter || 'Health Alert'}</p>
           <div class="alert-meta">
             <span class="alert-time">
               <i class="fa-regular fa-clock"></i>
-              ${a.timestamp.toLocaleString()}
+              ${formatTimestamp(a.timestamp)}
               &nbsp;·&nbsp;
               <span class="badge" style="background:rgba(59,130,246,0.12);color:#60a5fa;border:1px solid rgba(59,130,246,0.2);padding:2px 8px;font-size:0.7rem;">
-                Confidence: ${a.confidence || 0}%
+                Confidence: ${a.confidence || a.confidenceScore || 0}%
               </span>
             </span>
             ${actionBtns}
@@ -188,12 +249,33 @@ const AlertsModule = (function () {
   }
 
   function init() {
-    render();
+    // Show skeleton immediately
+    renderFeed();
+
+    // Set active class on the 'All' tab immediately
+    const allBtn = document.querySelector('[data-filter="all"]');
+    if (allBtn) allBtn.classList.add('active');
+
     initFilters();
 
-    document.addEventListener('kisanTrack:stateUpdated', () => {
-      render();
-    });
+    // Re-render whenever Firestore data updates
+    document.addEventListener('kisanTrack:stateUpdated', () => render());
+
+    // Safety net: if data still hasn't loaded in 8s, force empty state
+    setTimeout(() => {
+      const state = getState();
+      if (!state || state.isLoading) {
+        const feed = document.getElementById('alert-feed');
+        if (feed && feed.querySelector('.skeleton-pulse')) {
+          feed.innerHTML = `
+            <div class="empty-state" style="padding:56px 24px;">
+              <div style="font-size:3rem;margin-bottom:16px;">✅</div>
+              <h3 style="color:var(--accent-green);margin-bottom:8px;">All Clear!</h3>
+              <p style="color:var(--text-dim);font-size:0.9rem;">No active alerts for your herd.</p>
+            </div>`;
+        }
+      }
+    }, 8000);
   }
 
   return { init, render };
