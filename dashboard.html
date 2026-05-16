@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -179,7 +179,7 @@
         <div class="page-header"
           style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px; margin-bottom: 40px;">
           <h1 id="banner-greeting"><i class="fa-solid fa-gauge-high"
-              style="color:var(--accent-green);margin-right:10px;"></i>Good Morning, Farmer 🌾</h1>
+              style="color:var(--accent-green);margin-right:10px;"></i><span id="greeting-text" style="opacity:0.4;">Loading...</span></h1>
           <p class="subtitle" id="banner-farm-info">Real-time health monitoring for your entire livestock</p>
         </div>
 
@@ -222,8 +222,9 @@
                 transform="rotate(-90 50 50)" style="transition: stroke-dashoffset 1s ease-out;" />
             </svg>
             <div class="nexus-bio-score">
-              <span class="num" id="bio-score-val">0</span>
+              <span class="num" id="bio-score-val">--</span>
               <span class="lab">HEALTH INDEX</span>
+              <span class="lab" id="bio-score-label" style="font-size:0.65rem;opacity:0.6;margin-top:2px;">Calculating...</span>
             </div>
           </div>
 
