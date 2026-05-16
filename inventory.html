@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -214,7 +214,7 @@
               class="fa-solid fa-indian-rupee-sign"></i></div>
           <div class="kpi-body">
             <div class="kpi-label">Est. Monthly Cost / मासिक खर्च</div>
-            <div class="kpi-value" style="font-size: 1.1rem;">₹ 42,500</div>
+            <div class="kpi-value" id="stat-monthly-cost" style="font-size: 1.1rem;">-- </div>
           </div>
         </div>
       </div>
@@ -342,6 +342,13 @@
               <label class="form-label">Total Capacity</label>
               <input type="number" id="form-item-total" class="form-input" placeholder="e.g. 2000" required>
             </div>
+          </div>
+          <div class="form-group-row">
+            <div>
+              <label class="form-label">Cost Per Unit (&#x20b9;) / प्रति इकाई लागत</label>
+              <input type="number" id="form-item-cost" class="form-input" placeholder="e.g. 12" step="0.01" min="0">
+            </div>
+            <div></div>
           </div>
           <div style="margin-top: 24px; text-align: right;">
             <button type="button" class="btn btn-secondary" onclick="InventoryModule.closeModal()"

@@ -161,13 +161,34 @@ var ProfileModule = (function () {
   }
 
   function init() {
-    if (auth.currentUser) {
-      db.collection('farmers').doc(auth.currentUser.uid).onSnapshot(doc => {
-        if (doc.exists) { farmerData = doc.data(); render(); }
+    // Use onAuthStateChanged so we don't race with auth
+    firebase.auth().onAuthStateChanged(user => {
+      if (!user) return;
+
+      db.collection('farmers').doc(user.uid).onSnapshot(snap => {
+        if (snap.exists) {
+          farmerData = snap.data();
+        } else {
+          // Create a skeleton profile for new users
+          const email = user.email || '';
+          farmerData = {
+            fullName: user.displayName || email.split('@')[0] || 'Farmer',
+            email,
+            village: '', district: '', state: '',
+            farmName: '', farmSizeAcres: 0,
+            primaryAnimal: 'Cow', sensorSystemId: '',
+            yearsOfFarming: 0,
+          };
+          db.collection('farmers').doc(user.uid).set(farmerData, { merge: true }).catch(() => {});
+        }
+        render();
       });
-    }
-    setTimeout(() => { if (!farmerData && window.location.pathname.includes('profile.html')) init(); }, 1200);
-    document.addEventListener('kisanTrack:stateUpdated', render);
+    });
+
+    // Also re-render when herd/alerts data updates
+    document.addEventListener('kisanTrack:stateUpdated', () => {
+      if (farmerData) render();
+    });
   }
 
   return { init };
