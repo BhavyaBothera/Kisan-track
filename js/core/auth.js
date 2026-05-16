@@ -3,7 +3,7 @@
 // Purpose: Core Authentication & Redirection Logic
 // Page: Multiple
 // Dependencies: Firebase
-// Last Updated: 2026-05-09
+// Last Updated: 2026-05-17
 // ============================================
 
 (function() {
@@ -17,27 +17,37 @@
       const isIndexPage = path.includes('index.html') || path.endsWith('index.html') || path.endsWith('/');
 
       if (user) {
-        // a. Ensure Farmer Profile exists
+        // a. Ensure Farmer Profile exists in Firestore
         try {
           const farmerRef = db.collection('farmers').doc(user.uid);
           const doc = await farmerRef.get();
           
           if (!doc.exists) {
+            // New user — create profile using displayName if available, else email prefix
+            const fallbackName = user.displayName || user.email.split('@')[0];
             await farmerRef.set({
-              fullName: user.displayName || 'Farmer',
+              fullName: fallbackName,
               email: user.email,
               farmName: 'My Farm',
               registeredAt: firebase.firestore.FieldValue.serverTimestamp(),
               lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
             });
+            // Update UI immediately with the name we just created
+            updateUserUI(fallbackName);
           } else {
             await farmerRef.update({
               lastLogin: firebase.firestore.FieldValue.serverTimestamp()
             });
+            // Update UI from the existing Firestore profile (most reliable source)
+            const profileData = doc.data();
+            const name = profileData.fullName || user.displayName || user.email.split('@')[0];
+            updateUserUI(name);
           }
         } catch (profileErr) {
           console.error('Auth: Profile sync failed', profileErr);
-          // Proceed anyway to reveal the page
+          // Fallback: use whatever we can get from the auth object
+          const fallbackName = user.displayName || user.email.split('@')[0] || 'Farmer';
+          updateUserUI(fallbackName);
         }
 
         // b. Redirection
@@ -46,23 +56,21 @@
           return;
         }
 
-        // c. Update Global UI
-        const nameHi = document.getElementById('auth-first-name-hi');
-        const nameEn = document.getElementById('auth-first-name');
-        const avatar = document.getElementById('auth-avatar');
-        
-        const firstName = user.displayName ? user.displayName.split(' ')[0] : 'Farmer';
-        if (nameHi) nameHi.textContent = firstName;
-        if (nameEn) nameEn.textContent = firstName;
-        if (avatar) avatar.textContent = firstName.charAt(0).toUpperCase();
-
-        // d. Initialize Store
+        // c. Initialize Store (firestore-store.js MUST be loaded before auth.js)
         if (window.FirestoreStore) {
           window.FirestoreStore.init(user.uid);
+        } else {
+          console.error('Auth: FirestoreStore not found. Check script load order — firestore-store.js must come before auth.js');
         }
 
-        // e. Initialize Page Modules
+        // d. Initialize Page Modules
         initPageModules();
+
+        // e. Listen for farmer data to arrive and re-update UI (real-time name sync)
+        document.addEventListener('kisanTrack:farmerLoaded', (e) => {
+          const name = e.detail && e.detail.fullName;
+          if (name) updateUserUI(name);
+        });
 
       } else {
         // Not logged in
@@ -73,7 +81,7 @@
     } catch (err) {
       console.error('Auth: Initialization error', err);
     } finally {
-      // 1. Inject Global Loader if missing
+      // Inject Global Loader if missing
       if (!document.getElementById('global-loader')) {
         const loader = document.createElement('div');
         loader.id = 'global-loader';
@@ -84,7 +92,7 @@
         document.body.prepend(loader);
       }
 
-      // 2. Reveal Page with Animation
+      // Reveal Page with Animation
       setTimeout(() => {
         const loader = document.getElementById('global-loader');
         const main = document.getElementById('main-content');
@@ -96,6 +104,30 @@
       }, 400);
     }
   });
+
+  // --- Centralised User UI Update ---
+  // Called whenever we have a reliable name from Auth or Firestore
+  function updateUserUI(fullName) {
+    if (!fullName) return;
+    const firstName = fullName.split(' ')[0];
+    const initial = firstName.charAt(0).toUpperCase();
+
+    const nameHi  = document.getElementById('auth-first-name-hi');
+    const nameEn  = document.getElementById('auth-first-name');
+    const avatar  = document.getElementById('auth-avatar');
+    const greeting = document.getElementById('banner-greeting');
+
+    if (nameHi) nameHi.textContent = firstName;
+    if (nameEn) nameEn.textContent = firstName;
+    if (avatar) avatar.textContent = initial;
+
+    // Update dashboard greeting if present
+    if (greeting) {
+      const hour = new Date().getHours();
+      const timeGreeting = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening';
+      greeting.innerHTML = `<i class="fa-solid fa-gauge-high" style="color:var(--accent-green);margin-right:10px;"></i>${timeGreeting}, ${firstName} 🌾`;
+    }
+  }
 
   // --- 2. Global Dropdown Logic ---
   document.addEventListener('click', (e) => {
@@ -165,7 +197,6 @@
         window.FirestoreStore.unsubscribeAll();
       }
 
-      // Clear relevant localStorage
       localStorage.removeItem('selectedAnimalId');
       
       auth.signOut().then(() => {
@@ -214,29 +245,28 @@
       'inventory.html': 'nav-inventory',
       'veterinary.html': 'nav-veterinary',
       'analytics.html': 'nav-reports',
+      'vitals.html':    'nav-vitals',
     };
 
-    // Also map mobile nav
+    // Standardised mobile nav map (same 5 items on all pages)
     const mobileNavMap = {
       'dashboard.html': 'mnav-dashboard',
-      'herd.html':      'mnav-animals',
+      'analytics.html': 'mnav-analytics',
       'alerts.html':    'mnav-alerts',
       'camera.html':    'mnav-camera',
       'profile.html':   'mnav-profile',
-      'inventory.html': 'mnav-inventory',
-      'veterinary.html': 'mnav-veterinary',
-      'analytics.html': 'mnav-analytics',
     };
 
     Object.keys(navMap).forEach(file => {
       if (path.includes(file)) {
-        const desktopId = navMap[file];
-        const mobileId = mobileNavMap[file];
-        
-        const dEl = document.getElementById(desktopId);
-        const mEl = document.getElementById(mobileId);
-        
+        const dEl = document.getElementById(navMap[file]);
         if (dEl) dEl.classList.add('active');
+      }
+    });
+
+    Object.keys(mobileNavMap).forEach(file => {
+      if (path.includes(file)) {
+        const mEl = document.getElementById(mobileNavMap[file]);
         if (mEl) mEl.classList.add('active');
       }
     });

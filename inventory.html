@@ -1,9 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F33E;</text></svg>" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>KisanTrack | Inventory & Feed Management</title>
 
   <!-- Google Fonts -->
@@ -110,11 +111,6 @@
         <i class="fa-solid fa-circle-user"></i>
         <div class="nav-text">Farmer Profile<span class="nav-hi">किसान प्रोफ़ाइल</span></div>
       </a>
-
-      <a href="#" class="nav-link" id="nav-settings">
-        <i class="fa-solid fa-gear"></i>
-        <div class="nav-text">Farm Settings<span class="nav-hi">खेत की सेटिंग्स</span></div>
-      </a>
     </nav>
 
     <div class="sidebar-footer">
@@ -145,7 +141,7 @@
       <div class="top-bar-right">
         <div class="user-profile-dropdown" style="margin-right: 20px;">
           <button class="profile-dropdown-btn" id="topbar-profile-dropdown-btn">
-            <div class="user-avatar" id="auth-avatar">F</div>
+            <div class="user-avatar" id="auth-avatar">·</div>
             <div class="user-info">
               <span class="user-name" id="auth-first-name">Farmer</span>
               <span class="user-role">Premium Plan</span>
@@ -269,17 +265,18 @@
 
     </div><!-- /.content-area -->
   </main>
-
-  <!-- MOBILE BOTTOM NAVIGATION -->
+  <!-- ═══════════════════════════════════════════════════════
+     MOBILE BOTTOM NAVIGATION
+═══════════════════════════════════════════════════════ -->
   <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile Navigation">
     <div class="mobile-nav-inner">
       <a href="dashboard.html" class="mobile-nav-item" id="mnav-dashboard">
         <i class="fa-solid fa-gauge-high"></i>
         <span>Home</span>
       </a>
-      <a href="inventory.html" class="mobile-nav-item active" id="mnav-inventory">
-        <i class="fa-solid fa-boxes-stacked"></i>
-        <span>Stock</span>
+      <a href="analytics.html" class="mobile-nav-item" id="mnav-analytics">
+        <i class="fa-solid fa-chart-line"></i>
+        <span>Analytics</span>
       </a>
       <a href="alerts.html" class="mobile-nav-item" id="mnav-alerts">
         <i class="fa-solid fa-bell"></i>
@@ -371,9 +368,10 @@
 
   <script src="js/core/firebase-config.js"></script>
   <script src="js/core/utils.js"></script>
-  <script src="js/core/auth.js"></script>
   <script src="js/core/firestore-store.js"></script>
+  <script src="js/core/auth.js"></script>
   <script src="js/pages/inventory.js"></script>
 </body>
 
 </html>
+

@@ -108,9 +108,13 @@ const FirestoreStore = (function () {
       listeners.farmer = db.collection('farmers').doc(uid).onSnapshot((doc) => {
         if (doc.exists) {
           STATE.farmer = { id: doc.id, ...doc.data() };
+          // Dispatch so auth.js can update name/avatar in real time
+          document.dispatchEvent(new CustomEvent('kisanTrack:farmerLoaded', {
+            detail: { fullName: STATE.farmer.fullName, farmName: STATE.farmer.farmName }
+          }));
         } else {
           console.warn('FirestoreStore: Farmer profile not found.');
-          STATE.farmer = { fullName: 'Farmer', farmName: 'My Farm' }; // Fallback
+          STATE.farmer = { fullName: 'Farmer', farmName: 'My Farm' };
         }
         recalculateKPIs();
       }, (err) => {
