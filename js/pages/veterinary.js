@@ -76,12 +76,7 @@ var VeterinaryModule = (function () {
                 .orderBy('date', 'desc')
                 .get();
 
-            if (snap.empty) {
-                // Seed 3 sample entries on first visit so page isn't blank
-                await seedSampleLogs();
-            } else {
-                medicalLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            }
+            medicalLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         } catch (e) {
             console.warn('VeterinaryModule: load error (index building?):', e.message);
             // Try without orderBy as fallback
@@ -96,27 +91,6 @@ var VeterinaryModule = (function () {
         renderTimeline();
         renderSchedule();
         updateKPIs();
-    }
-
-    async function seedSampleLogs() {
-        const today  = new Date().toISOString().split('T')[0];
-        const daysAgo = n => { const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().split('T')[0]; };
-
-        const samples = [
-            { date: daysAgo(7),  type: 'Vaccination', diagnosis: 'FMD Prevention',    treatment: 'Foot and Mouth Disease Vaccine (2ml)', vet: 'Dr. Ramesh', cost: 450,  animalId: animals[0]?.animalId || 'C001' },
-            { date: daysAgo(12), type: 'Checkup',     diagnosis: 'Routine health scan', treatment: 'Vitamins administered, general health OK', vet: 'Dr. Sharma', cost: 300, animalId: animals[1]?.animalId || 'B001' },
-            { date: daysAgo(20), type: 'Treatment',   diagnosis: 'Limping left leg',  treatment: 'Anti-inflammatory injection, rest prescribed', vet: 'Dr. Ramesh', cost: 1200, animalId: animals[2]?.animalId || 'G001' },
-        ];
-
-        const batch = db.batch();
-        medicalLogs = [];
-        samples.forEach(s => {
-            const ref = db.collection(COLLECTION).doc();
-            const doc = { ...s, farmerId: uid() };
-            batch.set(ref, doc);
-            medicalLogs.push({ id: ref.id, ...doc });
-        });
-        await batch.commit().catch(e => console.warn('seed failed:', e.message));
     }
 
     // ── Firestore: Save log ───────────────────────────────────

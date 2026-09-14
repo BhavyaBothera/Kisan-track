@@ -3,7 +3,9 @@
     { "collectionGroup": "alerts", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "farmerId", "order": "ASCENDING" }, { "fieldPath": "timestamp", "order": "DESCENDING" }] },
     { "collectionGroup": "vitals", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "farmerId", "order": "ASCENDING" }, { "fieldPath": "timestamp", "order": "DESCENDING" }] },
     { "collectionGroup": "vitals", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "farmerId", "order": "ASCENDING" }, { "fieldPath": "animalId", "order": "ASCENDING" }, { "fieldPath": "timestamp", "order": "DESCENDING" }] },
-    { "collectionGroup": "cameraCaptures", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "farmerId", "order": "ASCENDING" }, { "fieldPath": "timestamp", "order": "DESCENDING" }] }
+    { "collectionGroup": "cameraCaptures", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "farmerId", "order": "ASCENDING" }, { "fieldPath": "timestamp", "order": "DESCENDING" }] },
+    { "collectionGroup": "inventoryActivity", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "farmerId", "order": "ASCENDING" }, { "fieldPath": "timestamp", "order": "DESCENDING" }] },
+    { "collectionGroup": "vet_logs", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "farmerId", "order": "ASCENDING" }, { "fieldPath": "date", "order": "DESCENDING" }] }
   ],
   "fieldOverrides": []
 }

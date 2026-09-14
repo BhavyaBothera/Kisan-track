@@ -12,15 +12,6 @@ var InventoryModule = (function () {
     const ACTIVITY_COLLECTION = 'inventoryActivity';
     const MAX_ACTIVITY = 10;
 
-    // Default seed items shown when a farmer has no inventory yet
-    const SEED_ITEMS = [
-        { name: 'Alfalfa Hay', nameHi: 'अल्फल्फा घास', category: 'Feed', current: 1200, total: 2000, unit: 'kg', costPerUnit: 12, lastRefill: today() },
-        { name: 'Grain Mix',   nameHi: 'अनाज का मिश्रण', category: 'Feed', current: 350,  total: 1500, unit: 'kg', costPerUnit: 18, lastRefill: today() },
-        { name: 'Vitamin B12', nameHi: 'विटामिन बी12',   category: 'Medicine', current: 45, total: 50, unit: 'vials', costPerUnit: 90, lastRefill: today(), expiry: nextDate(45) },
-        { name: 'Antibiotics', nameHi: 'एंटीबायोटिक्स', category: 'Medicine', current: 5,  total: 20, unit: 'packs', costPerUnit: 250, lastRefill: today(), expiry: nextDate(60) },
-        { name: 'Ear Tags',    nameHi: 'कान के टैग',    category: 'Supplies', current: 85, total: 100, unit: 'units', costPerUnit: 8, lastRefill: today() },
-    ];
-
     let inventoryItems = [];
     let activityLog    = [];
     let currentFilter  = 'all';
@@ -65,28 +56,11 @@ var InventoryModule = (function () {
             .where('farmerId', '==', uid())
             .get();
 
-        if (snap.empty) {
-            // Seed default items on first visit
-            await seedDefaultItems();
-        } else {
-            inventoryItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        }
+        inventoryItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
         renderInventoryGrid();
         updateKPIs();
         renderConsumptionChart();
-    }
-
-    async function seedDefaultItems() {
-        const batch = db.batch();
-        inventoryItems = [];
-        SEED_ITEMS.forEach(item => {
-            const ref = db.collection(COLLECTION).doc();
-            const doc = { ...item, farmerId: uid(), status: calcStatus(item.current, item.total) };
-            batch.set(ref, doc);
-            inventoryItems.push({ id: ref.id, ...doc });
-        });
-        await batch.commit();
     }
 
     // ── Firestore: Load activity log ─────────────────────────
