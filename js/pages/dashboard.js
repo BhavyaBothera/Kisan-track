@@ -125,7 +125,7 @@ const DashboardModule = (function () {
     const displayName = farmer.fullName || farmer.firstName || 'Farmer';
     const firstName = displayName.split(' ')[0];
 
-    const greetHtml = `${greetEn}, ${firstName} ${emoji} <span style="display:block;font-size:16px;opacity:0.7;">${greetHi}</span>`;
+    const greetHtml = `${greetEn}, ${window.escapeHtml(firstName)} ${emoji} <span style="display:block;font-size:16px;opacity:0.7;">${greetHi}</span>`;
 
     // If the inner span exists, update just it. Otherwise update full h1 innerHTML.
     if (greetSpan) {

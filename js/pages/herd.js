@@ -111,25 +111,26 @@ const HerdModule = (function () {
     }
 
     grid.innerHTML = animals.map(animal => {
+      const esc      = window.escapeHtml;
       const sc       = (animal.status || 'healthy').toLowerCase();
       const vitals   = state.vitals && state.vitals[animal.id] ? state.vitals[animal.id] : {};
       const temp     = vitals.temp ? `${vitals.temp}°C` : '--';
       const hr       = vitals.hr   ? `${vitals.hr} bpm` : '--';
-      const dobLine  = animal.dob  ? `<div class="detail-label">DOB</div><div class="detail-value">${animal.dob}</div>` : '';
-      const ownerLine = animal.owner ? `<div style="font-size:0.75rem;color:var(--text-dim);margin-top:6px;">👤 ${animal.owner}</div>` : '';
+      const dobLine  = animal.dob  ? `<div class="detail-label">DOB</div><div class="detail-value">${esc(animal.dob)}</div>` : '';
+      const ownerLine = animal.owner ? `<div style="font-size:0.75rem;color:var(--text-dim);margin-top:6px;">👤 ${esc(animal.owner)}</div>` : '';
 
       return `
         <div class="profile-card status-${sc}" role="button" tabindex="0"
              onclick="HerdModule.openDetailModal('${animal.id}')"
              onkeydown="if(event.key==='Enter') this.click()"
-             title="View ${animal.species} #${animal.animalId}">
+             title="View ${esc(animal.species)} #${esc(animal.animalId)}">
           <div class="profile-top">
-            <div class="profile-emoji">${animal.emoji || '🐄'}</div>
+            <div class="profile-emoji">${esc(animal.emoji || '🐄')}</div>
             <div class="profile-meta">
-              <div class="profile-id">${animal.species} #${animal.animalId}</div>
-              <div class="profile-breed">${animal.breed || 'Unknown'}</div>
+              <div class="profile-id">${esc(animal.species)} #${esc(animal.animalId)}</div>
+              <div class="profile-breed">${esc(animal.breed || 'Unknown')}</div>
               <div style="margin-top:6px;">
-                <span class="badge badge-${sc}">${animal.status || 'Healthy'}</span>
+                <span class="badge badge-${esc(sc)}">${esc(animal.status || 'Healthy')}</span>
               </div>
               ${ownerLine}
             </div>
@@ -146,7 +147,7 @@ const HerdModule = (function () {
             </div>
             <div class="profile-detail-item">
               <div class="detail-label">Tag / टैग</div>
-              <div class="detail-value" style="font-size:0.78rem;">${animal.tagId || '--'}</div>
+              <div class="detail-value" style="font-size:0.78rem;">${esc(animal.tagId || '--')}</div>
             </div>
             <div class="profile-detail-item">
               <div class="detail-label">Temp / तापमान</div>

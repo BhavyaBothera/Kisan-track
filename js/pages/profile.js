@@ -119,13 +119,14 @@ var ProfileModule = (function () {
   }
 
   function fieldRow(field, val) {
+    const safeValue = window.escapeHtml(val || '');
     return `
       <div class="profile-field-row">
         <div class="field-label"><i class="fa-solid ${field.icon}"></i> <span>${field.label}</span></div>
         <div class="field-value">
           ${isEditing ? 
-            `<input type="${field.type || 'text'}" id="pfi-${field.key}" class="form-input" value="${val || ''}">` : 
-            `<span>${val || '—'}</span>`
+            `<input type="${field.type || 'text'}" id="pfi-${field.key}" class="form-input" value="${safeValue}">` :
+            `<span>${safeValue || '—'}</span>`
           }
         </div>
       </div>

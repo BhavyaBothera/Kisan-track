@@ -297,10 +297,7 @@ window.CameraModule = (function () {
         }
       }
 
-      if (!captureUrl) {
-        // Fallback to dummy data
-        captureUrl = `https://loremflickr.com/800/600/cow,skin?lock=${Math.floor(Math.random()*1000)}`;
-      }
+      if (!captureUrl) throw new Error('Camera capture failed. Connect a camera or upload an image before analysing.');
 
       const img = ui.img();
       if (img) {
@@ -317,6 +314,9 @@ window.CameraModule = (function () {
         analysis = generateSimulatedReport();
       }
 
+      // Object URLs are browser-local and cannot be used as permanent history records.
+      // Do not create a Firestore capture until the image has been uploaded to Storage.
+      if (captureUrl.startsWith('blob:')) throw new Error('Capture storage is not configured. The image was not saved.');
       const doc = {
         farmerId: user.uid,
         animalId: state.currentAnimal ? state.currentAnimal.animalId : 'HERD-GENERIC',
@@ -416,7 +416,8 @@ window.CameraModule = (function () {
     if (!body) return;
     
     const col = report.severity === 'HEALTHY' ? 'var(--accent-green)' : (report.severity === 'WARNING' ? 'var(--accent-amber)' : 'var(--accent-red)');
-    const scorePct = report.healthScore * 10;
+    const scorePct = Math.min(100, Math.max(0, Number(report.healthScore) * 10 || 0));
+    const esc = window.escapeHtml;
 
     body.innerHTML = `
       <div class="nexus-diagnostic-card">
@@ -426,7 +427,7 @@ window.CameraModule = (function () {
                 <span class="stat-unit">/10</span>
             </div>
             <div class="stat-badge" style="background:${col}22; color:${col}; border-color:${col}44">
-                ${report.severity}
+                ${esc(report.severity)}
             </div>
         </div>
 
@@ -436,21 +437,21 @@ window.CameraModule = (function () {
 
         <div class="diagnostic-summary">
             <h5 style="color:var(--text-muted); font-size:0.6rem; margin-bottom:5px;">AI SUMMARY</h5>
-            <p>${report.summary || 'Analysis complete.'}</p>
+            <p>${esc(report.summary || 'Analysis complete.')}</p>
         </div>
 
         <div class="diagnostic-observations">
             ${(report.observations || []).map(o => `
                 <div class="obs-item">
                     <i class="fa-solid fa-microscope" style="color:${col}"></i>
-                    <span>${o}</span>
+                    <span>${esc(o)}</span>
                 </div>
             `).join('')}
         </div>
 
         <div class="nexus-advisory">
             <div class="advisory-label">TREATMENT ADVISORY</div>
-            <p>${report.farmerTip || 'No immediate action required.'}</p>
+            <p>${esc(report.farmerTip || 'No immediate action required.')}</p>
         </div>
       </div>
     `;

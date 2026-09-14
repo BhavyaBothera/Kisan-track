@@ -9,6 +9,14 @@
 (function () {
   'use strict';
 
+  // Use this before interpolating data from Firestore, user input, or an API into HTML.
+  // Prefer textContent when constructing new UI.
+  window.escapeHtml = function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>'\"]/g, (char) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    })[char]);
+  };
+
   // --- Toast Queue System ---
   let toastQueue = [];
   let toastShowing = false;

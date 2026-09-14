@@ -122,6 +122,8 @@ const VitalsModule = (function () {
 
   // ── Simulated live reading for demo mode ─────────────────
   async function generateSimulatedReading() {
+    // Synthetic readings must never be written unless a developer explicitly enables demo mode.
+    if (window.KISANTRACK_DEMO_MODE !== true) return;
     const state = getState();
     if (!state || state.animals.length === 0 || !auth.currentUser) return;
 
@@ -378,9 +380,11 @@ const VitalsModule = (function () {
     // Build empty charts immediately so canvases aren't blank
     createCharts('Cow');
 
-    // Start live simulation interval
-    if (liveInterval) clearInterval(liveInterval);
-    liveInterval = setInterval(generateSimulatedReading, 10000);
+    // Simulation is disabled by default; production pages only display persisted sensor data.
+    if (window.KISANTRACK_DEMO_MODE === true) {
+      if (liveInterval) clearInterval(liveInterval);
+      liveInterval = setInterval(generateSimulatedReading, 10000);
+    }
 
     // Clean up on page leave
     window.addEventListener('beforeunload', () => {

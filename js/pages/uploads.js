@@ -77,7 +77,12 @@ var UploadsModule = (function () {
       if (pct >= 100) {
         clearInterval(interval);
         // Actually parse the file content first, then finalize
-        parseFileContent(selectedFile).then(finalizeUpload);
+        parseFileContent(selectedFile).then(finalizeUpload).catch(err => {
+          console.error('Upload failed:', err);
+          hide(uploadProgress);
+          show(filePreview);
+          if (window.showToast) window.showToast(err.message || 'Could not import file.', 'error');
+        });
       }
     }, 100);
   }
@@ -154,15 +159,23 @@ var UploadsModule = (function () {
       'herd': 'Herd Profiles',
     }[category] || 'System';
 
-    // If no rows parsed from file, generate realistic mock
-    const recordsParsed = rows.length > 0 ? rows.length : 100 + Math.floor(Math.random() * 400);
-    const anomalies = rows.length > 0
-      ? detectAnomalies(rows)
-      : [
-          { id: 'C002', param: 'Temperature', value: '41.2°C', sev: 'High' },
-          { id: 'B005', param: 'Heart Rate',  value: '115 bpm', sev: 'Medium' },
-          { id: 'C008', param: 'Activity',    value: '12%',     sev: 'Low' },
-        ];
+    if (!rows.length) throw new Error('No importable records were found in this file.');
+    if (!firebase.auth().currentUser) throw new Error('Please sign in before importing data.');
+    const collection = { vitals: 'vitals', inventory: 'inventory', veterinary: 'vet_logs', herd: 'animals' }[category];
+    const records = rows.filter(row => row && typeof row === 'object').slice(0, 450);
+    if (!records.length) throw new Error('No valid records were found in this file.');
+    const batch = db.batch();
+    records.forEach(record => {
+      batch.set(db.collection(collection).doc(), {
+        ...record,
+        farmerId: firebase.auth().currentUser.uid,
+        importedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        sourceFile: selectedFile.name,
+      });
+    });
+    await batch.commit();
+    const recordsParsed = records.length;
+    const anomalies = detectAnomalies(records);
 
     const summary = {
       fileName: selectedFile.name,
@@ -175,7 +188,7 @@ var UploadsModule = (function () {
     };
 
     showResults(summary);
-    if (window.showToast) window.showToast(`✓ ${recordsParsed} records processed for ${categoryLabel}`);
+    if (window.showToast) window.showToast(`✓ ${recordsParsed} records saved to ${categoryLabel}`);
   }
 
   function showResults(data) {
@@ -211,10 +224,10 @@ var UploadsModule = (function () {
 
   // ── File select ────────────────────────────────────────────
   function handleFileSelect(file) {
-    const allowed = ['.csv', '.json', '.xlsx'];
+    const allowed = ['.csv', '.json'];
     const ext = '.' + file.name.split('.').pop().toLowerCase();
     if (!allowed.includes(ext)) {
-      if (window.showToast) window.showToast('Please select a CSV, JSON, or XLSX file.', 'warning');
+      if (window.showToast) window.showToast('Please select a CSV or JSON file.', 'warning');
       return;
     }
     showFilePreview(file);
@@ -235,7 +248,7 @@ var UploadsModule = (function () {
     hide(uploadResult);
     show(finalSuccess);
 
-    if (window.showToast) window.showToast('✓ Records merged into database successfully');
+    if (window.showToast) window.showToast('✓ Records were saved during import.');
   }
 
   function resetUploadView() {

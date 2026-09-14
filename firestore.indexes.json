@@ -1,0 +1,9 @@
+{
+  "indexes": [
+    { "collectionGroup": "alerts", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "farmerId", "order": "ASCENDING" }, { "fieldPath": "timestamp", "order": "DESCENDING" }] },
+    { "collectionGroup": "vitals", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "farmerId", "order": "ASCENDING" }, { "fieldPath": "timestamp", "order": "DESCENDING" }] },
+    { "collectionGroup": "vitals", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "farmerId", "order": "ASCENDING" }, { "fieldPath": "animalId", "order": "ASCENDING" }, { "fieldPath": "timestamp", "order": "DESCENDING" }] },
+    { "collectionGroup": "cameraCaptures", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "farmerId", "order": "ASCENDING" }, { "fieldPath": "timestamp", "order": "DESCENDING" }] }
+  ],
+  "fieldOverrides": []
+}
