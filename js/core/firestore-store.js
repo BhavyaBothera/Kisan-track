@@ -131,7 +131,6 @@ const FirestoreStore = (function () {
     // 2. Subscribe to Animals (Limit to 100 to prevent crash)
     listeners.animals = db.collection('animals')
       .where('farmerId', '==', uid)
-      .limit(100)
       .onSnapshot((snapshot) => {
         STATE.animals = snapshot.docs.map(mapAnimal);
         STATE.isLoading = false;
@@ -145,7 +144,6 @@ const FirestoreStore = (function () {
     listeners.alerts = db.collection('alerts')
       .where('farmerId', '==', uid)
       .orderBy('timestamp', 'desc')
-      .limit(50)
       .onSnapshot((snapshot) => {
         STATE.alerts = snapshot.docs.map(mapAlert);
         recalculateKPIs();
@@ -157,7 +155,6 @@ const FirestoreStore = (function () {
     listeners.vitals = db.collection('vitals')
       .where('farmerId', '==', uid)
       .orderBy('timestamp', 'desc')
-      .limit(100)
       .onSnapshot((snapshot) => {
         const latestPerAnimal = {};
         snapshot.docs.forEach(doc => {
@@ -205,15 +202,27 @@ const FirestoreStore = (function () {
     
     addAnimal: async (animalData) => {
       if (!STATE.initializedUid) throw new Error('Store not initialized');
+      const animalId = String(animalData.animalId || '').trim().toUpperCase();
+      const species = String(animalData.species || '').trim();
+      if (!animalId) throw new Error('Animal ID is required.');
+      if (!species) throw new Error('Animal species is required.');
+
+      const safeId = animalId.replace(/[^A-Z0-9_-]/g, '_');
+      const ref = db.collection('animals').doc(STATE.initializedUid + '_' + safeId);
+      if ((await ref.get()).exists) throw new Error('This Animal ID already exists in your herd.');
+
       const payload = {
         ...animalData,
         farmerId: STATE.initializedUid,
+        animalId,
+        species,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       };
-      // Only store dob/owner if provided
+      delete payload.id;
+      delete payload.vitals;
       if (!payload.dob) delete payload.dob;
       if (!payload.owner) delete payload.owner;
-      return await db.collection('animals').add(payload);
+      return await ref.create(payload);
     },
 
     resolveAlert: async (alertId) => {

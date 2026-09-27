@@ -175,17 +175,7 @@ var VeterinaryModule = (function () {
             }
         });
 
-        // If no scheduled future logs, show sensible defaults
-        if (upcoming.length === 0) {
-            const addDays = n => { const d = new Date(); d.setDate(d.getDate() + n); return d; };
-            const defaults = [
-                { due: addDays(8),  title: 'Anthrax Booster',   animal: 'Herd-Wide' },
-                { due: addDays(15), title: 'FMD Vaccination',   animal: animals[0]?.animalId || 'C001' },
-                { due: addDays(28), title: 'Deworming',         animal: 'All Goats / Sheep' },
-            ];
-            defaults.forEach(d => upcoming.push({ ...d, daysUntil: Math.ceil((d.due - today) / 86400000) }));
-        }
-
+        // No scheduled record means no scheduled visit. Never invent appointments.
         upcoming.sort((a, b) => a.daysUntil - b.daysUntil);
 
         container.innerHTML = upcoming.map(s => {

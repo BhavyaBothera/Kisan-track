@@ -102,12 +102,6 @@ const AddAnimalModule = (function () {
       age: parseInt(document.getElementById('new-age').value) || 0,
       weight: parseInt(document.getElementById('new-weight').value) || 0,
       status: document.getElementById('new-status').value,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-      vitals: {
-        lastTemp: 38.5,
-        lastHeartRate: 70,
-        lastActivity: 'Normal'
-      }
     };
 
     try {

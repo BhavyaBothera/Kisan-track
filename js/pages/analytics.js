@@ -20,8 +20,6 @@ const AnalyticsModule = (function () {
     // Show loading state in table immediately
     setTableLoading();
 
-    // Seed charts with realistic mock data right away — replaced when real data loads
-    seedChartsWithMock();
 
     // Wait for auth before fetching real data
     document.addEventListener('kisanTrack:stateUpdated', () => {
@@ -61,17 +59,6 @@ const AnalyticsModule = (function () {
   }
 
   // ── Seed charts with mock data so they're never blank ────────
-  function seedChartsWithMock() {
-    const days = getDays();
-    const labels = buildDateLabels(days);
-
-    // Realistic-looking mock: low alert counts, mostly healthy temps
-    const mockAlerts = labels.map(() => Math.floor(Math.random() * 3));
-    const mockTemps  = labels.map(() => +(38.2 + Math.random() * 1.2).toFixed(1));
-
-    renderCharts({ labels, alertCounts: mockAlerts, avgTemps: mockTemps }, true);
-  }
-
   // ── Data Refresh ─────────────────────────────────────────────
   async function refreshData() {
     if (!auth.currentUser) return;

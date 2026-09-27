@@ -100,7 +100,7 @@ const ReportsModule = (function () {
 
     labels.forEach(l => {
       const day = dailyData[l];
-      avgTemp.push(day.tempCount > 0 ? +(day.tempSum / day.tempCount).toFixed(1) : 38.5);
+      avgTemp.push(day.tempCount > 0 ? +(day.tempSum / day.tempCount).toFixed(1) : null);
       critical.push(day.critical);
       warning.push(day.warning);
       info.push(day.info);
@@ -161,6 +161,12 @@ const ReportsModule = (function () {
     window.currentReportData = data; 
   }
 
+  function csvCell(value) {
+    const s = String(value ?? '');
+    const safe = /^[=+\-@]/.test(s) ? "'" + s : s;
+    return '"' + safe.replace(/"/g, '""') + '"';
+  }
+
   function exportCSV() {
     const data = window.currentReportData;
     if (!data || !data.tableRows.length) {
@@ -174,7 +180,7 @@ const ReportsModule = (function () {
       ...data.tableRows.map(r => [
         r.date, r.animalId, r.parameter, r.reading,
         r.severity, r.confidence, r.status
-      ].map(v => `"${v}"`).join(','))
+      ].map(csvCell).join(','))
     ];
 
     const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
@@ -183,6 +189,7 @@ const ReportsModule = (function () {
     link.href     = url;
     link.download = 'kisantrack_report_' + new Date().toISOString().split('T')[0] + '.csv';
     link.click();
+    URL.revokeObjectURL(url);
   }
 
   function init() {

@@ -26,6 +26,7 @@ var InventoryModule = (function () {
     }
     function uid() { return firebase.auth().currentUser ? firebase.auth().currentUser.uid : null; }
     function calcStatus(current, total) {
+        if (!Number.isFinite(current) || !Number.isFinite(total) || total <= 0) return 'critical';
         const pct = (current / total) * 100;
         return pct < 10 ? 'critical' : pct < 25 ? 'low' : 'in-stock';
     }
@@ -353,8 +354,12 @@ var InventoryModule = (function () {
         const nameHi  = document.getElementById('form-item-name-hi').value.trim();
         const category= document.getElementById('form-item-category').value;
         const unit    = document.getElementById('form-item-unit').value.trim();
-        const current = parseInt(document.getElementById('form-item-current').value);
-        const total   = parseInt(document.getElementById('form-item-total').value);
+        const current = parseFloat(document.getElementById('form-item-current').value);
+        const total   = parseFloat(document.getElementById('form-item-total').value);
+        if (!Number.isFinite(current) || !Number.isFinite(total) || total <= 0 || current < 0 || current > total) {
+            if (window.showToast) window.showToast('Current stock must be between 0 and total stock.', 'warning');
+            return;
+        }
         const costPerUnit = parseFloat(document.getElementById('form-item-cost')?.value) || 0;
 
         const status = calcStatus(current, total);
