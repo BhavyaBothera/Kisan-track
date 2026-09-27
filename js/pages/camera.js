@@ -9,12 +9,10 @@ window.CameraModule = (function () {
   'use strict';
 
   // --- Configuration ---
-  const STORAGE_KEY = 'kt_gemini_api_key';
   const IP_KEY = 'kt_esp32_ip';
   const COLLECTION_CAPTURES = 'cameraCaptures';
   const COLLECTION_ANIMALS = 'animals';
   const COLLECTION_ALERTS = 'alerts';
-  const GEMINI_MODEL = 'gemini-2.0-flash';
 
   // --- State ---
   let state = {
@@ -23,11 +21,11 @@ window.CameraModule = (function () {
     isStreaming: false,
     activeMode: 'std', // std, night, thermal
     currentAnimal: null,
-    apiKey: localStorage.getItem(STORAGE_KEY) || '', // User should provide this
     esp32Ip: localStorage.getItem( IP_KEY ) || '',
     history: [],
     animalsList: [],
-    signalStrength: 92
+    signalStrength: null,
+    previewUrl: null
   };
 
   let timers = {
@@ -139,9 +137,6 @@ window.CameraModule = (function () {
     if (ui.btnScan()) {
       ui.btnScan().onclick = () => {
         const ipVal = ui.inpIp() ? ui.inpIp().value.trim() : '';
-        if (!state.apiKey && !ipVal) {
-          // No IP and no API key — run in demo/simulated mode, that's fine
-        }
         runDiagnostic();
       };
     }
@@ -217,31 +212,30 @@ window.CameraModule = (function () {
     if (!state.powerOn || !state.esp32Ip) return;
     state.isStreaming = true;
     if (timers.stream) clearInterval(timers.stream);
-
     showConnectionStatus('connecting', '⏳ Connecting to ESP32-CAM...');
     setPlaceholder('connecting');
-
-    timers.stream = setInterval(async () => {
+    const poll = async () => {
       if (!state.powerOn || !state.esp32Ip || state.isAnalyzing) return;
-
       const ip = state.esp32Ip.startsWith('http') ? state.esp32Ip : `http://${state.esp32Ip}`;
       const img = ui.img();
       if (!img) return;
-
-      const testUrl = `${ip}/capture?t=${Date.now()}`;
-      img.src = testUrl;
-
-      img.onload = () => {
+      try {
+        const res = await fetchWithTimeout(`${ip}/capture?t=${Date.now()}`, 5000);
+        const type = res.headers.get('content-type') || '';
+        if (!res.ok || !type.startsWith('image/')) throw new Error('Camera response was not an image.');
+        const blob = await res.blob();
+        if (state.previewUrl) URL.revokeObjectURL(state.previewUrl);
+        state.previewUrl = URL.createObjectURL(blob);
+        img.src = state.previewUrl; img.style.display = 'block';
         if (ui.placeholder()) ui.placeholder().style.display = 'none';
-        img.style.display = 'block';
         showConnectionStatus('ok', '✓ ESP32-CAM connected');
-      };
-      img.onerror = () => {
-        img.style.display = 'none';
-        setPlaceholder('error');
+      } catch (e) {
+        img.style.display = 'none'; setPlaceholder('error');
         showConnectionStatus('error', '✗ Cannot reach camera — check IP & network');
-      };
-    }, 2000);
+      }
+    };
+    await poll();
+    timers.stream = setInterval(poll, 2000);
   }
 
   function stopStream() {
@@ -275,140 +269,72 @@ window.CameraModule = (function () {
 
   async function runDiagnostic() {
     if (state.isAnalyzing || !state.powerOn) return;
-    const user = firebase.auth().currentUser;
-    if (!user) return;
-
+    if (!firebase.auth().currentUser) {
+      if (window.showToast) window.showToast('Please sign in before scanning.', 'warning');
+      return;
+    }
+    if (!state.esp32Ip) {
+      if (window.showToast) window.showToast('Connect the ESP32-CAM or use MANUAL UPLOAD.', 'warning');
+      return;
+    }
     state.isAnalyzing = true;
     clearCanvas();
-    const btn = ui.btnScan();
-    const originalText = btn ? btn.innerHTML : '';
+    const btn = ui.btnScan(); const originalText = btn ? btn.innerHTML : '';
     if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> SCANNING...';
-
     try {
-      let captureUrl = '';
-      if (state.esp32Ip) {
-        try {
-          const ip = state.esp32Ip.startsWith('http') ? state.esp32Ip : `http://${state.esp32Ip}`;
-          const res = await fetch(`${ip}/capture`, { signal: AbortSignal.timeout(5000) });
-          const blob = await res.blob();
-          captureUrl = URL.createObjectURL(blob);
-        } catch (e) { 
-          console.warn("Hardware fetch failed, using fallback."); 
-        }
-      }
-
-      if (!captureUrl) throw new Error('Camera capture failed. Connect a camera or upload an image before analysing.');
-
-      const img = ui.img();
-      if (img) {
-        img.src = captureUrl;
-        img.style.display = 'block';
-        if (ui.placeholder()) ui.placeholder().style.display = 'none';
-      }
-
-      let analysis;
-      if (state.apiKey) {
-        analysis = await performAIAnalysis(captureUrl);
-      } else {
-        await new Promise(r => setTimeout(r, 2000));
-        analysis = generateSimulatedReport();
-      }
-
-      // Object URLs are browser-local and cannot be used as permanent history records.
-      // Do not create a Firestore capture until the image has been uploaded to Storage.
-      if (captureUrl.startsWith('blob:')) throw new Error('Capture storage is not configured. The image was not saved.');
-      const doc = {
-        farmerId: user.uid,
-        animalId: state.currentAnimal ? state.currentAnimal.animalId : 'HERD-GENERIC',
-        imageUrl: captureUrl,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        ...analysis
-      };
-
-      const ref = await firebase.firestore().collection(COLLECTION_CAPTURES).add(doc);
-      doc.id = ref.id;
-      state.history.unshift(doc);
-      renderReel();
-      displayReport(doc);
-
-      if (analysis.healthScore < 6) triggerAlert(doc);
-
+      const ip = state.esp32Ip.startsWith('http') ? state.esp32Ip : `http://${state.esp32Ip}`;
+      const res = await fetchWithTimeout(`${ip}/capture`, 8000);
+      const type = res.headers.get('content-type') || 'image/jpeg';
+      if (!res.ok || !type.startsWith('image/')) throw new Error('Camera returned an invalid image response.');
+      await processImageBlob(await res.blob(), type);
     } catch (e) {
-      console.error(e);
-      if (window.showToast) window.showToast("Analysis Failed: " + e.message, "error");
+      console.error('Camera scan failed:', e);
+      if (window.showToast) window.showToast('Analysis Failed: ' + friendlyError(e), 'error');
     } finally {
-      state.isAnalyzing = false;
-      if (btn) btn.innerHTML = originalText;
+      state.isAnalyzing = false; if (btn) btn.innerHTML = originalText;
     }
   }
 
-  async function performAIAnalysis(imageUrl) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${state.apiKey}`;
-    
-    // Fetch image as base64
-    const res = await fetch(imageUrl);
-    const blob = await res.blob();
-    const reader = new FileReader();
-    const rawB64 = await new Promise(r => {
-        reader.onloadend = () => r(reader.result);
-        reader.readAsDataURL(blob);
+  async function processImageBlob(blob, contentType) {
+    if (!(blob instanceof Blob) || !blob.type.startsWith('image/')) throw new Error('Please select a valid image.');
+    if (blob.size > 10 * 1024 * 1024) throw new Error('Image is larger than the 10 MB limit.');
+    const user = firebase.auth().currentUser;
+    if (!user) throw new Error('Please sign in before analysing an image.');
+    if (state.previewUrl) URL.revokeObjectURL(state.previewUrl);
+    state.previewUrl = URL.createObjectURL(blob);
+    const img = ui.img();
+    if (img) { img.src = state.previewUrl; img.style.display = 'block'; if (ui.placeholder()) ui.placeholder().style.display = 'none'; }
+
+    const captureId = `capture_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+    const safeType = (contentType || blob.type || 'image/jpeg').split(';')[0].toLowerCase();
+    const ext = safeType === 'image/png' ? 'png' : safeType === 'image/webp' ? 'webp' : 'jpg';
+    const storagePath = `camera-captures/${user.uid}/${captureId}.${ext}`;
+    const storageRef = storage.ref(storagePath);
+    await storageRef.put(blob, { contentType: safeType, customMetadata: { ownerUid: user.uid, captureId } });
+
+    const result = await firebase.functions().httpsCallable('analyzeAnimalImage')({
+      captureId, storagePath, animalId: state.currentAnimal ? state.currentAnimal.animalId : 'HERD-GENERIC'
     });
-    
-    const compressed = await compressImage(rawB64);
-    const prompt = `Perform a high-precision veterinary skin analysis on this animal. Identify lesions, ticks, swelling, or abnormalities. 
-    Return ONLY JSON: {
-      "healthScore": 0-10,
-      "severity": "HEALTHY"|"WARNING"|"CRITICAL",
-      "conditions": ["name", ...],
-      "observations": ["technical observation", ...],
-      "farmerTip": "short advice in English and Hindi",
-      "summary": "brief technical summary",
-      "hotspots": [{"x": 0-100, "y": 0-100, "label": "issue name", "confidence": 0-1}]
-    }`;
-    
-    const body = { 
-      contents: [{ 
-        parts: [
-          { text: prompt }, 
-          { inline_data: { mime_type: "image/jpeg", data: compressed } }
-        ] 
-      }] 
-    };
-
-    const aiRes = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-    if (!aiRes.ok) throw new Error("Gemini API Error");
-
-    const data = await aiRes.json();
-    let text = data.candidates[0].content.parts[0].text;
-    text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    return JSON.parse(jsonMatch ? jsonMatch[0] : text);
+    const doc = result.data && result.data.capture;
+    if (!doc || !doc.id || !doc.imagePath) throw new Error('AI service returned an invalid analysis record.');
+    doc.imageUrl = await storageRef.getDownloadURL();
+    state.history.unshift(doc); state.history = state.history.slice(0,20);
+    renderReel(); displayReport(doc);
+    if (doc.severity === 'CRITICAL' && window.showToast) window.showToast('Critical finding — veterinary review recommended.', 'error');
+    else if (window.showToast) window.showToast('AI-assisted screening completed.', 'success');
   }
 
-  function compressImage(base64) {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const ratio = Math.min(800 / img.width, 1);
-        canvas.width = img.width * ratio;
-        canvas.height = img.height * ratio;
-        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL('image/jpeg', 0.8).split(',')[1]);
-      };
-      img.src = base64;
-    });
+  async function fetchWithTimeout(url, timeoutMs) {
+    const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try { return await fetch(url, { signal: controller.signal, cache: 'no-store' }); }
+    finally { clearTimeout(timer); }
   }
 
-  function generateSimulatedReport() {
-    return {
-      healthScore: 8,
-      severity: "HEALTHY",
-      conditions: [],
-      observations: ["Surface integrity nominal", "No thermal anomalies detected"],
-      farmerTip: "Maintain current nutrition. / वर्तमान पोषण बनाए रखें।",
-      summary: "Animal appears in optimal physical condition."
-    };
+  function friendlyError(error) {
+    if (error?.name === 'AbortError') return 'Camera request timed out. Check the ESP32-CAM network connection.';
+    if (error?.code === 'functions/not-found') return 'AI service is not deployed yet.';
+    if (error?.code === 'functions/unauthenticated') return 'Your session expired. Please sign in again.';
+    return error?.message || 'Please try again.';
   }
 
   function displayReport(report) {
@@ -553,50 +479,26 @@ window.CameraModule = (function () {
     if (!user) return;
     try {
       const snap = await firebase.firestore().collection(COLLECTION_CAPTURES)
-        .where('farmerId', '==', user.uid)
-        .orderBy('timestamp', 'desc')
-        .limit(20).get();
-      state.history = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        .where('farmerId','==',user.uid).orderBy('timestamp','desc').limit(20).get();
+      state.history = await Promise.all(snap.docs.map(async d => {
+        const item = { id:d.id, ...d.data(), imageUrl:'' };
+        if (item.imagePath) { try { item.imageUrl = await storage.ref(item.imagePath).getDownloadURL(); } catch (_) {} }
+        return item;
+      }));
       renderReel();
-    } catch (e) {
-      console.warn('CameraModule: Could not load history (index may be building):', e.message);
-      renderReel(); // Still show empty state
-    }
-  }
-
-  async function triggerAlert(doc) {
-    const user = firebase.auth().currentUser;
-    if (!user) return;
-    try {
-      await firebase.firestore().collection(COLLECTION_ALERTS).add({
-        farmerId: user.uid,
-        animalId: doc.animalId,
-        alertType: 'Skin Anomaly',
-        severity: doc.severity,
-        readingValue: `${doc.healthScore}/10`,
-        message: doc.summary,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        resolved: false,
-        source: 'Nexus AI'
-      });
-      if (window.showToast) window.showToast(`Nexus Alert: ${doc.animalId} anomaly detected`, "error");
-    } catch (e) { console.error(e); }
+    } catch (e) { console.warn('Camera history unavailable:', e.message); renderReel(); }
   }
 
   function handleFileUpload(e) {
-    const file = e.target.files[0];
+    const file = e.target.files && e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = ui.img();
-      if (img) {
-        img.src = event.target.result;
-        img.style.display = 'block';
-        if (ui.placeholder()) ui.placeholder().style.display = 'none';
-      }
-      runDiagnostic();
-    };
-    reader.readAsDataURL(file);
+    const btn = ui.btnScan(); const originalText = btn ? btn.innerHTML : '';
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> UPLOADING...';
+    state.isAnalyzing = true;
+    processImageBlob(file, file.type).catch(err => {
+      console.error('Manual image analysis failed:', err);
+      if (window.showToast) window.showToast('Analysis Failed: ' + friendlyError(err), 'error');
+    }).finally(() => { state.isAnalyzing = false; if (btn) btn.innerHTML = originalText; e.target.value=''; });
   }
 
   // --- Public API ---
