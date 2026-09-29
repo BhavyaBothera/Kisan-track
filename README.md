@@ -10,7 +10,11 @@ Static Firebase dashboard for managing animal health data.
    firebase use kisan-track
    firebase deploy --only firestore
    ```
-3. Deploy Firebase Functions as well as Firestore/Storage rules for production behavior:\n   ```sh\n   firebase deploy --only functions,firestore,storage\n   ```\n4. Serve this folder using a local web server; do not open the HTML files directly.
+3. Deploy Firebase Functions as well as Firestore/Storage rules for production behavior:
+   ```sh
+   firebase deploy --only functions,firestore,storage
+   ```
+4. Serve this folder using a local web server; do not open the HTML files directly.
 
 ## Data contracts
 
