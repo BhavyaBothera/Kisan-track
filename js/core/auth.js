@@ -9,6 +9,32 @@
 (function() {
   'use strict';
 
+  // --- Phase 3 client observability ---
+  function reportClientEvent(eventType, severity, message) {
+    try {
+      const user = auth.currentUser;
+      if (!user || typeof db === 'undefined') return;
+      const safeMessage = String(message || '').slice(0, 500);
+      db.collection('clientTelemetry').add({
+        farmerId: user.uid,
+        eventType: String(eventType || 'client_error').slice(0, 80),
+        severity: severity === 'warning' ? 'warning' : severity === 'info' ? 'info' : 'error',
+        message: safeMessage,
+        path: window.location.pathname,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).catch(() => {});
+    } catch (_) {}
+  }
+
+  window.addEventListener('error', (event) => {
+    reportClientEvent('window_error', 'error', event.message || 'Unhandled browser error');
+  });
+
+  window.addEventListener('unhandledrejection', (event) => {
+    const reason = event.reason && event.reason.message ? event.reason.message : String(event.reason || 'Unhandled promise rejection');
+    reportClientEvent('unhandled_rejection', 'error', reason);
+  });
+
   // --- 1. Global Redirection & State ---
   auth.onAuthStateChanged(async (user) => {
     try {
