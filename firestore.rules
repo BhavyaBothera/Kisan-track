@@ -46,6 +46,20 @@ service cloud.firestore {
       allow create: if ownsNew();
       allow update, delete: if false;
     }
+    match /clientTelemetry/{id} {
+      allow create: if signedIn()
+        && request.resource.data.farmerId == request.auth.uid
+        && request.resource.data.eventType is string
+        && request.resource.data.eventType.size() <= 80
+        && request.resource.data.severity is string
+        && request.resource.data.severity in ['error', 'warning', 'info']
+        && request.resource.data.message is string
+        && request.resource.data.message.size() <= 500;
+      allow read, update, delete: if false;
+    }
+    match /systemMetrics/{id} {
+      allow read, write: if false;
+    }
     match /vet_logs/{id} {
       allow read, delete: if ownsExisting();
       allow create: if ownsNew();
