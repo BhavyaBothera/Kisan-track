@@ -1,4 +1,5 @@
 const {onCall,HttpsError}=require("firebase-functions/v2/https");
+const {onSchedule}=require("firebase-functions/v2/scheduler");
 const {defineSecret}=require("firebase-functions/params");
 const {initializeApp}=require("firebase-admin/app");
 const {getFirestore,FieldValue}=require("firebase-admin/firestore");
@@ -6,6 +7,9 @@ const {getStorage}=require("firebase-admin/storage");
 initializeApp();
 const db=getFirestore(), bucket=getStorage().bucket(), GEMINI_API_KEY=defineSecret("GEMINI_API_KEY");
 const MODEL="gemini-2.0-flash";
+const CAMERA_RETENTION_DAYS=3;
+async function incrementAiMetric(uid,field){const day=new Date().toISOString().slice(0,10);const ref=db.collection("systemMetrics").doc("ai_"+day);await ref.set({scope:"ai",date:day,[field+"Count"]:FieldValue.increment(1),updatedAt:FieldValue.serverTimestamp()},{merge:true});}
+async function cleanupExpiredCaptures(){const cutoff=new Date(Date.now()-CAMERA_RETENTION_DAYS*24*60*60*1000);const snap=await db.collection("cameraCaptures").where("expiresAt","<=",cutoff).limit(100).get();let deleted=0;for(const doc of snap.docs){const path=String(doc.data().imagePath||"");if(/^camera-captures\/[^/]+\//.test(path)){try{await bucket.file(path).delete({ignoreNotFound:true});}catch(e){console.warn("Retention cleanup storage delete failed",doc.id,e.message);}}await doc.ref.delete();deleted++;}console.log(JSON.stringify({event:"camera_retention_cleanup",deleted,cutoff:cutoff.toISOString()}));return deleted;}
 function clean(v,n=1000){return typeof v==="string"?v.trim().slice(0,n):"";}
 function validate(r){
  const score=Number(r?.healthScore), severity=String(r?.severity||"").toUpperCase();
@@ -27,8 +31,10 @@ exports.analyzeAnimalImage=onCall({region:"asia-south1",timeoutSeconds:60,memory
  const data=await response.json(),text=data?.candidates?.[0]?.content?.parts?.[0]?.text;if(!text)throw new HttpsError("data-loss","AI screening returned no usable result.");
  let parsed;try{parsed=JSON.parse(text)}catch(_){throw new HttpsError("data-loss","AI screening returned invalid JSON.");}
  let analysis;try{analysis=validate(parsed)}catch(_){throw new HttpsError("data-loss","AI screening returned an invalid result.");}
- const capture={farmerId:uid,animalId:clean(animalId,120)||"HERD-GENERIC",imagePath:storagePath,timestamp:FieldValue.serverTimestamp(),...analysis};
+ const capture={farmerId:uid,animalId:clean(animalId,120)||"HERD-GENERIC",imagePath:storagePath,timestamp:FieldValue.serverTimestamp(),expiresAt:new Date(Date.now()+CAMERA_RETENTION_DAYS*24*60*60*1000),...analysis};
  const batch=db.batch(),ref=db.collection("cameraCaptures").doc(captureId);batch.set(ref,capture);
+ await incrementAiMetric(uid,"request");
  if(analysis.healthScore<6||analysis.severity==="CRITICAL")batch.set(db.collection("alerts").doc(),{farmerId:uid,animalId:capture.animalId,parameter:"AI Visual Screening",readingValue:`${analysis.healthScore}/10`,alertType:"AI Visual Anomaly",severity:analysis.severity,confidenceScore:analysis.hotspots.length?Math.round(Math.max(...analysis.hotspots.map(h=>h.confidence))*100):null,message:analysis.summary,timestamp:FieldValue.serverTimestamp(),resolved:false,source:"Nexus AI"});
- await batch.commit();return {capture:{id:captureId,...capture,timestamp:new Date().toISOString()}};
+ await batch.commit();await incrementAiMetric(uid,"success");return {capture:{id:captureId,...capture,timestamp:new Date().toISOString()}};
 });
+exports.cleanupExpiredCameraCaptures=onSchedule({schedule:"every day 03:15",timeZone:"Asia/Kolkata",region:"asia-south1"},async()=>cleanupExpiredCaptures());
