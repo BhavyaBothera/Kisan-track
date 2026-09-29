@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KisanTrack | Privacy & AI Processing</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <main class="main-content" style="margin-left:0;max-width:900px;margin-right:auto;padding:40px 24px;">
+    <div class="page-header">
+      <h1>Privacy & AI Processing</h1>
+      <p class="subtitle">How KisanTrack handles farmer, livestock, sensor and camera data.</p>
+    </div>
+
+    <section class="nexus-card" style="padding:28px;margin-bottom:20px;">
+      <h2>Data we store</h2>
+      <p>KisanTrack stores account/profile information, livestock records, historical vitals, alerts, inventory records, veterinary logs and uploaded camera captures needed for the features you use.</p>
+    </section>
+
+    <section class="nexus-card" style="padding:28px;margin-bottom:20px;">
+      <h2>AI visual screening</h2>
+      <p>Camera images are uploaded to KisanTrack-controlled storage and processed by a server-side AI function. The AI result is a screening aid, not a veterinary diagnosis. Concerning findings should be reviewed by a qualified veterinarian.</p>
+      <p>AI requests and outcomes are recorded as operational metrics without storing the image in the metrics record.</p>
+    </section>
+
+    <section class="nexus-card" style="padding:28px;margin-bottom:20px;">
+      <h2>Camera image retention</h2>
+      <p>Camera captures are configured for a 3-day retention period. Expired capture records and their associated stored images are removed by the scheduled cleanup function.</p>
+      <p>Retention cleanup requires the Firebase scheduled function to be deployed and Cloud Scheduler to be enabled.</p>
+    </section>
+
+    <section class="nexus-card" style="padding:28px;margin-bottom:20px;">
+      <h2>Security & observability</h2>
+      <p>Firestore and Storage access is protected by authenticated, collection-specific rules. Client-side errors may be recorded as short operational telemetry so application failures can be diagnosed. Telemetry is not exposed to other users.</p>
+    </section>
+
+    <section class="nexus-card" style="padding:28px;">
+      <h2>Your data</h2>
+      <p>For account export, correction, retention or deletion requests, use the project's configured support/data-management process. Do not upload unnecessary personal or medical information into livestock notes.</p>
+      <p style="margin-top:18px;"><a href="profile.html">← Back to Farmer Profile</a></p>
+    </section>
+  </main>
+</body>
+</html>
