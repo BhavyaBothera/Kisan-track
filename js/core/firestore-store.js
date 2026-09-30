@@ -31,7 +31,8 @@ const FirestoreStore = (function () {
     farmer: null,
     animals: null,
     alerts: null,
-    vitals: null
+    vitals: null,
+    latestVitals: null
   };
 
   // --- Mapping Helpers ---
@@ -151,28 +152,25 @@ const FirestoreStore = (function () {
         console.error('FirestoreStore: Alerts Listener Error:', err);
       });
 
-    // 4. Subscribe to latest Vitals (Limit to 100)
-    listeners.vitals = db.collection('vitals')
+    // 4. Subscribe only to server-maintained latest vitals state.
+    // Historical vitals remain queryable by date range on analytics/report pages.
+    listeners.latestVitals = db.collection('animalLatestVitals')
       .where('farmerId', '==', uid)
-      .orderBy('timestamp', 'desc')
       .onSnapshot((snapshot) => {
         const latestPerAnimal = {};
         snapshot.docs.forEach(doc => {
           const data = doc.data();
-          const animalDocId = data.animalId; 
-          if (!latestPerAnimal[animalDocId]) {
-            latestPerAnimal[animalDocId] = {
-              temp: data.bodyTempCelsius,
-              hr: data.heartRateBpm,
-              activity: data.activityScore,
-              timestamp: data.timestamp ? data.timestamp.toDate() : new Date()
-            };
-          }
+          latestPerAnimal[data.animalId] = {
+            temp: data.bodyTempCelsius,
+            hr: data.heartRateBpm,
+            activity: data.activityScore,
+            timestamp: data.timestamp && data.timestamp.toDate ? data.timestamp.toDate() : new Date()
+          };
         });
         STATE.vitals = latestPerAnimal;
         recalculateKPIs();
       }, (err) => {
-        console.error('FirestoreStore: Vitals Listener Error:', err);
+        console.error('FirestoreStore: Latest vitals listener error:', err);
       });
   }
 
