@@ -1,5 +1,6 @@
 const {onCall,HttpsError}=require("firebase-functions/v2/https");
 const {onSchedule}=require("firebase-functions/v2/scheduler");
+const {onDocumentWritten}=require("firebase-functions/v2/firestore");
 const {defineSecret}=require("firebase-functions/params");
 const {initializeApp}=require("firebase-admin/app");
 const {getFirestore,FieldValue}=require("firebase-admin/firestore");
@@ -44,5 +45,17 @@ exports.requestDataAction=onCall({region:"asia-south1"},async request=>{
  const ref=db.collection("dataRequests").doc();
  await ref.set({farmerId:uid,type,status:"pending",requestedAt:FieldValue.serverTimestamp(),updatedAt:FieldValue.serverTimestamp()});
  return {requestId:ref.id,status:"pending",message:type==="export"?"Your data export request was recorded.":"Your account deletion request was recorded for review."};
+});
+exports.syncLatestVitals=onDocumentWritten({region:"asia-south1",document:"vitals/{vitalId}"},async event=>{
+ const after=event.data?.after;
+ if(!after?.exists)return;
+ const data=after.data();
+ if(typeof data.farmerId!=="string"||typeof data.animalId!=="string")return;
+ const latestRef=db.collection("animalLatestVitals").doc(data.farmerId+"_"+data.animalId);
+ const current=await latestRef.get();
+ const currentTs=current.exists&&current.data().timestamp;
+ const nextTs=data.timestamp;
+ if(current.exists&&currentTs&&nextTs&&typeof currentTs.toMillis==="function"&&typeof nextTs.toMillis==="function"&&currentTs.toMillis()>=nextTs.toMillis())return;
+ await latestRef.set({farmerId:data.farmerId,animalId:data.animalId,bodyTempCelsius:data.bodyTempCelsius??null,heartRateBpm:data.heartRateBpm??null,activityScore:data.activityScore??null,timestamp:nextTs||FieldValue.serverTimestamp(),sourceVitalId:event.params.vitalId,updatedAt:FieldValue.serverTimestamp()},{merge:true});
 });
 exports.cleanupExpiredCameraCaptures=onSchedule({schedule:"every day 03:15",timeZone:"Asia/Kolkata",region:"asia-south1"},async()=>cleanupExpiredCaptures());
