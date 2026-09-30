@@ -164,6 +164,24 @@
     return d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
   }
 
+  // Best-effort operational telemetry. Never log secrets, document contents, or raw URLs.
+  window.recordClientTelemetry = function recordClientTelemetry(eventType, message, severity = 'error') {
+    try {
+      const user = window.auth?.currentUser;
+      if (!user || !window.db) return;
+      const safeType = String(eventType || 'client_error').slice(0, 80);
+      const safeMessage = String(message || 'Unknown client error').replace(/\s+/g, ' ').slice(0, 500);
+      const safeSeverity = ['error', 'warning', 'info'].includes(severity) ? severity : 'error';
+      return window.db.collection('clientTelemetry').add({
+        farmerId: user.uid,
+        eventType: safeType,
+        severity: safeSeverity,
+        message: safeMessage,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      }).catch(() => {});
+    } catch (_) {}
+  };
+
   // Export to global scope
   window.showToast = showToast;
   window.validateEmail = validateEmail;
