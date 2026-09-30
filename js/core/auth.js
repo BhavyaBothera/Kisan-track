@@ -9,21 +9,11 @@
 (function() {
   'use strict';
 
-  // --- Phase 3 client observability ---
+  // --- Central client observability ---
   function reportClientEvent(eventType, severity, message) {
-    try {
-      const user = auth.currentUser;
-      if (!user || typeof db === 'undefined') return;
-      const safeMessage = String(message || '').slice(0, 500);
-      db.collection('clientTelemetry').add({
-        farmerId: user.uid,
-        eventType: String(eventType || 'client_error').slice(0, 80),
-        severity: severity === 'warning' ? 'warning' : severity === 'info' ? 'info' : 'error',
-        message: safeMessage,
-        path: window.location.pathname,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      }).catch(() => {});
-    } catch (_) {}
+    if (typeof window.recordClientTelemetry === 'function') {
+      window.recordClientTelemetry(eventType, message, severity);
+    }
   }
 
   window.addEventListener('error', (event) => {
@@ -31,7 +21,7 @@
   });
 
   window.addEventListener('unhandledrejection', (event) => {
-    const reason = event.reason && event.reason.message ? event.reason.message : String(event.reason || 'Unhandled promise rejection');
+    const reason = event.reason?.message || String(event.reason || 'Unhandled promise rejection');
     reportClientEvent('unhandled_rejection', 'error', reason);
   });
 
@@ -71,7 +61,7 @@
           }
         } catch (profileErr) {
           console.error('Auth: Profile sync failed', profileErr);
-          if (window.recordClientTelemetry) window.recordClientTelemetry('auth_profile_sync_failed', profileErr?.code || 'profile sync failed', 'warning');
+          reportClientEvent('auth_profile_sync_failed', 'warning', profileErr?.code || 'profile sync failed');
           // Fallback: use whatever we can get from the auth object
           const fallbackName = user.displayName || user.email.split('@')[0] || 'Farmer';
           updateUserUI(fallbackName);
@@ -92,6 +82,7 @@
 
         // d. Initialize Page Modules
         initPageModules();
+        document.dispatchEvent(new CustomEvent('kisanTrack:authReady', { detail: { user } }));
 
         // e. Listen for farmer data to arrive and re-update UI (real-time name sync)
         document.addEventListener('kisanTrack:farmerLoaded', (e) => {
@@ -107,7 +98,7 @@
       }
     } catch (err) {
       console.error('Auth: Initialization error', err);
-      if (window.recordClientTelemetry) window.recordClientTelemetry('auth_initialization_failed', err?.code || err?.message || 'initialization failed', 'error');
+      reportClientEvent('auth_initialization_failed', 'error', err?.code || err?.message || 'initialization failed');
     } finally {
       // Inject Global Loader if missing
       if (!document.getElementById('global-loader')) {
@@ -149,11 +140,13 @@
     if (nameEn) nameEn.textContent = firstName;
     if (avatar) avatar.textContent = initial;
 
-    // Update dashboard greeting if present
+    // Update dashboard greeting without interpolating user data into HTML.
     if (greeting) {
       const hour = new Date().getHours();
       const timeGreeting = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening';
-      greeting.innerHTML = `<i class="fa-solid fa-gauge-high" style="color:var(--accent-green);margin-right:10px;"></i>${timeGreeting}, ${firstName} 🌾`;
+      const icon = greeting.querySelector('i');
+      greeting.textContent = `${timeGreeting}, ${firstName} 🌾`;
+      if (icon) greeting.prepend(icon);
     }
   }
 
