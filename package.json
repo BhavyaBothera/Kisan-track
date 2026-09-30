@@ -1,0 +1,1 @@
+{"name":"kisantrack-phase6-tests","private":true,"scripts":{"test":"node --test tests/phase6.test.js"},"engines":{"node":">=20"}}
