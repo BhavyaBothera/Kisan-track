@@ -16,6 +16,14 @@ service cloud.firestore {
       allow create: if ownsNew() && request.resource.data.animalId is string && request.resource.data.species is string;
       allow update: if ownsExisting() && ownerUnchanged();
     }
+    match /animalLatestVitals/{id} {
+      allow read: if ownsExisting();
+      allow write: if false;
+    }
+    match /farmerStats/{id} {
+      allow read: if signedIn() && request.auth.uid == id;
+      allow write: if false;
+    }
     match /vitals/{id} {
       allow read: if ownsExisting();
       allow create: if ownsNew()
