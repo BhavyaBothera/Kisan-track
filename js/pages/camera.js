@@ -148,9 +148,16 @@ window.CameraModule = (function () {
       };
     }
 
-    // Re-analyze btn
+    // Re-analyze button
     const reBtn = document.getElementById('re-analyse-btn');
-    if (reBtn) reBtn.onclick = () => runDiagnostic();
+    if (reBtn) reBtn.addEventListener('click', runDiagnostic);
+
+    // Delegate clicks from the dynamically rendered recent-scan reel.
+    const reel = ui.reel();
+    if (reel) reel.addEventListener('click', (event) => {
+      const item = event.target.closest('[data-capture-id]');
+      if (item) loadCapture(item.dataset.captureId);
+    });
   }
 
   // ── Connection status badge ───────────────────────────────
@@ -444,9 +451,9 @@ window.CameraModule = (function () {
       const scoreColor = item.severity === 'HEALTHY' ? 'var(--accent-green)' : item.severity === 'WARNING' ? 'var(--accent-amber)' : 'var(--accent-red)';
       const imgSrc = item.imageUrl || '';
       return `
-        <div class="reel-item" style="flex:0 0 140px;margin-right:10px;cursor:pointer;" onclick="window.CameraModule.loadCapture('${item.id}')">
+        <div class="reel-item" style="flex:0 0 140px;margin-right:10px;cursor:pointer;" data-capture-id="${window.escapeHtml(item.id)}">
           <div style="width:100%;height:80px;border-radius:4px;overflow:hidden;background:rgba(255,255,255,0.05);">
-            ${imgSrc ? `<img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" />` : '<div style="height:100%;display:flex;align-items:center;justify-content:center;opacity:0.3;">📷</div>'}
+            ${imgSrc ? `<img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover;" />` : '<div style="height:100%;display:flex;align-items:center;justify-content:center;opacity:0.3;">📷</div>'}
           </div>
           <div style="font-size:0.6rem;color:var(--text-dim);margin-top:4px;display:flex;justify-content:space-between;">
             <span>${item.animalId || 'HERD'}</span>
@@ -502,17 +509,15 @@ window.CameraModule = (function () {
   }
 
   // --- Public API ---
-  return {
-    init,
-    loadCapture: (id) => {
-      const item = state.history.find(h => h.id === id);
-      if (item) {
-        const img = ui.img();
-        if (img) img.src = item.imageUrl;
-        if (ui.placeholder()) ui.placeholder().style.display = 'none';
-        displayReport(item);
-      }
-    }
-  };
+  function loadCapture(id) {
+    const item = state.history.find(h => h.id === id);
+    if (!item) return;
+    const img = ui.img();
+    if (img) img.src = item.imageUrl;
+    if (ui.placeholder()) ui.placeholder().style.display = 'none';
+    displayReport(item);
+  }
+
+  return { init, loadCapture };
 
 })();
