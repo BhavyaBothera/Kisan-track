@@ -71,6 +71,7 @@
           }
         } catch (profileErr) {
           console.error('Auth: Profile sync failed', profileErr);
+          if (window.recordClientTelemetry) window.recordClientTelemetry('auth_profile_sync_failed', profileErr?.code || 'profile sync failed', 'warning');
           // Fallback: use whatever we can get from the auth object
           const fallbackName = user.displayName || user.email.split('@')[0] || 'Farmer';
           updateUserUI(fallbackName);
@@ -106,6 +107,7 @@
       }
     } catch (err) {
       console.error('Auth: Initialization error', err);
+      if (window.recordClientTelemetry) window.recordClientTelemetry('auth_initialization_failed', err?.code || err?.message || 'initialization failed', 'error');
     } finally {
       // Inject Global Loader if missing
       if (!document.getElementById('global-loader')) {
