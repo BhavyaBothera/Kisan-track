@@ -158,19 +158,17 @@ var ProfileModule = (function () {
       if (window.showToast) window.showToast('✓ Profile saved successfully', 'success');
     } catch (err) {
       console.error('Profile Save Error:', err);
+      if (window.recordClientTelemetry) window.recordClientTelemetry('profile_save_failed', err?.code || err?.message || 'profile save failed', 'error');
     }
   }
 
   function init() {
-    // Use onAuthStateChanged so we don't race with auth
-    firebase.auth().onAuthStateChanged(user => {
+    const loadProfile = (user) => {
       if (!user) return;
-
       db.collection('farmers').doc(user.uid).onSnapshot(snap => {
         if (snap.exists) {
           farmerData = snap.data();
         } else {
-          // Create a skeleton profile for new users
           const email = user.email || '';
           farmerData = {
             fullName: user.displayName || email.split('@')[0] || 'Farmer',
@@ -180,11 +178,20 @@ var ProfileModule = (function () {
             primaryAnimal: 'Cow', sensorSystemId: '',
             yearsOfFarming: 0,
           };
-          db.collection('farmers').doc(user.uid).set(farmerData, { merge: true }).catch(() => {});
+          db.collection('farmers').doc(user.uid).set(farmerData, { merge: true }).catch(err => {
+            console.error('Profile bootstrap failed:', err);
+            if (window.recordClientTelemetry) window.recordClientTelemetry('profile_bootstrap_failed', err?.code || 'profile bootstrap failed', 'warning');
+          });
         }
         render();
+      }, err => {
+        console.error('Profile listener failed:', err);
+        if (window.recordClientTelemetry) window.recordClientTelemetry('profile_listener_failed', err?.code || 'profile listener failed', 'error');
       });
-    });
+    };
+
+    document.addEventListener('kisanTrack:authReady', (event) => loadProfile(event.detail?.user), { once: true });
+    if (firebase.auth().currentUser) loadProfile(firebase.auth().currentUser);
 
     // Also re-render when herd/alerts data updates
     document.addEventListener('kisanTrack:stateUpdated', () => {
