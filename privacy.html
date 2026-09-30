@@ -36,11 +36,42 @@
       <p>Firestore and Storage access is protected by authenticated, collection-specific rules. Client-side errors may be recorded as short operational telemetry so application failures can be diagnosed. Telemetry is not exposed to other users.</p>
     </section>
 
-    <section class="nexus-card" style="padding:28px;">
+    <section class="nexus-card" style="padding:28px;margin-bottom:20px;">
       <h2>Your data</h2>
-      <p>For account export, correction, retention or deletion requests, use the project's configured support/data-management process. Do not upload unnecessary personal or medical information into livestock notes.</p>
+      <p>You can submit an authenticated request for a data export or account deletion. Requests are recorded for controlled processing rather than allowing a browser to directly delete protected records.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:18px;">
+        <button class="btn btn-secondary" id="request-export">Request Data Export</button>
+        <button class="btn btn-secondary" id="request-deletion">Request Account Deletion</button>
+      </div>
+      <p id="request-status" role="status" aria-live="polite" style="margin-top:14px;"></p>
       <p style="margin-top:18px;"><a href="profile.html">← Back to Farmer Profile</a></p>
     </section>
   </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-functions-compat.js"></script>
+  <script src="js/core/firebase-config.js"></script>
+  <script>
+    (function () {
+      const status = document.getElementById('request-status');
+      async function request(type) {
+        if (!firebase.auth().currentUser) {
+          status.textContent = 'Please sign in before submitting a data request.';
+          return;
+        }
+        status.textContent = 'Submitting request…';
+        try {
+          const result = await firebase.functions().httpsCallable('requestDataAction')({ type });
+          status.textContent = result.data?.message || 'Request submitted successfully.';
+        } catch (error) {
+          console.error('Data request failed:', error);
+          status.textContent = 'Could not submit the request. Please try again.';
+        }
+      }
+      document.getElementById('request-export').addEventListener('click', () => request('export'));
+      document.getElementById('request-deletion').addEventListener('click', () => request('deletion'));
+    })();
+  </script>
 </body>
 </html>
