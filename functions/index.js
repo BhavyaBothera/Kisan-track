@@ -37,4 +37,12 @@ exports.analyzeAnimalImage=onCall({region:"asia-south1",timeoutSeconds:60,memory
  if(analysis.healthScore<6||analysis.severity==="CRITICAL")batch.set(db.collection("alerts").doc(),{farmerId:uid,animalId:capture.animalId,parameter:"AI Visual Screening",readingValue:`${analysis.healthScore}/10`,alertType:"AI Visual Anomaly",severity:analysis.severity,confidenceScore:analysis.hotspots.length?Math.round(Math.max(...analysis.hotspots.map(h=>h.confidence))*100):null,message:analysis.summary,timestamp:FieldValue.serverTimestamp(),resolved:false,source:"Nexus AI"});
  await batch.commit();await incrementAiMetric(uid,"success");return {capture:{id:captureId,...capture,timestamp:new Date().toISOString()}};
 });
+exports.requestDataAction=onCall({region:"asia-south1"},async request=>{
+ const uid=request.auth?.uid;if(!uid)throw new HttpsError("unauthenticated","Sign in before requesting data management.");
+ const type=String(request.data?.type||"").toLowerCase();
+ if(!["export","deletion"].includes(type))throw new HttpsError("invalid-argument","Data action must be export or deletion.");
+ const ref=db.collection("dataRequests").doc();
+ await ref.set({farmerId:uid,type,status:"pending",requestedAt:FieldValue.serverTimestamp(),updatedAt:FieldValue.serverTimestamp()});
+ return {requestId:ref.id,status:"pending",message:type==="export"?"Your data export request was recorded.":"Your account deletion request was recorded for review."};
+});
 exports.cleanupExpiredCameraCaptures=onSchedule({schedule:"every day 03:15",timeZone:"Asia/Kolkata",region:"asia-south1"},async()=>cleanupExpiredCaptures());
