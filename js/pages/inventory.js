@@ -17,6 +17,8 @@ var InventoryModule = (function () {
     let currentFilter  = 'all';
     let searchQuery    = '';
     let consumChart    = null;
+    let activityCursor = null;
+    let activityHasMore = false;
 
     // ── Helpers ───────────────────────────────────────────────
     function today() { return new Date().toISOString().split('T')[0]; }
@@ -45,7 +47,7 @@ var InventoryModule = (function () {
     async function loadAll() {
         if (!uid()) return;
         try {
-            await Promise.all([loadInventory(), loadActivity()]);
+            await Promise.all([loadInventory(), loadActivity(true)]);
         } catch (e) {
             console.error('InventoryModule: load error', e);
         }
@@ -65,19 +67,27 @@ var InventoryModule = (function () {
     }
 
     // ── Firestore: Load activity log ─────────────────────────
-    async function loadActivity() {
+    async function loadActivity(reset = false) {
         try {
-            const snap = await db.collection(ACTIVITY_COLLECTION)
+            if (reset) {
+                activityCursor = null;
+                activityHasMore = false;
+                activityLog = [];
+            }
+            let query = db.collection(ACTIVITY_COLLECTION)
                 .where('farmerId', '==', uid())
                 .orderBy('timestamp', 'desc')
-                .limit(MAX_ACTIVITY)
-                .get();
-            activityLog = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                .limit(MAX_ACTIVITY);
+            if (activityCursor) query = query.startAfter(activityCursor);
+            const snap = await query.get();
+            const page = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            activityLog = reset ? page : activityLog.concat(page);
+            activityCursor = snap.docs.length ? snap.docs[snap.docs.length - 1] : activityCursor;
+            activityHasMore = snap.docs.length === MAX_ACTIVITY;
             renderTransactions();
         } catch (e) {
-            // Index may still be building — show empty state, not an error
             console.warn('InventoryModule: activity log unavailable:', e.message);
-            renderTransactions([]);
+            renderTransactions(reset ? [] : activityLog);
         }
     }
 
@@ -145,6 +155,9 @@ var InventoryModule = (function () {
             if (e.target.closest('#btn-add-item'))    { resetForm(); openModal('Add New Item / नया आइटम जोड़ें'); }
             if (e.target.closest('#modal-close-btn')) closeModal();
         });
+
+        const more = document.getElementById('load-more-activity');
+        if (more) more.addEventListener('click', () => loadActivity(false));
 
         // Form submit
         const form = document.getElementById('inventory-form');
@@ -280,6 +293,8 @@ var InventoryModule = (function () {
                     </div>
                 </div>`;
         }).join('');
+        const more = document.getElementById('load-more-activity');
+        if (more) more.style.display = activityHasMore ? 'block' : 'none';
     }
 
     // ── UI: Consumption chart ─────────────────────────────────
@@ -295,12 +310,15 @@ var InventoryModule = (function () {
             labels.push(d.toLocaleDateString([], { weekday: 'short' }));
         }
 
-        // Estimate daily feed consumption: total feed current / 30 days, with natural variance
-        const totalFeedKg = inventoryItems
-            .filter(i => i.category === 'Feed')
-            .reduce((s, i) => s + (i.current || 0), 0);
-        const baseDaily = Math.max(50, Math.round(totalFeedKg / 30));
-        const data = labels.map(() => Math.round(baseDaily * (0.85 + Math.random() * 0.3)));
+        // Use recorded inventory activity instead of generated values.
+        const buckets = Object.fromEntries(labels.map(label => [label, 0]));
+        activityLog.forEach(entry => {
+            if (entry.type !== 'down' || !entry.timestamp) return;
+            const date = entry.timestamp.toDate ? entry.timestamp.toDate() : new Date(entry.timestamp);
+            const label = date.toLocaleDateString([], { weekday: 'short' });
+            if (Object.prototype.hasOwnProperty.call(buckets, label)) buckets[label] += Math.abs(Number(entry.diff) || 0);
+        });
+        const data = labels.map(label => buckets[label]);
 
         consumChart = new Chart(ctx, {
             type: 'line',
