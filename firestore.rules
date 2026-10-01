@@ -70,8 +70,38 @@ service cloud.firestore {
     }
     match /vet_logs/{id} {
       allow read, delete: if ownsExisting();
-      allow create: if ownsNew();
+      allow create: if ownsNew()
+        && request.resource.data.animalId is string
+        && request.resource.data.type is string;
       allow update: if ownsExisting() && ownerUnchanged();
+    }
+    match /userPreferences/{userId} {
+      allow read, create, update: if signedIn() && request.auth.uid == userId
+        && request.resource.data.farmerId == userId;
+      allow delete: if false;
+    }
+    match /devices/{id} {
+      allow read: if ownsExisting();
+      allow create: if ownsNew()
+        && request.resource.data.label is string
+        && request.resource.data.label.size() <= 80
+        && request.resource.data.userAgent is string
+        && request.resource.data.userAgent.size() <= 300;
+      allow update: if ownsExisting() && ownerUnchanged();
+      allow delete: if false;
+    }
+    match /auditLogs/{id} {
+      allow read: if ownsExisting();
+      allow create: if ownsNew()
+        && request.resource.data.action is string
+        && request.resource.data.action.size() <= 80;
+      allow update, delete: if false;
+    }
+    match /dataRequests/{id} {
+      allow read: if ownsExisting();
+      allow create: if ownsNew()
+        && request.resource.data.type in ['export', 'deletion'];
+      allow update, delete: if false;
     }
   }
 }

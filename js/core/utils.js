@@ -182,6 +182,86 @@
     } catch (_) {}
   };
 
+
+  // --- Phase 8: offline, notifications and audit infrastructure ---
+  function installOfflineHandling() {
+    const sync = () => {
+      let banner = document.getElementById('kisan-offline-banner');
+      if (!navigator.onLine) {
+        if (!banner) {
+          banner = document.createElement('div');
+          banner.id = 'kisan-offline-banner';
+          banner.setAttribute('role', 'status');
+          banner.style.cssText = 'position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:9999;padding:10px 16px;border-radius:999px;background:#3b1f1f;color:#ffd7d7;border:1px solid #a94442;box-shadow:0 8px 24px rgba(0,0,0,.25);font-size:.82rem;font-weight:600;';
+          banner.textContent = 'Offline mode: changes will resume when your connection returns.';
+          document.body.appendChild(banner);
+        }
+      } else if (banner) {
+        banner.remove();
+        if (window.showToast && sessionStorage.getItem('kisan:offlineSeen') === '1') {
+          window.showToast('Connection restored. KisanTrack is online.', 'success');
+        }
+        sessionStorage.removeItem('kisan:offlineSeen');
+      }
+      if (!navigator.onLine) sessionStorage.setItem('kisan:offlineSeen', '1');
+    };
+    window.addEventListener('online', sync);
+    window.addEventListener('offline', sync);
+    sync();
+  }
+
+  async function saveUserPreference(key, value) {
+    const user = window.auth?.currentUser;
+    if (!user || !window.db) throw new Error('Authentication required.');
+    await window.db.collection('userPreferences').doc(user.uid).set({
+      farmerId: user.uid,
+      [key]: value,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+  }
+
+  async function recordAudit(action, metadata = {}) {
+    const user = window.auth?.currentUser;
+    if (!user || !window.db) return;
+    const safeMetadata = {};
+    Object.keys(metadata).slice(0, 10).forEach(key => {
+      safeMetadata[String(key).slice(0, 40)] = String(metadata[key] ?? '').slice(0, 200);
+    });
+    return window.db.collection('auditLogs').add({
+      farmerId: user.uid,
+      action: String(action || 'unknown').slice(0, 80),
+      metadata: safeMetadata,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(() => {});
+  }
+
+  function setupNotificationInfrastructure() {
+    document.addEventListener('kisanTrack:stateUpdated', async (event) => {
+      const state = event.detail?.state;
+      const user = window.auth?.currentUser;
+      if (!user || !state || !('Notification' in window)) return;
+      try {
+        const pref = await window.db.collection('userPreferences').doc(user.uid).get();
+        if (pref.exists && pref.data().browserNotifications !== true) return;
+        const critical = (state.alerts || []).find(a => !a.resolved && a.severity === 'Critical');
+        if (critical && Notification.permission === 'granted') {
+          const key = 'kisan:lastNotifiedAlert';
+          if (localStorage.getItem(key) !== critical.id) {
+            new Notification('KisanTrack: Critical livestock alert', {
+              body: 'A critical alert needs your attention for ' + String(critical.animalId || 'an animal') + '.'
+            });
+            localStorage.setItem(key, critical.id);
+          }
+        }
+      } catch (_) {}
+    });
+  }
+
+  window.saveUserPreference = saveUserPreference;
+  window.recordAudit = recordAudit;
+  window.installOfflineHandling = installOfflineHandling;
+  window.setupNotificationInfrastructure = setupNotificationInfrastructure;
+
   // Export to global scope
   window.showToast = showToast;
   window.validateEmail = validateEmail;

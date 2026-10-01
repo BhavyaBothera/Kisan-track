@@ -203,6 +203,9 @@
     else if (path.includes('veterinary.html')) {
       if (window.VeterinaryModule) window.VeterinaryModule.init();
     }
+    else if (path.includes('settings.html')) {
+      if (window.SettingsModule) window.SettingsModule.init();
+    }
   }
 
   // --- 4. Shared Listeners ---
@@ -250,6 +253,9 @@
       });
     }
 
+    if (typeof window.installOfflineHandling === 'function') window.installOfflineHandling();
+    if (typeof window.setupNotificationInfrastructure === 'function') window.setupNotificationInfrastructure();
+
     // Sidebar Active State Sync
     syncActiveNav();
   });
@@ -267,6 +273,7 @@
       'veterinary.html': 'nav-veterinary',
       'analytics.html': 'nav-reports',
       'vitals.html':    'nav-vitals',
+      'settings.html':  'nav-settings',
     };
 
     // Standardised mobile nav map (same 5 items on all pages)

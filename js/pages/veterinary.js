@@ -143,12 +143,12 @@ var VeterinaryModule = (function () {
                         <span class="timeline-date">${formatDate(log.date)}</span>
                         <span class="timeline-badge badge-${(log.type || '').toLowerCase()}">${log.type || 'Visit'}</span>
                     </div>
-                    <div class="timeline-title">${log.diagnosis || '—'}</div>
-                    <div class="timeline-animal">Animal: <strong>${log.animalId || '—'}</strong></div>
-                    <div class="timeline-desc">${log.treatment || ''}</div>
+                    <div class="timeline-title">${window.escapeHtml(log.diagnosis || '—')}</div>
+                    <div class="timeline-animal">Animal: <strong>${window.escapeHtml(log.animalId || '—')}</strong></div>
+                    <div class="timeline-desc">${window.escapeHtml(log.treatment || '')}</div>
                     <div class="timeline-footer">
-                        <span><i class="fa-solid fa-user-doctor"></i> ${log.vet || 'N/A'}</span>
-                        <span><i class="fa-solid fa-indian-rupee-sign"></i> ${log.cost || 0}</span>
+                        <span><i class="fa-solid fa-user-doctor"></i> ${window.escapeHtml(log.vet || 'N/A')}</span>
+                        <span><i class="fa-solid fa-indian-rupee-sign"></i> ${window.escapeHtml(log.cost || 0)}</span>
                     </div>
                 </div>
             </div>`).join('');
@@ -187,8 +187,8 @@ var VeterinaryModule = (function () {
                         <span class="sch-month">${s.due.toLocaleDateString([], { month: 'short' })}</span>
                     </div>
                     <div class="schedule-info">
-                        <div class="sch-title">${s.title}</div>
-                        <div class="sch-animal">${s.animal}</div>
+                        <div class="sch-title">${window.escapeHtml(s.title)}</div>
+                        <div class="sch-animal">${window.escapeHtml(s.animal)}</div>
                     </div>
                     <div class="sch-badge" style="font-size:0.65rem;padding:2px 7px;border-radius:10px;background:${urgency}18;color:${urgency};white-space:nowrap;">
                         ${s.daysUntil === 0 ? 'Today' : s.daysUntil === 1 ? 'Tomorrow' : 'In ' + s.daysUntil + 'd'}
@@ -231,13 +231,14 @@ var VeterinaryModule = (function () {
     async function handleFormSubmit(e) {
         e.preventDefault();
         const logData = {
-            date:      new Date().toISOString().split('T')[0],
-            animalId:  document.getElementById('form-animal-id')?.value   || '',
-            type:      document.getElementById('form-event-type')?.value  || 'Checkup',
-            diagnosis: document.getElementById('form-diagnosis')?.value   || '',
-            treatment: document.getElementById('form-treatment')?.value   || '',
-            vet:       document.getElementById('form-vet-name')?.value    || 'N/A',
-            cost:      parseInt(document.getElementById('form-cost')?.value) || 0,
+            date: document.getElementById('form-visit-date')?.value || new Date().toISOString().split('T')[0],
+            animalId: document.getElementById('form-animal-id')?.value || '',
+            type: document.getElementById('form-event-type')?.value || 'Checkup',
+            diagnosis: document.getElementById('form-diagnosis')?.value || '',
+            treatment: document.getElementById('form-treatment')?.value || '',
+            vet: document.getElementById('form-vet-name')?.value || 'N/A',
+            cost: parseInt(document.getElementById('form-cost')?.value, 10) || 0,
+            nextDueDate: document.getElementById('form-next-due')?.value || '',
         };
 
         try {

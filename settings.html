@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KisanTrack | Settings & Privacy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="css/main.css"><link rel="stylesheet" href="css/components.css"><link rel="stylesheet" href="css/animations.css"><link rel="stylesheet" href="css/sidebar.css">
+<style>
+.settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:18px}.settings-card{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:22px}.settings-card h3{margin:0 0 8px}.settings-muted{color:var(--text-muted);font-size:.82rem;line-height:1.5}.settings-row{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.06)}.settings-row:last-child{border-bottom:0}.settings-pill{font-size:.72rem;padding:4px 9px;border-radius:99px;background:rgba(124,181,24,.12);color:var(--accent-green);white-space:nowrap}.settings-check{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:12px 0}.settings-check input{width:20px;height:20px;accent-color:var(--accent-green)}.onboarding-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:18px 0}.onboarding-step{padding:12px 8px;text-align:center;border-radius:10px;background:rgba(255,255,255,.04);font-size:.75rem}@media(max-width:700px){.onboarding-steps{grid-template-columns:1fr 1fr}}
+</style></head>
+<body>
+<div id="global-loader"><div class="loader-spinner"></div><div class="loader-text">Loading Settings...</div></div>
+<aside class="sidebar" id="sidebar" role="navigation" aria-label="Main Navigation">
+<div class="sidebar-brand"><div class="brand-icon">🌾</div><div class="brand-text"><span class="brand-name">KisanTrack</span><span class="brand-sub">Animal Health Monitor</span></div></div>
+<div class="sidebar-status"><div class="status-dot"></div><span class="status-text">System Active / सक्रिय</span></div>
+<nav class="sidebar-nav">
+<div class="nav-label">Core Matrix / मुख्य मैट्रिक्स</div>
+<a href="dashboard.html" class="nav-link" id="nav-dashboard"><i class="fa-solid fa-gauge-high"></i><div class="nav-text">Dashboard<span class="nav-hi">डैशबोर्ड</span></div></a>
+<a href="herd.html" class="nav-link" id="nav-animals"><i class="fa-solid fa-paw"></i><div class="nav-text">Animal Profiles<span class="nav-hi">पशु प्रोफ़ाइल</span></div></a>
+<a href="vitals.html" class="nav-link" id="nav-vitals"><i class="fa-solid fa-heartbeat"></i><div class="nav-text">Live Vitals<span class="nav-hi">लाइव जीवन संकेत</span></div></a>
+<a href="camera.html" class="nav-link" id="nav-camera"><i class="fa-solid fa-camera"></i><div class="nav-text">AI Camera Monitor<span class="nav-hi">AI कैमरा मॉनिटर</span></div></a>
+<div class="nav-label">Management / प्रबंधन</div>
+<a href="alerts.html" class="nav-link" id="nav-alerts"><i class="fa-solid fa-bell"></i><div class="nav-text">Alerts Hub<span class="nav-hi">अलर्ट हब</span></div></a>
+<a href="analytics.html" class="nav-link" id="nav-reports"><i class="fa-solid fa-chart-column"></i><div class="nav-text">Livestock Analytics<span class="nav-hi">पशुधन विश्लेषण</span></div></a>
+<a href="inventory.html" class="nav-link" id="nav-inventory"><i class="fa-solid fa-boxes-stacked"></i><div class="nav-text">Inventory & Feed<span class="nav-hi">सूची और चारा</span></div></a>
+<a href="veterinary.html" class="nav-link" id="nav-veterinary"><i class="fa-solid fa-stethoscope"></i><div class="nav-text">Veterinary Logs<span class="nav-hi">पशु चिकित्सा लॉग</span></div></a>
+<a href="uploads.html" class="nav-link" id="nav-upload"><i class="fa-solid fa-cloud-arrow-up"></i><div class="nav-text">Data Upload<span class="nav-hi">डेटा अपलोड</span></div></a>
+<div class="nav-label">Account / खाता</div>
+<a href="profile.html" class="nav-link" id="nav-profile"><i class="fa-solid fa-circle-user"></i><div class="nav-text">Farmer Profile<span class="nav-hi">किसान प्रोफ़ाइल</span></div></a>
+<a href="settings.html" class="nav-link" id="nav-settings"><i class="fa-solid fa-sliders"></i><div class="nav-text">Settings & Privacy<span class="nav-hi">सेटिंग्स और गोपनीयता</span></div></a>
+</nav></aside>
+<button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false"><i class="fa-solid fa-bars"></i></button><div class="sidebar-overlay" id="sidebar-overlay"></div>
+<main class="main-content" id="main-content">
+<header class="top-bar"><div class="top-bar-left"><h2 class="top-bar-title">Settings & Privacy / <span class="hi">सेटिंग्स और गोपनीयता</span></h2></div><div class="top-bar-right"><div class="user-profile-dropdown"><button class="profile-dropdown-btn" id="topbar-profile-dropdown-btn" aria-expanded="false"><div class="user-avatar" id="auth-avatar">·</div><div class="user-info"><span class="user-name" id="auth-first-name">Farmer</span><span class="user-role">Premium Plan</span></div><i class="fa-solid fa-chevron-down" aria-hidden="true"></i></button><div class="profile-dropdown-menu" id="profile-dropdown-menu"><a href="profile.html" class="dropdown-item"><i class="fa-solid fa-user-circle"></i> View Profile</a><div class="dropdown-item" id="btn-sign-out"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</div></div></div></div></header>
+<div class="content-area"><div class="page-header"><h1><i class="fa-solid fa-sliders" style="color:var(--accent-green);margin-right:12px"></i>Settings & Product Controls</h1><p class="subtitle">Manage onboarding, notifications, devices, privacy requests and account activity.</p></div>
+<div class="settings-grid">
+<section class="settings-card"><h3><i class="fa-solid fa-bell"></i> Notifications</h3><p class="settings-muted">Receive browser notifications for new critical livestock alerts.</p><div class="settings-check"><span>Critical alert notifications</span><input id="pref-notifications" type="checkbox" aria-label="Critical alert notifications"></div></section>
+<section class="settings-card"><h3><i class="fa-solid fa-route"></i> Onboarding</h3><p class="settings-muted">Complete the product setup checklist so the dashboard starts with the right context.</p><div class="onboarding-steps"><div class="onboarding-step">1. Profile</div><div class="onboarding-step">2. Animals</div><div class="onboarding-step">3. Alerts</div><div class="onboarding-step">4. Veterinary</div></div><div class="settings-row"><span>Status</span><strong id="onboarding-status">Not completed</strong></div><button class="btn btn-primary" id="btn-onboarding-complete">Mark onboarding complete</button></section>
+<section class="settings-card"><h3><i class="fa-solid fa-mobile-screen-button"></i> Devices</h3><p class="settings-muted">See browsers that have accessed this farmer account. Removing a record does not revoke Firebase sessions.</p><div id="device-list"><p class="settings-muted">Loading devices...</p></div></section>
+<section class="settings-card"><h3><i class="fa-solid fa-shield-halved"></i> Privacy Controls</h3><p class="settings-muted">Request a copy of your data or submit an account deletion request. Camera images follow the documented retention policy.</p><div class="settings-row"><span>Data export</span><button class="btn btn-secondary" id="btn-export-data">Request export</button></div><div class="settings-row"><span>Account deletion</span><button class="btn btn-secondary" id="btn-delete-account">Request deletion</button></div><a href="privacy.html" class="btn btn-secondary" style="margin-top:12px;display:inline-flex">Read privacy & AI disclosure</a></section>
+<section class="settings-card"><h3><i class="fa-solid fa-clock-rotate-left"></i> Audit Activity</h3><p class="settings-muted">Recent product actions recorded for your account.</p><div id="audit-list"><p class="settings-muted">Loading activity...</p></div></section>
+<section class="settings-card"><h3><i class="fa-solid fa-wifi"></i> Offline Handling</h3><p class="settings-muted">KisanTrack shows an offline banner when connectivity drops and restores the online state automatically when the browser reconnects.</p><button class="btn btn-secondary" id="btn-reset-local">Reset local onboarding state</button></section>
+</div></div></main>
+<nav class="mobile-nav" id="mobile-nav" aria-label="Mobile Navigation"><div class="mobile-nav-inner"><a href="dashboard.html" class="mobile-nav-item" id="mnav-dashboard"><i class="fa-solid fa-gauge-high"></i><span>Home</span></a><a href="analytics.html" class="mobile-nav-item" id="mnav-analytics"><i class="fa-solid fa-chart-line"></i><span>Analytics</span></a><a href="alerts.html" class="mobile-nav-item" id="mnav-alerts"><i class="fa-solid fa-bell"></i><span>Alerts</span></a><a href="camera.html" class="mobile-nav-item" id="mnav-camera"><i class="fa-solid fa-camera"></i><span>Camera</span></a><a href="settings.html" class="mobile-nav-item" id="mnav-settings"><i class="fa-solid fa-sliders"></i><span>Settings</span></a></div></nav>
+<div class="toast" id="app-toast" role="alert" aria-live="polite"><i class="fa-solid fa-circle-check toast-icon"></i><span class="toast-msg" id="toast-msg">Success</span></div>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="js/core/firebase-config.js"></script><script src="js/core/utils.js"></script><script src="js/core/firestore-store.js"></script><script src="js/core/auth.js"></script><script src="js/pages/settings.js"></script>
+</body></html>
