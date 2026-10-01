@@ -449,14 +449,14 @@ window.CameraModule = (function () {
 
     reel.innerHTML = state.history.map(item => {
       const scoreColor = item.severity === 'HEALTHY' ? 'var(--accent-green)' : item.severity === 'WARNING' ? 'var(--accent-amber)' : 'var(--accent-red)';
-      const imgSrc = item.imageUrl || '';
+      const imgSrc = window.escapeHtml(item.imageUrl || '');
       return `
         <div class="reel-item" style="flex:0 0 140px;margin-right:10px;cursor:pointer;" data-capture-id="${window.escapeHtml(item.id)}">
           <div style="width:100%;height:80px;border-radius:4px;overflow:hidden;background:rgba(255,255,255,0.05);">
             ${imgSrc ? `<img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover;" />` : '<div style="height:100%;display:flex;align-items:center;justify-content:center;opacity:0.3;">📷</div>'}
           </div>
           <div style="font-size:0.6rem;color:var(--text-dim);margin-top:4px;display:flex;justify-content:space-between;">
-            <span>${item.animalId || 'HERD'}</span>
+            <span>${window.escapeHtml(item.animalId || 'HERD')}</span>
             <span style="color:${scoreColor}">${item.healthScore !== undefined ? item.healthScore + '/10' : '—'}</span>
           </div>
         </div>`;
@@ -474,7 +474,7 @@ window.CameraModule = (function () {
     const emojiMap = { Cow: '🐄', Buffalo: '🐃', Goat: '🐐', Sheep: '🐑' };
     sel.innerHTML = '<option value="">— SELECT SUBJECT —</option>' +
       state.animalsList.map(a =>
-        `<option value="${a.id}">${emojiMap[a.species] || '🐄'} ${a.animalId} · ${a.breed || a.species} (${a.status})</option>`
+        `<option value="${window.escapeHtml(a.id)}">${emojiMap[a.species] || '🐄'} ${window.escapeHtml(a.animalId)} · ${window.escapeHtml(a.breed || a.species)} (${window.escapeHtml(a.status)})</option>`
       ).join('');
 
     // Also re-listen in case more animals are added
