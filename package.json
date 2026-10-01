@@ -1,1 +1,17 @@
-{"name":"kisantrack-phase6-tests","private":true,"scripts":{"test":"node --test tests/phase6.test.js"},"engines":{"node":">=20"}}
+{
+  "name": "kisantrack",
+  "private": true,
+  "version": "1.0.0",
+  "description": "KisanTrack livestock monitoring dashboard",
+  "scripts": {
+    "test": "node --test tests/phase6.test.js tests/phase7.test.js",
+    "test:phase6": "node --test tests/phase6.test.js",
+    "test:phase7": "node --test tests/phase7.test.js",
+    "lint": "eslint eslint.config.js scripts/verify-production.js tests/phase7.test.js",
+    "format:check": "prettier --check package.json eslint.config.js .prettierrc.json .prettierignore scripts/verify-production.js tests/phase7.test.js .github/workflows/phase7.yml",
+    "verify:production": "node scripts/verify-production.js",
+    "verify": "npm run lint && npm run format:check && npm test && npm run verify:production"
+  },
+  "engines": { "node": ">=20" },
+  "devDependencies": { "eslint": "^9.39.1", "globals": "^16.0.0", "prettier": "^3.6.2" }
+}

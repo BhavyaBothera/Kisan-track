@@ -1,0 +1,73 @@
+name: KisanTrack Phase 7 DevOps
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+permissions:
+  contents: read
+concurrency:
+  group: kisantrack-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm install
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm test
+      - run: npm run verify:production
+      - run: npm audit --audit-level=high
+  staging:
+    needs: quality
+    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npm install --global firebase-tools@latest
+      - name: Authenticate Firebase
+        env:
+          FIREBASE_SERVICE_ACCOUNT_KISANTRACK: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KISANTRACK }}
+        run: |
+          test -n "$FIREBASE_SERVICE_ACCOUNT_KISANTRACK"
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT_KISANTRACK" > "$RUNNER_TEMP/firebase-service-account.json"
+      - name: Deploy staging backend and rules
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+        run: firebase deploy --project "$FIREBASE_PROJECT_ID" --only functions,firestore,storage --non-interactive
+  production:
+    needs: quality
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npm install --global firebase-tools@latest
+      - name: Verify production credentials
+        env:
+          FIREBASE_SERVICE_ACCOUNT_KISANTRACK: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KISANTRACK }}
+        run: |
+          test -n "$FIREBASE_SERVICE_ACCOUNT_KISANTRACK"
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT_KISANTRACK" > "$RUNNER_TEMP/firebase-service-account.json"
+      - name: Deploy production backend and rules
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+        run: firebase deploy --project "$FIREBASE_PROJECT_ID" --only functions,firestore,storage --non-interactive
