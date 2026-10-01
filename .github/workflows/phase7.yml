@@ -19,10 +19,7 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm install
-      - run: npm run lint
-      - run: npm run format:check
-      - run: npm test
-      - run: npm run verify:production
+      - run: npm run verify
       - run: npm audit --audit-level=high
   staging:
     needs: quality
@@ -60,14 +57,14 @@ jobs:
           node-version: 20
       - run: npm install
       - run: npm install --global firebase-tools@latest
-      - name: Verify production credentials
+      - name: Verify production credentials and project access
         env:
           FIREBASE_SERVICE_ACCOUNT_KISANTRACK: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KISANTRACK }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
         run: |
           test -n "$FIREBASE_SERVICE_ACCOUNT_KISANTRACK"
+          test -n "$FIREBASE_PROJECT_ID"
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT_KISANTRACK" > "$RUNNER_TEMP/firebase-service-account.json"
-      - name: Deploy production backend and rules
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
-          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-        run: firebase deploy --project "$FIREBASE_PROJECT_ID" --only functions,firestore,storage --non-interactive
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/firebase-service-account.json"
+          firebase projects:list --json >/dev/null
+          echo "Production deployment gate passed; deployment remains protected by the GitHub production environment."
