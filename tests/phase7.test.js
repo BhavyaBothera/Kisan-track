@@ -19,6 +19,6 @@ test('formatter ignores generated and dependency directories', () => { const c=r
 
 test('production verifier checks deployment contracts', () => { const c=read('scripts/verify-production.js'); for(const x of ['firebase.json','firestore.rules','firestore.indexes.json','storage.rules','functions/package.json','nodejs20','KISANTRACK_DEMO_MODE']) assert.match(c,new RegExp(x.replace(/[.*+?^${}()|[\\]\\\\]/g,'\\\\$&'))); });
 
-test('Phase 7 CI defines quality, staging and production gates', () => { const c=read('.github/workflows/phase7.yml'); for(const x of ['npm install','npm run lint','npm test','npm audit','firebase-tools','FIREBASE_SERVICE_ACCOUNT_KISANTRACK','staging','production']) assert.match(c,new RegExp(x.replace(/[.*+?^${}()|[\\]\\\\]/g,'\\\\$&'))); });
+test('Phase 7 CI defines quality, staging and production gates', () => { const c=read('.github/workflows/phase7.yml'); for(const x of ['npm install','npm run verify','npm test','npm audit','firebase-tools','FIREBASE_SERVICE_ACCOUNT_KISANTRACK','staging','production']) assert.match(c,new RegExp(x.replace(/[.*+?^${}()|[\\]\\\\]/g,'\\\\$&'))); });
 
 test('Phase 6 regression remains part of the pipeline', () => { assert.ok(fs.existsSync(path.join(ROOT,'tests/phase6.test.js'))); assert.ok(fs.existsSync(path.join(ROOT,'.github/workflows/phase6.yml'))); });
