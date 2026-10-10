@@ -24,7 +24,7 @@ The vitals screen is read-only. It never creates synthetic sensor readings or al
 
 ## Privacy, retention and AI boundary
 
-Camera images are processed through the authenticated server-side Firebase Function and the Gemini provider key is kept in server-side secrets. Camera captures are configured for a 3-day retention period and are removed by the scheduled cleanup function after deployment.
+Camera images are processed through the authenticated server-side Firebase Function and the Gemini provider key is kept in server-side secrets. Camera captures expire after 3 days and the scheduled cleanup removes expired capture records and their associated images after deployment.\n\nAI screening enforces a server-side limit of 20 requests per signed-in user per UTC day and rejects reused capture IDs. Failed AI attempts still count toward the daily quota to limit repeated cost-inducing retries.
 
 AI output is an AI-assisted visual screening signal, not a veterinary diagnosis. Review concerning findings with a qualified veterinarian.
 
