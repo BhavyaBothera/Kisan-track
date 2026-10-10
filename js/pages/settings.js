@@ -1,5 +1,5 @@
 // KisanTrack — Phase 8 Settings & Product Polish
-var SettingsModule = (function () {
+window.SettingsModule = (function () {
   'use strict';
   let currentUser = null;
   let preferences = { browserNotifications: false, onboardingComplete: false };
