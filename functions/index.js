@@ -10,7 +10,27 @@ const db=getFirestore(), bucket=getStorage().bucket(), GEMINI_API_KEY=defineSecr
 const MODEL="gemini-2.0-flash";
 const CAMERA_RETENTION_DAYS=3;
 async function incrementAiMetric(uid,field){const day=new Date().toISOString().slice(0,10);const ref=db.collection("systemMetrics").doc("ai_"+day);await ref.set({scope:"ai",date:day,[field+"Count"]:FieldValue.increment(1),updatedAt:FieldValue.serverTimestamp()},{merge:true});}
-async function cleanupExpiredCaptures(){const cutoff=new Date(Date.now()-CAMERA_RETENTION_DAYS*24*60*60*1000);const snap=await db.collection("cameraCaptures").where("expiresAt","<=",cutoff).limit(100).get();let deleted=0;for(const doc of snap.docs){const path=String(doc.data().imagePath||"");if(/^camera-captures\/[^/]+\//.test(path)){try{await bucket.file(path).delete({ignoreNotFound:true});}catch(e){console.warn("Retention cleanup storage delete failed",doc.id,e.message);}}await doc.ref.delete();deleted++;}console.log(JSON.stringify({event:"camera_retention_cleanup",deleted,cutoff:cutoff.toISOString()}));return deleted;}
+async function cleanupExpiredCaptures() {
+  // expiresAt is the actual retention deadline (createdAt + 3 days); compare it to now.
+  const now = new Date();
+  const snap = await db.collection("cameraCaptures").where("expiresAt", "<=", now).limit(100).get();
+  let deleted = 0;
+  for (const doc of snap.docs) {
+    const storagePath = String(doc.data().imagePath || "");
+    const segments = storagePath.split("/");
+    if (segments.length === 3 && segments[0] === "camera-captures" && segments[1] && segments[2]) {
+      try {
+        await bucket.file(storagePath).delete({ ignoreNotFound: true });
+      } catch (error) {
+        console.warn("Retention cleanup storage delete failed", doc.id, error.message);
+      }
+    }
+    await doc.ref.delete();
+    deleted++;
+  }
+  console.log(JSON.stringify({ event: "camera_retention_cleanup", deleted, cutoff: now.toISOString() }));
+  return deleted;
+}
 function clean(v,n=1000){return typeof v==="string"?v.trim().slice(0,n):"";}
 function validate(r){
  const score=Number(r?.healthScore), severity=String(r?.severity||"").toUpperCase();
