@@ -4,6 +4,13 @@ on:
     branches: [main, staging]
   pull_request:
     branches: [main, staging]
+  workflow_dispatch:
+    inputs:
+      deploy_production:
+        description: 'Deploy Firebase Functions and rules to production after quality checks'
+        required: true
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -17,7 +24,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
       - run: npm install
       - run: npm run verify
       - run: npm audit --audit-level=high
@@ -46,7 +52,7 @@ jobs:
         run: firebase deploy --project "$FIREBASE_PROJECT_ID" --only functions,firestore,storage --non-interactive
   production:
     needs: quality
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.deploy_production == true
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -67,4 +73,6 @@ jobs:
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT_KISANTRACK" > "$RUNNER_TEMP/firebase-service-account.json"
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/firebase-service-account.json"
           firebase projects:list --json >/dev/null
-          echo "Production deployment gate passed; deployment remains protected by the GitHub production environment."
+          firebase deploy --project "$FIREBASE_PROJECT_ID" --only functions,firestore,storage --non-interactive
+          rm -f "$RUNNER_TEMP/firebase-service-account.json"
+          echo "Production Firebase deployment completed after quality checks and environment approval."

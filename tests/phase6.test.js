@@ -172,6 +172,6 @@ test('telemetry writes are bounded by the Firestore rules contract', () => {
 
 test('package test command targets the Phase 6 suite', () => {
   const pkg = JSON.parse(read(path.join(ROOT, 'package.json')));
-  assert.equal(pkg.scripts?.test, 'node --test tests/phase6.test.js');
+  assert.equal(pkg.scripts?.test, 'node --test tests/phase6.test.js tests/phase7.test.js tests/phase8.test.js');
   assert.match(pkg.engines?.node || '', />=20/);
 });

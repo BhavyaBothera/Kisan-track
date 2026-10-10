@@ -1,9 +1,12 @@
 const fs = require('node:fs');
 const path = require('node:path');
+const { spawnSync } = require('node:child_process');
 
 const root = path.resolve(__dirname, '..');
 const required = ['firebase.json','firestore.rules','firestore.indexes.json','storage.rules','functions/package.json','functions/index.js','js/core/firebase-config.js'];
 const failures = [];
+const functionsSyntax = spawnSync(process.execPath, ['--check', path.join(root, 'functions/index.js')], { encoding: 'utf8' });
+if (functionsSyntax.status !== 0) failures.push('Firebase Functions syntax check failed: ' + functionsSyntax.stderr);
 for (const file of required) if (!fs.existsSync(path.join(root, file))) failures.push('Missing required deployment file: ' + file);
 const firebase = JSON.parse(fs.readFileSync(path.join(root, 'firebase.json'), 'utf8'));
 if (firebase.functions?.runtime !== 'nodejs20') failures.push('Firebase Functions runtime must remain Node.js 20.');

@@ -76,8 +76,11 @@ service cloud.firestore {
       allow update: if ownsExisting() && ownerUnchanged();
     }
     match /userPreferences/{userId} {
-      allow read, create, update: if signedIn() && request.auth.uid == userId
-        && request.resource.data.farmerId == userId;
+      allow read: if signedIn() && request.auth.uid == userId;
+      allow create, update: if signedIn() && request.auth.uid == userId
+        && request.resource.data.farmerId == userId
+        && (!('browserNotifications' in request.resource.data) || request.resource.data.browserNotifications is bool)
+        && (!('onboardingComplete' in request.resource.data) || request.resource.data.onboardingComplete is bool);
       allow delete: if false;
     }
     match /devices/{id} {

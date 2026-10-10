@@ -19,25 +19,114 @@ function validate(r){
  const hs=Array.isArray(r.hotspots)?r.hotspots.slice(0,20).map(h=>({x:Number(h?.x),y:Number(h?.y),label:clean(h?.label,120),confidence:Number(h?.confidence)})).filter(h=>h.label&&h.x>=0&&h.x<=100&&h.y>=0&&h.y<=100&&h.confidence>=0&&h.confidence<=1):[];
  return {healthScore:Number(score.toFixed(1)),severity,conditions:list(r.conditions),observations:list(r.observations),farmerTip:clean(r.farmerTip,800),summary:clean(r.summary,1000),hotspots:hs,analysisType:"AI-assisted visual screening",model:MODEL};
 }
-exports.analyzeAnimalImage=onCall({region:"asia-south1",timeoutSeconds:60,memory:"512MiB",secrets:[GEMINI_API_KEY]},async request=>{
- const uid=request.auth?.uid;if(!uid)throw new HttpsError("unauthenticated","Sign in before analysing an image.");
- const {captureId,storagePath,animalId}=request.data||{};
- if(typeof captureId!=="string"||!/^capture_[A-Za-z0-9_-]{1,70}$/.test(captureId)||typeof storagePath!=="string"||!storagePath.startsWith(`camera-captures/${uid}/`))throw new HttpsError("invalid-argument","Invalid capture reference.");
- const file=bucket.file(storagePath),[meta]=await file.getMetadata();
- if(Number(meta.size)>10*1024*1024||!String(meta.contentType||"").startsWith("image/"))throw new HttpsError("invalid-argument","Invalid image.");
- const [buf]=await file.download();
- const prompt=`You are an AI-assisted livestock health screening system. Analyze only visible evidence. Do not diagnose disease. Return JSON only: {"healthScore":0-10,"severity":"HEALTHY"|"WARNING"|"CRITICAL","conditions":[],"observations":[],"farmerTip":"brief cautious advice in English and Hindi","summary":"evidence-based screening summary","hotspots":[{"x":0-100,"y":0-100,"label":"visible issue","confidence":0-1}]}. If image quality is insufficient, say so and recommend veterinary review for concerning findings.`;
- const response=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY.value())}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:prompt},{inline_data:{mime_type:meta.contentType,data:buf.toString("base64")}}]}],generationConfig:{responseMimeType:"application/json",temperature:.1}})});
- if(!response.ok)throw new HttpsError("unavailable","AI screening service is temporarily unavailable.");
- const data=await response.json(),text=data?.candidates?.[0]?.content?.parts?.[0]?.text;if(!text)throw new HttpsError("data-loss","AI screening returned no usable result.");
- let parsed;try{parsed=JSON.parse(text)}catch(_){throw new HttpsError("data-loss","AI screening returned invalid JSON.");}
- let analysis;try{analysis=validate(parsed)}catch(_){throw new HttpsError("data-loss","AI screening returned an invalid result.");}
- const capture={farmerId:uid,animalId:clean(animalId,120)||"HERD-GENERIC",imagePath:storagePath,timestamp:FieldValue.serverTimestamp(),expiresAt:new Date(Date.now()+CAMERA_RETENTION_DAYS*24*60*60*1000),...analysis};
- const batch=db.batch(),ref=db.collection("cameraCaptures").doc(captureId);batch.set(ref,capture);
- await incrementAiMetric(uid,"request");
- if(analysis.healthScore<6||analysis.severity==="CRITICAL")batch.set(db.collection("alerts").doc(),{farmerId:uid,animalId:capture.animalId,parameter:"AI Visual Screening",readingValue:`${analysis.healthScore}/10`,alertType:"AI Visual Anomaly",severity:analysis.severity,confidenceScore:analysis.hotspots.length?Math.round(Math.max(...analysis.hotspots.map(h=>h.confidence))*100):null,message:analysis.summary,timestamp:FieldValue.serverTimestamp(),resolved:false,source:"Nexus AI"});
- await batch.commit();await incrementAiMetric(uid,"success");return {capture:{id:captureId,...capture,timestamp:new Date().toISOString()}};
-});
+exports.analyzeAnimalImage = onCall(
+  { region: "asia-south1", timeoutSeconds: 60, memory: "512MiB", secrets: [GEMINI_API_KEY] },
+  async request => {
+    const uid = request.auth?.uid;
+    if (!uid) throw new HttpsError("unauthenticated", "Sign in before analysing an image.");
+    const { captureId, storagePath, animalId } = request.data || {};
+    if (typeof captureId !== "string" || !/^capture_[A-Za-z0-9_-]{1,70}$/.test(captureId) ||
+        typeof storagePath !== "string" || !storagePath.startsWith(`camera-captures/${uid}/`)) {
+      throw new HttpsError("invalid-argument", "Invalid capture reference.");
+    }
+
+    const file = bucket.file(storagePath);
+    let meta, buf;
+    try {
+      [meta] = await file.getMetadata();
+      if (Number(meta.size) <= 0 || Number(meta.size) > 10 * 1024 * 1024 ||
+          !/^image\/(jpeg|png|webp|gif|heic|heif)$/i.test(String(meta.contentType || ""))) {
+        throw new HttpsError("invalid-argument", "Invalid image.");
+      }
+      [buf] = await file.download();
+    } catch (error) {
+      if (error instanceof HttpsError) throw error;
+      throw new HttpsError("not-found", "The uploaded image could not be found.");
+    }
+
+    const day = new Date().toISOString().slice(0, 10);
+    const quotaRef = db.collection("aiRateLimits").doc(`${uid}_${day}`);
+    const captureRef = db.collection("cameraCaptures").doc(captureId);
+    const expiry = new Date(Date.now() + CAMERA_RETENTION_DAYS * 24 * 60 * 60 * 1000);
+    await db.runTransaction(async transaction => {
+      const [quotaSnap, captureSnap] = await Promise.all([
+        transaction.get(quotaRef), transaction.get(captureRef)
+      ]);
+      if (captureSnap.exists) throw new HttpsError("already-exists", "This capture ID has already been used.");
+      const used = Number(quotaSnap.exists ? quotaSnap.data().count : 0);
+      if (!Number.isFinite(used) || used >= 20) {
+        throw new HttpsError("resource-exhausted", "Daily AI screening limit reached. Try again tomorrow.");
+      }
+      transaction.set(quotaRef, {
+        farmerId: uid, date: day, count: used + 1, updatedAt: FieldValue.serverTimestamp()
+      });
+      transaction.create(captureRef, {
+        farmerId: uid, animalId: clean(animalId, 120) || "HERD-GENERIC",
+        imagePath: storagePath, status: "processing",
+        timestamp: FieldValue.serverTimestamp(), expiresAt: expiry
+      });
+    });
+
+    let completed = false;
+    try {
+      await incrementAiMetric(uid, "request");
+      const prompt = `You are an AI-assisted livestock health screening system. Analyze only visible evidence. Do not diagnose disease. Return JSON only: {"healthScore":0-10,"severity":"HEALTHY"|"WARNING"|"CRITICAL","conditions":[],"observations":[],"farmerTip":"brief cautious advice in English and Hindi","summary":"evidence-based screening summary","hotspots":[{"x":0-100,"y":0-100,"label":"visible issue","confidence":0-1}]}. If image quality is insufficient, say so and recommend veterinary review for concerning findings.`;
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY.value())}`,
+        { method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents: [{ parts: [
+            { text: prompt }, { inline_data: { mime_type: meta.contentType, data: buf.toString("base64") } }
+          ] }], generationConfig: { responseMimeType: "application/json", temperature: 0.1 } }) }
+      );
+      if (!response.ok) throw new HttpsError("unavailable", "AI screening service is temporarily unavailable.");
+      const data = await response.json();
+      const responseText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!responseText) throw new HttpsError("data-loss", "AI screening returned no usable result.");
+      let parsed;
+      try { parsed = JSON.parse(responseText); }
+      catch (_) { throw new HttpsError("data-loss", "AI screening returned invalid JSON."); }
+      let analysis;
+      try { analysis = validate(parsed); }
+      catch (_) { throw new HttpsError("data-loss", "AI screening returned an invalid result."); }
+
+      const capture = {
+        farmerId: uid, animalId: clean(animalId, 120) || "HERD-GENERIC",
+        imagePath: storagePath, timestamp: FieldValue.serverTimestamp(), expiresAt: expiry, ...analysis
+      };
+      const batch = db.batch();
+      batch.set(captureRef, capture);
+      if (analysis.healthScore < 6 || analysis.severity === "CRITICAL") {
+        batch.set(db.collection("alerts").doc(), {
+          farmerId: uid, animalId: capture.animalId, parameter: "AI Visual Screening",
+          readingValue: `${analysis.healthScore}/10`, alertType: "AI Visual Anomaly",
+          severity: analysis.severity,
+          confidenceScore: analysis.hotspots.length ? Math.round(Math.max(...analysis.hotspots.map(h => h.confidence)) * 100) : null,
+          message: analysis.summary, timestamp: FieldValue.serverTimestamp(), resolved: false, source: "Nexus AI"
+        });
+      }
+      await batch.commit();
+      await incrementAiMetric(uid, "success");
+      completed = true;
+      return { capture: { id: captureId, ...capture, timestamp: new Date().toISOString() } };
+    } catch (error) {
+      if (!completed) {
+        try {
+          await db.runTransaction(async transaction => {
+            const snap = await transaction.get(captureRef);
+            if (snap.exists && snap.data().farmerId === uid && snap.data().status === "processing") {
+              transaction.delete(captureRef);
+            }
+          });
+        } catch (cleanupError) {
+          console.error("Failed to clean up AI capture reservation", cleanupError.message);
+        }
+      }
+      if (error instanceof HttpsError) throw error;
+      console.error("AI screening failed", error.message);
+      throw new HttpsError("unavailable", "AI screening failed. Please try again.");
+    }
+  }
+);
 exports.requestDataAction=onCall({region:"asia-south1"},async request=>{
  const uid=request.auth?.uid;if(!uid)throw new HttpsError("unauthenticated","Sign in before requesting data management.");
  const type=String(request.data?.type||"").toLowerCase();

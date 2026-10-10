@@ -7,7 +7,7 @@ const read = file => fs.readFileSync(path.join(ROOT, file), 'utf8');
 
 test('Phase 7 package exposes the verification pipeline', () => {
   const pkg = JSON.parse(read('package.json'));
-  assert.equal(pkg.scripts.lint, 'eslint eslint.config.js scripts/verify-production.js tests/phase7.test.js');
+  assert.equal(pkg.scripts.lint, 'eslint eslint.config.js scripts/verify-production.js tests/phase7.test.js tests/phase8.test.js js/pages/settings.js');
   assert.match(pkg.scripts['format:check'], /^prettier --check/);
   assert.equal(pkg.scripts.verify, 'npm run lint && npm run format:check && npm test && npm run verify:production');
   assert.ok(pkg.devDependencies.eslint); assert.ok(pkg.devDependencies.prettier); assert.ok(pkg.devDependencies.globals);
